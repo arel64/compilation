@@ -29,7 +29,7 @@ import java_cup.runtime.*;
 /********************************************************************/
 %line
 %column
-
+%state MULTI_LINE_COMMENT
 /*******************************************************************************/
 /* Note that this has to be the EXACT same name of the class the CUP generates */
 /*******************************************************************************/
@@ -74,7 +74,9 @@ LineTerminator   = \r|\n|\r\n
 WhiteSpace       = {LineTerminator} | [ \t]
 INTEGER          = 0|[1-9][0-9]*
 ID               = [a-zA-Z_][a-zA-Z0-9_]*
-STRING_LITERAL   = \"(\\.|[^\"\\])*\" 
+TYPE_1_COMMENT 	 = \/\/[(|)|\[|\]|{|} | \?|\!|\.|\; | \+|\-|\*|\/ | [0-9] | [a-zA-Z_]]*{WhiteSpace}*
+TYPE_2_COMMENT_BODY = [(|)|\[|\]|{|} | \?|\!|\.|\; | \+|\-|\*|\/ | [0-9] | [a-zA-Z_]]*{WhiteSpace}*
+TYPE_2_COMMENT_BODY_TERMINATED = //[^(\*\/)[(|)|\[|\]|{|} | \?|\!|\.|\; | \+|\-|\*|\/ | [0-9] | [a-zA-Z_]]]*[|\r|\n|\r\n| [ \t]]*\*\/
 
 /******************************/
 /* DOLAR DOLAR - DON'T TOUCH! */
@@ -91,9 +93,12 @@ STRING_LITERAL   = \"(\\.|[^\"\\])*\"
 /* So these regular expressions will only be matched if the   */
 /* scanner is in the start state YYINITIAL.                   */
 /**************************************************************/
-
+<MULTI_LINE_COMMENT> {
+	{TYPE_2_COMMENT_BODY_TERMINATED} { yybegin(YYINITIAL); }
+	{TYPE_2_COMMENT_BODY} { return symbol(TokenNames.EMPTY);}
+}
 <YYINITIAL> {
-
+"/*"			{ yybegin(MULTI_LINE_COMMENT); }
 "+"             { return symbol(TokenNames.PLUS); }
 "-"             { return symbol(TokenNames.MINUS); }
 "*"             { return symbol(TokenNames.TIMES); }
@@ -111,7 +116,6 @@ STRING_LITERAL   = \"(\\.|[^\"\\])*\"
 "="            { return symbol(TokenNames.EQ); }
 "<"             { return symbol(TokenNames.LT); }
 ">"             { return symbol(TokenNames.GT); }
-
 "nil"           { return symbol(TokenNames.NIL); }
 "array"         { return symbol(TokenNames.ARRAY); }
 "class"         { return symbol(TokenNames.CLASS); }
@@ -123,9 +127,8 @@ STRING_LITERAL   = \"(\\.|[^\"\\])*\"
 "void"          { return symbol(TokenNames.TYPE_VOID); }
 "int"           { return symbol(TokenNames.TYPE_INT); }
 "string"        { return symbol(TokenNames.TYPE_STRING); }
-
-{INTEGER}       { return symbol(TokenNames.NUMBER, new Integer(yytext())); }
-//{STRING_LITERAL}{ return symbol(TokenNames.STRING, yytext()); }
+{TYPE_1_COMMENT} { return symbol(TokenNames.EMPTY);}
+{INTEGER}       { return symbol(TokenNames.INT, new Integer(yytext())); }
 {ID}            { return symbol(TokenNames.ID, yytext()); }   
 {WhiteSpace}    { /* skip whitespace */ }
 <<EOF>>         { return symbol(TokenNames.EOF); }
