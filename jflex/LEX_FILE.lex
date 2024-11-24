@@ -107,8 +107,8 @@ STRING_LITERAL   = \"(\\.|[^\"\\])*\"
 ","             { return symbol(TokenNames.COMMA); }
 "."             { return symbol(TokenNames.DOT); }
 ";"             { return symbol(TokenNames.SEMICOLON); }
-"="             { return symbol(TokenNames.ASSIGN); }
-"=="            { return symbol(TokenNames.EQ); }
+":="             { return symbol(TokenNames.ASSIGN); }
+"="            { return symbol(TokenNames.EQ); }
 "<"             { return symbol(TokenNames.LT); }
 ">"             { return symbol(TokenNames.GT); }
 
@@ -125,7 +125,7 @@ STRING_LITERAL   = \"(\\.|[^\"\\])*\"
 "string"        { return symbol(TokenNames.TYPE_STRING); }
 
 {INTEGER}       { return symbol(TokenNames.NUMBER, new Integer(yytext())); }
-{STRING_LITERAL}{ return symbol(TokenNames.STRING_LITERAL, yytext()); }
+//{STRING_LITERAL}{ return symbol(TokenNames.STRING, yytext()); }
 {ID}            { return symbol(TokenNames.ID, yytext()); }   
 {WhiteSpace}    { /* skip whitespace */ }
 <<EOF>>         { return symbol(TokenNames.EOF); }

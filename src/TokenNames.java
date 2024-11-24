@@ -1,5 +1,19 @@
+import java.lang.reflect.Field;
 public interface TokenNames {
   /* terminals */
+  public static String getTokenName(int tokenValue) {
+    try {
+          Field[] fields = TokenNames.class.getFields();
+          for (Field field : fields) {
+              if (field.getType() == int.class && field.getInt(null) == tokenValue) {
+                  return field.getName();
+              }
+          }
+      } catch (IllegalAccessException e) {
+          e.printStackTrace();
+      }
+      return "UNKNOWN_TOKEN";
+  }
   public static final int EOF = 0;
   public static final int PLUS = 1;
   public static final int MINUS = 2;
@@ -16,7 +30,7 @@ public interface TokenNames {
   public static final int NIL = 13;
   public static final int COMMA = 14;
   public static final int DOT = 15;
-  public static final int SEMICOLOM = 16;
+  public static final int SEMICOLON = 16;
   public static final int TYPE_INT = 17;
   public static final int TYPE_VOID =18;
   public static final int ASSIGN =19;
