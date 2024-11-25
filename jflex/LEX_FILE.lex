@@ -75,10 +75,8 @@ WhiteSpace       = {LineTerminator} | [ \t]
 INTEGER          = 0|[1-9][0-9]*
 ID               = [a-zA-Z_][a-zA-Z0-9_]*
 TYPE_1_COMMENT 	 = \/\/[(|)|\[|\]|{|} | \?|\!|\.|\; | \+|\-|\*|\/ | [0-9] | [a-zA-Z_]]*{WhiteSpace}*
-TYPE_2_COMMENT_BODY = [(|)|\[|\]|{|} | \?|\!|\.|\; | \+|\-|\*|\/ | [0-9] | [a-zA-Z_]]*{WhiteSpace}*
-TYPE_2_COMMENT_BODY_TERMINATED = //[^(\*\/)[(|)|\[|\]|{|} | \?|\!|\.|\; | \+|\-|\*|\/ | [0-9] | [a-zA-Z_]]]*[|\r|\n|\r\n| [ \t]]*\*\/
 VALID_COMMENT_CHAR = [a-zA-Z0-9 \t\n\r\(\)\[\]\{\}\?\!\+\-\*/\.;]
-INVALID_COMMENT_CHAR = [^\(\)\[\]\{\}\?\!\+\-\*/\.;a-zA-Z0-9 \t\n\r]   
+
 /******************************/
 /* DOLAR DOLAR - DON'T TOUCH! */
 /******************************/
@@ -94,19 +92,12 @@ INVALID_COMMENT_CHAR = [^\(\)\[\]\{\}\?\!\+\-\*/\.;a-zA-Z0-9 \t\n\r]
 /* So these regular expressions will only be matched if the   */
 /* scanner is in the start state YYINITIAL.                   */
 /**************************************************************/
-"/*" { // Start of a multi-line comment
-    yybegin(MULTILINE_COMMENT); // Switch to MULTILINE_COMMENT state
+
+< MULTI_LINE_COMMENT > {
+    "*/"                    /* End of comment */ { yybegin(YYINITIAL); } 
+    {VALID_COMMENT_CHAR} { } 
 }
-< MULTILINE_COMMENT > {
-    {VALID_COMMENT_CHAR}+       /* Match valid content inside the comment */ { /* Do nothing, continue reading */ }
-    "*/"                        /* End of comment */ { yybegin(YYINITIAL); } 
-    {INVALID_COMMENT_CHAR}      /* Invalid character */ { return "ERROR"; }
-    <<EOF>>                     /* Unclosed comment */ { return "ERROR"; }
-}
-<MULTI_LINE_COMMENT> {
-	{TYPE_2_COMMENT_BODY_TERMINATED} { yybegin(YYINITIAL); }
-	{TYPE_2_COMMENT_BODY} { return symbol(TokenNames.EMPTY);}
-}
+
 <YYINITIAL> {
 "/*"			{ yybegin(MULTI_LINE_COMMENT); }
 "+"             { return symbol(TokenNames.PLUS); }
@@ -137,7 +128,7 @@ INVALID_COMMENT_CHAR = [^\(\)\[\]\{\}\?\!\+\-\*/\.;a-zA-Z0-9 \t\n\r]
 "void"          { return symbol(TokenNames.TYPE_VOID); }
 "int"           { return symbol(TokenNames.TYPE_INT); }
 "string"        { return symbol(TokenNames.TYPE_STRING); }
-{TYPE_1_COMMENT} { return symbol(TokenNames.EMPTY);}
+{TYPE_1_COMMENT} { }
 {INTEGER}       { return symbol(TokenNames.INT, new Integer(yytext())); }
 {ID}            { return symbol(TokenNames.ID, yytext()); }   
 {WhiteSpace}    { /* skip whitespace */ }
