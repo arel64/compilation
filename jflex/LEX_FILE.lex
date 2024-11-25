@@ -77,7 +77,8 @@ ID               = [a-zA-Z_][a-zA-Z0-9_]*
 TYPE_1_COMMENT 	 = \/\/[(|)|\[|\]|{|} | \?|\!|\.|\; | \+|\-|\*|\/ | [0-9] | [a-zA-Z_]]*{WhiteSpace}*
 TYPE_2_COMMENT_BODY = [(|)|\[|\]|{|} | \?|\!|\.|\; | \+|\-|\*|\/ | [0-9] | [a-zA-Z_]]*{WhiteSpace}*
 TYPE_2_COMMENT_BODY_TERMINATED = //[^(\*\/)[(|)|\[|\]|{|} | \?|\!|\.|\; | \+|\-|\*|\/ | [0-9] | [a-zA-Z_]]]*[|\r|\n|\r\n| [ \t]]*\*\/
-
+VALID_COMMENT_CHAR = [a-zA-Z0-9 \t\n\r\(\)\[\]\{\}\?\!\+\-\*/\.;]
+INVALID_COMMENT_CHAR = [^\(\)\[\]\{\}\?\!\+\-\*/\.;a-zA-Z0-9 \t\n\r]   
 /******************************/
 /* DOLAR DOLAR - DON'T TOUCH! */
 /******************************/
@@ -93,6 +94,15 @@ TYPE_2_COMMENT_BODY_TERMINATED = //[^(\*\/)[(|)|\[|\]|{|} | \?|\!|\.|\; | \+|\-|
 /* So these regular expressions will only be matched if the   */
 /* scanner is in the start state YYINITIAL.                   */
 /**************************************************************/
+"/*" { // Start of a multi-line comment
+    yybegin(MULTILINE_COMMENT); // Switch to MULTILINE_COMMENT state
+}
+< MULTILINE_COMMENT > {
+    {VALID_COMMENT_CHAR}+       /* Match valid content inside the comment */ { /* Do nothing, continue reading */ }
+    "*/"                        /* End of comment */ { yybegin(YYINITIAL); } 
+    {INVALID_COMMENT_CHAR}      /* Invalid character */ { return "ERROR"; }
+    <<EOF>>                     /* Unclosed comment */ { return "ERROR"; }
+}
 <MULTI_LINE_COMMENT> {
 	{TYPE_2_COMMENT_BODY_TERMINATED} { yybegin(YYINITIAL); }
 	{TYPE_2_COMMENT_BODY} { return symbol(TokenNames.EMPTY);}
