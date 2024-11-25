@@ -1,3 +1,6 @@
+LEXER
+bin
+output
 # Compiled class file
 *.class
 
