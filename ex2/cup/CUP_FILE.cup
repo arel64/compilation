@@ -52,6 +52,8 @@ scan with
 /*************/
 /* TERMINALS */
 /*************/
+terminal Integer INT;
+terminal String ID;
 terminal IF;
 terminal EQ;
 terminal DOT;
@@ -68,12 +70,18 @@ terminal LBRACE;
 terminal RBRACE;
 terminal SEMICOLON;
 terminal ASSIGN;
-
-/*************/
-/* TERMINALS */
-/*************/
-terminal Integer INT;
-terminal String ID;
+terminal COMMA;
+terminal LT;
+terminal GT;
+terminal NIL;
+terminal ARRAY;
+terminal CLASS;
+terminal EXTENDS;
+terminal RETURN;
+terminal NEW;
+terminal TYPE_VOID;
+terminal TYPE_INT;
+terminal TYPE_STRING;
 
 /*****************/
 /* NON TERMINALS */
