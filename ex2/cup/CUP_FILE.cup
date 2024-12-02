@@ -96,10 +96,15 @@ non terminal AST_BINOP binop;
 /***********************/
 /* OPERATOR PRECEDENCE */
 /***********************/
-precedence left PLUS;
-precedence left MINUS;
-precedence left TIMES;
-precedence left DIVIDE;
+precedence left DOT;          // Highest precedence: Field access (.)
+precedence left LPAREN;       // Function call
+precedence left LBRACKET;     // Array indexing
+precedence left TIMES, DIVIDE; // Multiplication and division
+precedence left PLUS, MINUS;  // Addition and subtraction
+precedence left LT, GT;       // Less-than, greater-than
+precedence left EQUALS;       // Equals operator
+precedence left ASSIGN;       // Lowest precedence: Assignment
+
 
 /************************/
 /* START WITH: stmtList */
