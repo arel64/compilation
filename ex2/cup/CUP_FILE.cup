@@ -78,10 +78,20 @@ terminal String ID;
 /*****************/
 /* NON TERMINALS */
 /*****************/
+non terminal AST_PROGRAM program;
+non terminal AST_DEC dec;
+non terminal AST_TYPE type;
+non terminal AST_VAR_DEC varDec;
+non terminal AST_FUNC_DEC funcDec;
+non terminal AST_CLASS_DEC classDec;
+non terminal AST_ARRAY_TYPEDEF arrayTypedef;
 non terminal AST_EXP exp;
 non terminal AST_VAR var;
 non terminal AST_STMT stmt;
-non terminal AST_STMT_LIST stmtList;
+non terminal AST_NEW_EXP newExp;
+non terminal AST_CFIELD cField;
+non terminal AST_BINOP binop;
+
 
 /***********************/
 /* OPERATOR PRECEDENCE */
