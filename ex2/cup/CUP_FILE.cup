@@ -82,6 +82,7 @@ terminal NEW;
 terminal TYPE_VOID;
 terminal TYPE_INT;
 terminal TYPE_STRING;
+terminal STRING;
 
 /*****************/
 /* NON TERMINALS */
@@ -106,39 +107,91 @@ non terminal AST_BINOP binop;
 /***********************/
 precedence left DOT;          // Highest precedence: Field access (.)
 precedence left LPAREN;       // Function call
-precedence left LBRACKET;     // Array indexing
+precedence left LBRACK;     // Array indexing
 precedence left TIMES, DIVIDE; // Multiplication and division
 precedence left PLUS, MINUS;  // Addition and subtraction
 precedence left LT, GT;       // Less-than, greater-than
-precedence left EQUALS;       // Equals operator
+precedence left EQ;       // Equals operator
 precedence left ASSIGN;       // Lowest precedence: Assignment
 
 
 /************************/
-/* START WITH: stmtList */
+/* START WITH: program */
 /************************/
-start with stmtList;
+start with program;
 
 /********************/
 /* DERIVATION RULES */
 /********************/
 
-stmtList	::=		stmt:s	stmtList:l		{: RESULT = new AST_STMT_LIST(s,l);    :}
-					| stmt:s				{: RESULT = new AST_STMT_LIST(s,null); :}
-					;
 
-var			::=		ID:name								{: RESULT = new AST_VAR_SIMPLE(name);       :}
-					| var:v DOT ID:fieldName			{: RESULT = new AST_VAR_FIELD(v,fieldName); :} 
-					| var:v LBRACK exp:e RBRACK			{: RESULT = new AST_VAR_SUBSCRIPT(v,e);     :} 
-					;
-					
-stmt		::=		var:v ASSIGN exp:e SEMICOLON								{: RESULT = new AST_STMT_ASSIGN(v,e); :}
-					| IF    LPAREN exp:cond RPAREN LBRACE stmtList:body RBRACE	{: RESULT = new AST_STMT_IF(   cond,body); :}
-					| WHILE LPAREN exp:cond RPAREN LBRACE stmtList:body RBRACE	{: RESULT = new AST_STMT_WHILE(cond,body); :}
-					;
+program ::= dec+ {: RESULT = new AST_PROGRAM($1) ; :};  //a list of declarations
 
-exp			::=		INT:i								{: RESULT = new AST_EXP_INT(i);          :}
-					| var:v								{: RESULT = new AST_EXP_VAR(v);          :}
-					| exp:e1 PLUS  exp:e2				{: RESULT = new AST_EXP_BINOP(e1, e2, 0);:}
-					| exp:e1 MINUS exp:e2				{: RESULT = new AST_EXP_BINOP(e1, e2, 1);:}
-					;
+binop ::= PLUS  {:RESULT = new AST_BINOP("+"); :}  
+ 		| MINUS {:RESULT = new AST_BINOP("-"); :}
+		| TIMES {:RESULT = new AST_BINOP("*"); :}
+		| DIVIDE {:RESULT = new AST_BINOP("/"); :}
+		| LT {:RESULT = new AST_BINOP("<"); :}
+		| GT {:RESULT = new AST_BINOP(">"); :}
+		| EQ {:RESULT = new AST_BINOP("="); :};
+
+type  ::=  TYPE_INT {:RESULT = new AST_TYPE("int"); :}
+		 | TYPE_STRING {:RESULT = new AST_TYPE("String"); :}
+		 | TYPE_VOID {:RESULT = new AST_TYPE("void"); :}
+		 | ID {: RESULT = new AST_TYPE($1); :};
+
+arrayTypedef ::= ARRAY ID EQ type LBRACK RBRACK SEMICOLON {: RESULT = new AST_ARRAY_TYPEDEF($2, $4); :};
+
+varDec ::= type ID ASSIGN exp SEMICOLON
+    {: RESULT = new AST_VAR_DEC($2, $1, $4); :}  // Regular assignment with expression
+    | type ID ASSIGN newExp SEMICOLON
+    {: RESULT = new AST_VAR_DEC($2, $1, $4); :}  // Assignment with new expression
+    | type ID SEMICOLON
+    {: RESULT = new AST_VAR_DEC($2, $1); :};  // No assignment
+
+
+funcDec ::= type ID LPAREN (type ID (COMMA type ID)*)? RPAREN LBRACE stmt (stmt)* RBRACE
+    {: 
+        RESULT = new AST_FUNC_DEC($2, $1, $4, $7); 
+		// $2 = function name, $1 = return type, $4 = params, $7 = statements
+    :};
+
+classDec ::= CLASS ID (EXTENDS ID)? LBRACE cField (cField)* RBRACE
+    {: 
+        RESULT = new AST_CLASS_DEC($2, $3, $5); 
+        // $2 = class name, $3 = optional parent class, $5 = fields
+    :};
+
+dec ::= varDec {: RESULT = $1; :}
+     | funcDec {: RESULT = $1; :}
+     | classDec {: RESULT = $1; :}
+     | arrayTypedef {: RESULT = $1; :};
+
+cField ::= varDec {: RESULT = $1; :}
+		| funcDec {: RESULT = $1; :};
+
+newExp ::= NEW type {: RESULT = AST_NEW_EXP($1); :}
+		| NEW type LBRACK exp RBRACK {: RESULT = new AST_NEW_EXP($1, $2);:};
+
+var	::=		ID {: RESULT = new AST_VAR_SIMPLE($1); :}
+			| var:v DOT ID:fieldName {: RESULT = new AST_VAR_FIELD(v,fieldName); :} 
+			| var:v LBRACK exp:e RBRACK	{: RESULT = new AST_VAR_SUBSCRIPT(v,e); :};
+
+exp ::= var {: RESULT = $1; :}
+		| LPAREN exp RPAREN {: RESULT = new AST_EXP($2); :}
+		| exp binop exp {: RESULT = new AST_EXP_BINOP($1, $2, $3); :}
+		| (var DOT)? ID LPAREN (exp (COMMA exp)*)? RPAREN {: RESULT = new AST_FUNC_INVO($2, $3, $1); :}
+		| (MINUS)? INT {: RESULT = new AST_LIT_NUMBER($1, $2);:};
+		| NIL  {: RESULT = new AST_LIT_STRING("NIL"); :}
+		| STRING  {: RESULT = new AST_LIT_STRING($1); :}
+
+stmt ::= varDec {: RESULT = $1; :}
+    	| var ASSIGN exp SEMICOLON {: RESULT = new AST_STMT_ASSIGN($1, $3); :}
+    	| var ASSIGN newExp SEMICOLON {: RESULT = new AST_STMT_ASSIGN_NEW($1, $3); :}
+    	| RETURN exp SEMICOLON {: RESULT = new AST_STMT_RETURN($2); :}
+    	| RETURN SEMICOLON {: RESULT = new AST_STMT_RETURN(null); :}
+    	| IF LPAREN exp RPAREN LBRACE stmt (stmt)* RBRACE {: RESULT = new AST_STMT_IF($3, $6); :}
+    	| WHILE LPAREN exp RPAREN LBRACE stmt (stmt)* RBRACE {: RESULT = new AST_STMT_WHILE($3, $6); :}
+    	| var DOT ID LPAREN (exp (COMMA exp)*)? RPAREN SEMICOLON {: RESULT = new AST_FUNC_INVO($1, $3, $5); :};
+
+		
