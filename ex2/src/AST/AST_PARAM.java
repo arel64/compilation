@@ -11,7 +11,6 @@ public class AST_PARAM extends AST_Node{
     }
 
     public void printMe() {
-        System.out.printf("%s %s", paramType, paramName);
         AST_GRAPHVIZ.getInstance().logNode(
             SerialNumber,
             String.format("PARAM(%s,%s)", paramType,paramName)

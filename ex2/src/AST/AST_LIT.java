@@ -1,6 +1,6 @@
 package AST;
 
-public abstract class AST_LIT extends AST_Node
+public abstract class AST_LIT extends AST_EXP
 {
    abstract String getValue();
 

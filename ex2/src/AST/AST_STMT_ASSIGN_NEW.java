@@ -10,7 +10,6 @@ public class AST_STMT_ASSIGN_NEW extends AST_STMT {
     }
     @Override
     public void PrintMe() {
-        System.out.printf("ASSIGN NEW: %s = ", var);
         newExp.PrintMe();
     }
 }

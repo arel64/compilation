@@ -7,22 +7,18 @@ import AST.*;
 parser code 
 {:
 	public Lexer lexer;
-
+  public int errorLine = -1;
 	public Parser(Lexer lexer)
 	{
 		super(lexer);
 		this.lexer = lexer;
 	}
 	public void report_error(String message, Object info)
-	{
-		System.out.print("ERROR >> ");		
-		System.out.print("[");
-		System.out.print(lexer.getLine());
-		System.out.print(":");
-		System.out.print(lexer.getCharPos());
-		System.out.print("] ");		
-		System.exit(0);
-	}
+  {
+    if (errorLine == -1) {
+      errorLine = lexer.getLine();
+    }
+  }
 :}
 
 /************************/
@@ -32,19 +28,7 @@ scan with
 {:
 	Symbol s;
 	s = lexer.next_token();
-	System.out.print("[");
-	System.out.print(lexer.getLine());
-	System.out.print(":");
-	System.out.print(lexer.getCharPos());
-	System.out.print("] ");
-	System.out.print(TokenNames.terminalNames[s.sym]);
-	if (s.value != null)
-	{
-		System.out.print("( ");
-		System.out.print(s.value);
-		System.out.print(" )");
-	}
-	System.out.print("\n");
+	
 	return s; 
 :};
 
@@ -97,7 +81,7 @@ non terminal AST_EXP exp;
 non terminal AST_VAR var;
 non terminal AST_STMT stmt;
 non terminal AST_NEW_EXP newExp;
-non terminal AST_CFIELD cField;
+non terminal AST_FIELD cField;
 non terminal AST_BINOP binop;
 non terminal AST_DEC_LIST dec_list;
 non terminal AST_PARAM_LIST opt_param_list;
@@ -130,9 +114,9 @@ start with program;
 /* DERIVATION RULES */
 /********************/
 
-program ::= dec_list:dl {: RESULT = new AST_PROGRAM(dl); :};
+program ::= dec_list:sl {: RESULT = new AST_PROGRAM(sl); :};
 
-dec_list ::= dec:d {: RESULT = new AST_DEC_LIST(d,null); :}
+dec_list ::= dec:d {: RESULT = new AST_DEC_LIST(d); :}
            | dec_list:dl dec:d {: RESULT = new AST_DEC_LIST(dl,d); :};
 
 binop ::= PLUS:p    {: RESULT = new AST_BINOP("+"); :}
@@ -165,8 +149,8 @@ opt_param_list ::=
     {: RESULT = null; :}
   | param_list:pl {: RESULT = pl; :};
 
-param_list ::= type:t ID:i {: RESULT = new AST_PARAM_LIST(t, i); :}
-             | param_list:pl COMMA:c type:t ID:i {: pl.add(t,i); RESULT = pl; :};
+param_list ::= type:t ID:i {: RESULT = new AST_PARAM_LIST(new AST_PARAM(t, i)); :}
+             | param_list:pl COMMA:c type:t ID:i {: pl.list.add(new AST_PARAM(t,i)); RESULT = pl; :};
 
 classDec ::= CLASS:c ID:i extends_opt:eo LBRACE:lb cField_list:cf RBRACE:rb
              {: RESULT = new AST_CLASS_DEC(i, eo, cf); :};
@@ -183,8 +167,8 @@ dec ::= varDec:v   {: RESULT = v; :}
      | classDec:c  {: RESULT = c; :}
      | arrayTypedef:at {: RESULT = at; :};
 
-cField ::= varDec:v  {: RESULT = v; :}
-         | funcDec:f  {: RESULT = f; :};
+cField ::= varDec:v  {: RESULT = new AST_FIELD(v); :}
+         | funcDec:f  {: RESULT = new AST_FIELD(f); :};
 
 newExp ::= NEW:n type:t {: RESULT = new AST_NEW_EXP(t); :}
          | NEW:n type:t LBRACK:lb exp:ex RBRACK:rb {: RESULT = new AST_NEW_EXP(t, ex); :};
@@ -193,34 +177,35 @@ var ::= ID:i {: RESULT = new AST_VAR_SIMPLE(i); :}
       | var:v DOT:d ID:i {: RESULT = new AST_VAR_FIELD(v, i); :}
       | var:v LBRACK:lb exp:ex RBRACK:rb {: RESULT = new AST_VAR_SUBSCRIPT(v, ex); :};
 
-exp ::= var:v                 {: RESULT = v; :}
+exp ::= var:v                 {: RESULT = new AST_EXP_VAR(v); :}
       | LPAREN:lp exp:e RPAREN:rp {: RESULT = new AST_EXP_PAREN(e); :}
-      | exp:e1 binop:b exp:e2  {: RESULT = new AST_EXP_BINOP(e1, b, e2); :}
+      | exp:e1 binop:b exp:e2  {: RESULT = new AST_EXP_BINOP(e1, e2,b); :}
       | var:v DOT:d ID:i LPAREN:lp opt_exp_list:oel RPAREN:rp {: RESULT = new AST_FUNC_INVO(i, oel, v); :}
       | ID:i LPAREN:lp opt_exp_list:oel RPAREN:rp {: RESULT = new AST_FUNC_INVO(i, oel, null); :}
       | num_exp:ne            {: RESULT = ne; :}
       | NIL:n                 {: RESULT = new AST_LIT_STRING("NIL"); :}
-      | STRING:str            {: RESULT = new AST_LIT_STRING(str); :};
+      | STRING:str            {: RESULT = new AST_LIT_STRING((String)str); :};
 
 opt_exp_list ::=
     {: RESULT = null; :}
   | exp_list:el {: RESULT = el; :};
 
 exp_list ::= exp:e {: RESULT = new AST_EXP_LIST(e); :}
-           | exp_list:el COMMA:c exp:e {: el.add(e); RESULT = el; :};
+           | exp_list:el COMMA:c exp:e {: el.list.add(e); RESULT = el; :};
 
 num_exp ::= INT:in          {: RESULT = new AST_LIT_NUMBER(null, in); :}
-          | MINUS:m INT:in  {: RESULT = new AST_LIT_NUMBER(m, in); :};
+          | MINUS:m INT:in  {: RESULT = new AST_LIT_NUMBER((String)m, in); :};
 
-stmt ::= varDec:v {: RESULT = v; :}
+stmt ::= varDec:v {: RESULT = new AST_STMT_VAR_DECL(v); :}
        | var:v ASSIGN:a exp:e SEMICOLON:se {: RESULT = new AST_STMT_ASSIGN(v, e); :}
        | var:v ASSIGN:a newExp:n SEMICOLON:se {: RESULT = new AST_STMT_ASSIGN_NEW(v, n); :}
        | RETURN:r exp:e SEMICOLON:se {: RESULT = new AST_STMT_RETURN(e); :}
        | RETURN:r SEMICOLON:se {: RESULT = new AST_STMT_RETURN(null); :}
        | IF:i LPAREN:lp exp:e RPAREN:rp LBRACE:lb stmt_list:sl RBRACE:rb {: RESULT = new AST_STMT_IF(e, sl); :}
        | WHILE:w LPAREN:lp exp:e RPAREN:rp LBRACE:lb stmt_list:sl RBRACE:rb {: RESULT = new AST_STMT_WHILE(e, sl); :}
-       | var:v DOT:d ID:i LPAREN:lp opt_exp_list:oel RPAREN:rp SEMICOLON:se {: RESULT = new AST_STMT_FUNC_INVO(v, i, oel); :};
+       | var:v DOT:d ID:i LPAREN:lp opt_exp_list:oel RPAREN:rp SEMICOLON:se {: RESULT = new AST_STMT_FUNC_INVO(v, i, oel); :}
+       | ID:i LPAREN:lp opt_exp_list:oel RPAREN:rp SEMICOLON:se {: RESULT = new AST_STMT_FUNC_INVO(i, oel); :};
 
 stmt_list ::=
     {: RESULT = new AST_STMT_LIST(null,null); :}
-  | stmt_list:sl stmt:s {: sl.add(s); RESULT = sl; :};
+  | stmt:s stmt_list:sl {: sl.list.add(s); RESULT = sl; :};

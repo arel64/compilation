@@ -5,9 +5,10 @@ SCRIPT_DIR="$(pwd)"
 
 INPUT_DIR="$SCRIPT_DIR/input"
 EXPECTED_OUTPUT_DIR="$SCRIPT_DIR/expected_output"
+OUTPUT_DIR="$SCRIPT_DIR/output"
 BIN_DIR="$SCRIPT_DIR/bin"
 PARSER="$SCRIPT_DIR/PARSER"
-
+chmod +x PARSER
 # Ensure the PARSER executable exists
 if [ ! -x "$PARSER" ]; then
     echo "Error: PARSER executable not found in $BIN_DIR or is not executable."
@@ -30,7 +31,7 @@ for input_file in "$INPUT_DIR"/*.txt; do
         echo "Testing $base_name..."
 
         # Run the parser and redirect output to a temporary file
-        temp_output_file="$(mktemp)"
+        temp_output_file="$OUTPUT_DIR/${base_name}_Result.txt"
         java -jar PARSER "$input_file" "$temp_output_file"
 
         # Compare the output
@@ -41,9 +42,6 @@ for input_file in "$INPUT_DIR"/*.txt; do
             echo "Differences:"
             diff "$temp_output_file" "$expected_output_file"
         fi
-
-        # Clean up
-        rm "$temp_output_file"
     else
         echo "Skipping $base_name: No matching expected output."
     fi

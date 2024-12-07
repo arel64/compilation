@@ -14,6 +14,5 @@ public abstract class AST_Node
 	/***********************************************/
 	public void PrintMe()
 	{
-		System.out.print("AST NODE UNKNOWN\n");
 	}
 }

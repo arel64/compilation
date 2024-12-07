@@ -1,6 +1,6 @@
    
 import java.io.*;
-import java.io.PrintWriter;
+
 import java_cup.runtime.Symbol;
 import AST.*;
 
@@ -11,7 +11,7 @@ public class Main
 		Lexer l;
 		Parser p;
 		Symbol s;
-		AST_STMT_LIST AST;
+		AST_PROGRAM AST;
 		FileReader file_reader;
 		PrintWriter file_writer;
 		String inputFilename = argv[0];
@@ -42,12 +42,22 @@ public class Main
 			/***********************************/
 			/* [5] 3 ... 2 ... 1 ... Parse !!! */
 			/***********************************/
-			AST = (AST_STMT_LIST) p.parse().value;
+			try{
+				AST = (AST_PROGRAM) p.parse().value;
+				file_writer.write("OK\n");
+				AST.PrintMe();
+
+
+			}
+			catch(Exception e)
+			{
+				file_writer.write("ERROR(" + p.errorLine + ")\n");
+			}
+			
 			
 			/*************************/
 			/* [6] Print the AST ... */
 			/*************************/
-			AST.PrintMe();
 			
 			/*************************/
 			/* [7] Close output file */

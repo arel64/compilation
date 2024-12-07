@@ -17,13 +17,10 @@ public class AST_CLASS_DEC extends AST_DEC {
     @Override
     public void PrintMe() {
         if (parentClass != null) {
-            System.out.printf("CLASS %s EXTENDS %s\n", className, parentClass);
         } else {
-            System.out.printf("CLASS %s\n", className);
         }
-        System.out.println("FIELDS:");
         for (AST_FIELD field : fields.list) {
-            field.PrintMe();  
+            field.PrintMe();
         }
     }
 }

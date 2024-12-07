@@ -9,7 +9,6 @@ public class AST_EXP_BINOP extends AST_EXP
 	public AST_EXP_BINOP(AST_EXP left,AST_EXP right, AST_BINOP OP)
 	{
 		SerialNumber = AST_Node_Serial_Number.getFresh();
-		System.out.print("====================== exp -> exp BINOP exp\n");
 		this.left = left;
 		this.right = right;
 		this.binop = OP;
@@ -17,7 +16,6 @@ public class AST_EXP_BINOP extends AST_EXP
 	
 	public void PrintMe()
 	{
-		System.out.print("AST NODE BINOP EXP\n");
 
 		if (left != null) left.PrintMe();
 		if (right != null) right.PrintMe();

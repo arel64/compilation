@@ -10,10 +10,8 @@ public class AST_STMT_RETURN extends AST_STMT {
     @Override
     public void PrintMe() {
         if (exp != null) {
-            System.out.print("RETURN: ");
             exp.PrintMe();
         } else {
-            System.out.println("RETURN;");
         }
     }
 }

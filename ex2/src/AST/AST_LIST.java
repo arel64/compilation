@@ -5,7 +5,7 @@ public class AST_LIST<T extends AST_Node> extends AST_Node{
 
     
     public AST_LIST(T first) {
-        list = new java.util.ArrayList();
+        list = new java.util.ArrayList<T>();
         if(first !=null)
         {
             list.add(first);
@@ -15,16 +15,24 @@ public class AST_LIST<T extends AST_Node> extends AST_Node{
     }
 
     public AST_LIST(AST_LIST<T> prev, T next) {
-        list = new java.util.ArrayList(prev.list);
+        SerialNumber = AST_Node_Serial_Number.getFresh();
+
+        if(prev == null)
+        {
+            list = new java.util.ArrayList<T>();
+        }
+        else
+        {
+            list = new java.util.ArrayList<T>(prev.list);
+        }
+        
         if(next != null)
         {
             list.add(next);
         }
-        SerialNumber = AST_Node_Serial_Number.getFresh();
     }
     @Override
     public void PrintMe() {
-        System.out.printf("LIST OF\n %s",list.getClass().getCanonicalName());
         for (T dec : list) {
             dec.PrintMe();
         }

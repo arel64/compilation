@@ -11,6 +11,5 @@ public class AST_ARRAY_TYPEDEF extends AST_DEC {
 
     @Override
     public void PrintMe() {
-        System.out.printf("ARRAY TYPEDEF: %s = %s[]\n", arrayName, baseType.getClass().getSimpleName());
     }
 }

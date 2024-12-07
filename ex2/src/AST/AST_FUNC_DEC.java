@@ -16,13 +16,10 @@ public class AST_FUNC_DEC extends AST_DEC {
 
     @Override
     public void PrintMe() {
-        System.out.printf("FUNCTION DECLARATION: %s %s(", returnType, funcName);
         if (params != null) {
             for (AST_PARAM param : params.list) {
                 param.printMe();
             }
         }
-        System.out.println(")");
-        body.head.PrintMe();
     }
 }

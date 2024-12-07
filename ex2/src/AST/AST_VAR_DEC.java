@@ -21,10 +21,8 @@ public class AST_VAR_DEC extends AST_DEC {
     @Override
     public void PrintMe() {
         if (this.varValue != null) {
-            System.out.printf("VAR DEC: %s %s = ", this.varType, this.varName);
             this.varValue.PrintMe(); 
         } else {
-            System.out.printf("VAR DEC: %s %s\n", this.varType, this.varName);
         }
     }
 }
