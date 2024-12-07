@@ -1,13 +1,13 @@
 package AST;
 
-public class AST_BINOP extends AST_NODE
+public class AST_BINOP extends AST_Node
 {
 	String op;
 	
 	/******************/
 	/* CONSTRUCTOR(S) */
 	/******************/
-	public AST_BINOP(String OP)
+	public AST_BINOP(String op)
 	{
 		/******************************/
 		/* SET A UNIQUE SERIAL NUMBER */
@@ -22,7 +22,7 @@ public class AST_BINOP extends AST_NODE
 		/*******************************/
 		/* COPY INPUT DATA NENBERS ... */
 		/*******************************/
-		this.OP = OP;
+		this.op = op;
 	}
 	
 	/*************************************************/
@@ -40,6 +40,6 @@ public class AST_BINOP extends AST_NODE
 		/***************************************/
 		AST_GRAPHVIZ.getInstance().logNode(
 			SerialNumber,
-			String.format("BINOP(%s)",OP));
+			String.format("BINOP(%s)",op));
 	}
 }

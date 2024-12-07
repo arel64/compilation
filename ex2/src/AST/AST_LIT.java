@@ -1,6 +1,6 @@
 package AST;
 
-public abstract class AST_VAR_SIMPLE extends AST_NODE
+public abstract class AST_LIT extends AST_Node
 {
    abstract String getValue();
 

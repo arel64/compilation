@@ -9,19 +9,20 @@ public class AST_VAR_DEC extends AST_DEC {
         this.varName = varName;
         this.varType = varType;
         this.varValue = initialValue;
+        SerialNumber = AST_Node_Serial_Number.getFresh();
     }
-    //Constructor for dec with no assignment
     public AST_VAR_DEC(String varName, AST_TYPE varType) {
         this.varName = varName;
         this.varType = varType;
-        this.varValue = null; // No assignment
+        this.varValue = null;
+        SerialNumber = AST_Node_Serial_Number.getFresh();
     }
 
     @Override
-    public void printMe() {
+    public void PrintMe() {
         if (this.varValue != null) {
             System.out.printf("VAR DEC: %s %s = ", this.varType, this.varName);
-            this.varValue.printMe();  // Print the value of the assignment
+            this.varValue.PrintMe(); 
         } else {
             System.out.printf("VAR DEC: %s %s\n", this.varType, this.varName);
         }

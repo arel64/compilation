@@ -8,15 +8,16 @@ public class AST_STMT_WHILE extends AST_STMT {
     public AST_STMT_WHILE(AST_EXP condition, List<AST_STMT> body) {
         this.condition = condition;
         this.body = body;
+        SerialNumber = AST_Node_Serial_Number.getFresh();
     }
 
     
     @Override
-    public void printMe() {
+    public void PrintMe() {
         System.out.println("WHILE LOOP:");
         System.out.print("Condition: ");
         if (condition != null) {
-            condition.printMe();
+            condition.PrintMe();
         } else {
             System.out.println("null");
         }
@@ -24,7 +25,7 @@ public class AST_STMT_WHILE extends AST_STMT {
         System.out.println("Body:");
         for (AST_STMT stmt : body) {
             if (stmt != null) {
-                stmt.printMe();
+                stmt.PrintMe();
             }
         }
     }

@@ -10,26 +10,15 @@ public class AST_VAR_SUBSCRIPT extends AST_VAR
 	/******************/
 	public AST_VAR_SUBSCRIPT(AST_VAR var,AST_EXP subscript)
 	{
-		/******************************/
-		/* SET A UNIQUE SERIAL NUMBER */
-		/******************************/
-		SerialNumber = AST_Node_Serial_Number.getFresh();
-
-		/***************************************/
-		/* PRINT CORRESPONDING DERIVATION RULE */
-		/***************************************/
+		super(var.val);
 		System.out.print("====================== var -> var [ exp ]\n");
-
-		/*******************************/
-		/* COPY INPUT DATA NENBERS ... */
-		/*******************************/
-		this.var = var;
 		this.subscript = subscript;
 	}
 
 	/*****************************************************/
 	/* The printing message for a subscript var AST node */
 	/*****************************************************/
+	@Override
 	public void PrintMe()
 	{
 		/*************************************/
