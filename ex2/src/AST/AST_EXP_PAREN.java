@@ -17,6 +17,7 @@ public class AST_EXP_PAREN extends AST_EXP {
         );
         if (exp != null) {
             AST_GRAPHVIZ.getInstance().logEdge(SerialNumber, exp.SerialNumber);
+            exp.PrintMe();
         }
     }
 }

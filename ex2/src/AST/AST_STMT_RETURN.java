@@ -11,7 +11,6 @@ public class AST_STMT_RETURN extends AST_STMT {
     public void PrintMe() {
         if (exp != null) {
             exp.PrintMe();
-        } else {
         }
     }
 }

@@ -19,6 +19,7 @@ public class AST_EXP_VAR extends AST_EXP
 			"EXP\nVAR");
 
 		AST_GRAPHVIZ.getInstance().logEdge(SerialNumber,var.SerialNumber);
+		var.PrintMe();
 			
 	}
 }

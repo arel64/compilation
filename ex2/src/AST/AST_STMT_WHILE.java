@@ -17,15 +17,10 @@ public class AST_STMT_WHILE extends AST_STMT {
 
         if (condition != null) {
             condition.PrintMe();
-        } else {
-
         }
-        
+        AST_GRAPHVIZ.getInstance().logEdge(SerialNumber,body.SerialNumber);
+        body.PrintMe();
 
-        condition.PrintMe();
-        for (AST_STMT field : body.list) {
-            field.PrintMe();
-        }
         
     }
 }

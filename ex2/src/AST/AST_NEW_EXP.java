@@ -16,6 +16,7 @@ public class AST_NEW_EXP extends AST_EXP {
 
     @Override
     public void PrintMe() {
+        AST_GRAPHVIZ.getInstance().logEdge(SerialNumber,type.SerialNumber);
         type.PrintMe();
     }
 }

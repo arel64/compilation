@@ -15,5 +15,6 @@ public class AST_ARRAY_TYPEDEF extends AST_DEC {
 			SerialNumber,
 			"ARRAY_DEC ");
         AST_GRAPHVIZ.getInstance().logEdge(SerialNumber, baseType.SerialNumber);
+        baseType.PrintMe();
     }
 }

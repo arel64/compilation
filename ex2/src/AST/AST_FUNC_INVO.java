@@ -25,6 +25,7 @@ public class AST_FUNC_INVO extends AST_EXP {
         }
         if (params != null) {
             AST_GRAPHVIZ.getInstance().logEdge(SerialNumber,params.SerialNumber);
+            params.PrintMe();
         }
     }
 }

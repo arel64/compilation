@@ -19,6 +19,7 @@ public class AST_PROGRAM extends AST_Node {
         );
         if (declerationList != null) {
             AST_GRAPHVIZ.getInstance().logEdge(SerialNumber, declerationList.SerialNumber);
+            declerationList.PrintMe();
         }
     }
 }

@@ -22,5 +22,6 @@ public class AST_CLASS_DEC extends AST_DEC {
             );     
         }
         AST_GRAPHVIZ.getInstance().logEdge(SerialNumber,fields.SerialNumber);
+        fields.PrintMe();
     }
 }

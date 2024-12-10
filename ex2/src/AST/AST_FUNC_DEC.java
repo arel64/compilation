@@ -24,6 +24,7 @@ public class AST_FUNC_DEC extends AST_DEC {
 		
         if (params != null) {
             AST_GRAPHVIZ.getInstance().logEdge(SerialNumber,params.SerialNumber);
+            params.PrintMe();
         }
     }
 }

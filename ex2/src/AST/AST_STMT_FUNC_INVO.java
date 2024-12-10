@@ -28,9 +28,11 @@ public class AST_STMT_FUNC_INVO extends AST_STMT {
         );
         if (var != null) {
             AST_GRAPHVIZ.getInstance().logEdge(SerialNumber, var.SerialNumber);
+            var.PrintMe();
         }
         if (args != null) {
             AST_GRAPHVIZ.getInstance().logEdge(SerialNumber, args.SerialNumber);
+            args.PrintMe();
         }
     }
 }

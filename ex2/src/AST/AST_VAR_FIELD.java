@@ -16,6 +16,6 @@ public class AST_VAR_FIELD extends AST_VAR
 			SerialNumber,
 			String.format("FIELD\nVAR\n...->%s",fieldName));
 		
-		if (var != null) AST_GRAPHVIZ.getInstance().logEdge(SerialNumber,SerialNumber);
+		if (var != null) AST_GRAPHVIZ.getInstance().logEdge(SerialNumber,SerialNumber);//fix var
 	}
 }

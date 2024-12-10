@@ -20,7 +20,9 @@ public class AST_VAR_DEC extends AST_DEC {
         super.PrintMe();
         if (this.varValue != null) {
             AST_GRAPHVIZ.getInstance().logEdge(SerialNumber,varValue.SerialNumber); 
+            varValue.PrintMe();
         } 
         AST_GRAPHVIZ.getInstance().logEdge(SerialNumber,varType.SerialNumber); 
+        varType.PrintMe();
     }
 }

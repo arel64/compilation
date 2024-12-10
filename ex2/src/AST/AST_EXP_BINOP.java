@@ -25,7 +25,15 @@ public class AST_EXP_BINOP extends AST_EXP
 			"BINOP"
 			);
 		
-		if (left  != null) AST_GRAPHVIZ.getInstance().logEdge(SerialNumber,left.SerialNumber);
-		if (right != null) AST_GRAPHVIZ.getInstance().logEdge(SerialNumber,right.SerialNumber);
+		if (left  != null)
+		{
+			AST_GRAPHVIZ.getInstance().logEdge(SerialNumber,left.SerialNumber);
+			left.PrintMe();
+		} 
+		if (right != null)
+		{
+			AST_GRAPHVIZ.getInstance().logEdge(SerialNumber,right.SerialNumber);	
+			right.PrintMe();
+		} 
 	}
 }

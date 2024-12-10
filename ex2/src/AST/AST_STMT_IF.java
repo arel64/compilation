@@ -13,8 +13,7 @@ public class AST_STMT_IF extends AST_STMT
     @Override
     public void PrintMe() {
         condition.PrintMe();
-        for (AST_STMT field : body.list) {
-            field.PrintMe();
-        }
+        body.PrintMe();
+        AST_GRAPHVIZ.getInstance().logEdge(SerialNumber,body.SerialNumber);
     }
 }
