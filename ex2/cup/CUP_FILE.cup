@@ -81,14 +81,14 @@ non terminal AST_EXP exp;
 non terminal AST_VAR var;
 non terminal AST_STMT stmt;
 non terminal AST_NEW_EXP newExp;
-non terminal AST_FIELD cField;
+non terminal AST_DEC cField;
 non terminal AST_BINOP binop;
 non terminal AST_DEC_LIST dec_list;
-non terminal AST_PARAM_LIST opt_param_list;
-non terminal AST_PARAM_LIST param_list;
+non terminal AST_DEC_LIST opt_param_list;
+non terminal AST_DEC_LIST param_list;
 non terminal AST_STMT_LIST stmt_list;
 non terminal String extends_opt;
-non terminal AST_FIELD_LIST cField_list;
+non terminal AST_DEC_LIST cField_list;
 non terminal AST_EXP_LIST opt_exp_list;
 non terminal AST_EXP_LIST exp_list;
 non terminal AST_EXP num_exp;
@@ -149,8 +149,8 @@ opt_param_list ::=
     {: RESULT = null; :}
   | param_list:pl {: RESULT = pl; :};
 
-param_list ::= type:t ID:i {: RESULT = new AST_PARAM_LIST(new AST_PARAM(t, i)); :}
-             | param_list:pl COMMA:c type:t ID:i {: pl.list.add(new AST_PARAM(t,i)); RESULT = pl; :};
+param_list ::= type:t ID:i {: RESULT = new AST_DEC_LIST(new AST_VAR_DEC(i,t)); :}
+             | param_list:pl COMMA:c type:t ID:i {: pl.list.add(new AST_VAR_DEC(i,t)); RESULT = pl; :};
 
 classDec ::= CLASS:c ID:i extends_opt:eo LBRACE:lb cField_list:cf RBRACE:rb
              {: RESULT = new AST_CLASS_DEC(i, eo, cf); :};
@@ -159,16 +159,16 @@ extends_opt ::=
     {: RESULT = null; :}
   | EXTENDS:e ID:i {: RESULT = i; :};
 
-cField_list ::= cField:cf {: RESULT = new AST_FIELD_LIST(cf); :}
-              | cField_list:cfl cField:cf {: RESULT = new AST_FIELD_LIST(cfl, cf); :};
+cField_list ::= cField:cf {: RESULT = new AST_DEC_LIST(cf); :}
+              | cField_list:cfl cField:cf {: RESULT = new AST_DEC_LIST(cfl, cf); :};
 
 dec ::= varDec:v   {: RESULT = v; :}
      | funcDec:f   {: RESULT = f; :}
      | classDec:c  {: RESULT = c; :}
      | arrayTypedef:at {: RESULT = at; :};
 
-cField ::= varDec:v  {: RESULT = new AST_FIELD(v); :}
-         | funcDec:f  {: RESULT = new AST_FIELD(f); :};
+cField ::= varDec:v  {: RESULT = v; :}
+         | funcDec:f  {: RESULT = f; :};
 
 newExp ::= NEW:n type:t {: RESULT = new AST_NEW_EXP(t); :}
          | NEW:n type:t LBRACK:lb exp:ex RBRACK:rb {: RESULT = new AST_NEW_EXP(t, ex); :};

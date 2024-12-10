@@ -1,6 +1,22 @@
 package AST;
 
-// Common abstract class for all types of declarations
+
 public abstract class AST_DEC extends AST_Node {
-    // Common fields or methods for declarations can go here
+    private String name;
+    public AST_DEC(String name)
+    {
+        this.name = name;
+        SerialNumber = AST_Node_Serial_Number.getFresh();
+    }
+    public String getName()
+    {
+        return name;
+    }
+    @Override
+    public void PrintMe()
+    {
+        AST_GRAPHVIZ.getInstance().logNode(
+			SerialNumber,
+			"AST_DEC\nNAME\n"+getName());		
+    }
 }

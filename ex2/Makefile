@@ -138,5 +138,5 @@ all:
 	@echo "*                                              *"
 	@echo "*                                              *"
 	@echo "************************************************"
-#	eog ${OUTPUT_DIR}/AST.jpeg &
+	eog ${OUTPUT_DIR}/AST.jpeg &
 
