@@ -12,7 +12,7 @@ public class AST_PROGRAM extends AST_Node {
     @Override
     public void PrintMe()
     {
-        if (declerationList != null) declerationList.PrintMe();
+
         AST_GRAPHVIZ.getInstance().logNode(
             SerialNumber,
             "PROGRAM"
