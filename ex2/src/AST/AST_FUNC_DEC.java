@@ -15,16 +15,19 @@ public class AST_FUNC_DEC extends AST_DEC {
     }
 
     @Override
-    public void PrintMe() {
-        super.PrintMe();
-        
+    public void PrintMe() {        
         AST_GRAPHVIZ.getInstance().logNode(
 			SerialNumber,
-			"FUNC_DECLARATION\n "+returnType+" "+super.getName()+"(params)");
+			"FUNC_DECLARATION\n "+returnType.type+" "+this.getName()+"("+params+")");
 		
         if (params != null) {
             AST_GRAPHVIZ.getInstance().logEdge(SerialNumber,params.SerialNumber);
             params.PrintMe();
+        }
+        if(body != null)
+        {
+            AST_GRAPHVIZ.getInstance().logEdge(SerialNumber,body.SerialNumber);
+            body.PrintMe();
         }
     }
 }

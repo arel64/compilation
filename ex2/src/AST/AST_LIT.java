@@ -7,11 +7,12 @@ public abstract class AST_LIT extends AST_EXP
    @Override
    public void PrintMe()
 	{
-		/***************************************/
-		/* PRINT Node to AST GRAPHVIZ DOT file */
-		/***************************************/
 		AST_GRAPHVIZ.getInstance().logNode(
 			SerialNumber,
-			String.format("LITERAL\n...->%s",getValue()));
+			String.format("LITERAL(%s)",getValue()));
+	}
+	@Override
+	public String toString() {
+		return getValue();
 	}
 }

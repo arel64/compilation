@@ -17,12 +17,12 @@ public class AST_VAR_DEC extends AST_DEC {
 
     @Override
     public void PrintMe() {
-        super.PrintMe();
-        if (this.varValue != null) {
-            AST_GRAPHVIZ.getInstance().logEdge(SerialNumber,varValue.SerialNumber); 
-            varValue.PrintMe();
-        } 
-        AST_GRAPHVIZ.getInstance().logEdge(SerialNumber,varType.SerialNumber); 
-        varType.PrintMe();
+        AST_GRAPHVIZ.getInstance().logNode(
+			SerialNumber,
+			"AST_DEC\n"+ this.toString());	
+    }
+    @Override
+    public String toString() {
+        return varType.toString()+ " "+getName() + (varValue != null ? "="+varValue:"");
     }
 }

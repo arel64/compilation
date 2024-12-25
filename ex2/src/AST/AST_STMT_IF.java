@@ -13,7 +13,11 @@ public class AST_STMT_IF extends AST_STMT
     @Override
     public void PrintMe() {
         condition.PrintMe();
+        AST_GRAPHVIZ.getInstance().logNode(
+            SerialNumber,
+            "IF("+condition+")");
         body.PrintMe();
         AST_GRAPHVIZ.getInstance().logEdge(SerialNumber,body.SerialNumber);
+        AST_GRAPHVIZ.getInstance().logEdge(SerialNumber,condition.SerialNumber);
     }
 }

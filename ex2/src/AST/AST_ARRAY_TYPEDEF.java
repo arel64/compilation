@@ -10,11 +10,9 @@ public class AST_ARRAY_TYPEDEF extends AST_DEC {
 
     @Override
     public void PrintMe() {
-        super.PrintMe();
         AST_GRAPHVIZ.getInstance().logNode(
 			SerialNumber,
-			"ARRAY_DEC ");
-        AST_GRAPHVIZ.getInstance().logEdge(SerialNumber, baseType.SerialNumber);
-        baseType.PrintMe();
+			String.format("ARRAY_DEC\n array %s = %s[];",this.getName(),this.baseType)
+        );
     }
 }

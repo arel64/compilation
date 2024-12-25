@@ -46,11 +46,10 @@ public class Main
 				AST = (AST_PROGRAM) p.parse().value;
 				file_writer.write("OK\n");
 				AST.PrintMe();
-
-
 			}
 			catch(Exception e)
 			{
+				// e.printStackTrace();
 				file_writer.write("ERROR(" + p.errorLine + ")\n");
 			}
 			

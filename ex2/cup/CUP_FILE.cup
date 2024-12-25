@@ -180,8 +180,8 @@ var ::= ID:i {: RESULT = new AST_VAR_SIMPLE(i); :}
 exp ::= var:v                 {: RESULT = new AST_EXP_VAR(v); :}
       | LPAREN:lp exp:e RPAREN:rp {: RESULT = new AST_EXP_PAREN(e); :}
       | exp:e1 binop:b exp:e2  {: RESULT = new AST_EXP_BINOP(e1, e2,b); :}
-      | var:v DOT:d ID:i LPAREN:lp opt_exp_list:oel RPAREN:rp {: RESULT = new AST_FUNC_INVO(i, oel, v); :}
-      | ID:i LPAREN:lp opt_exp_list:oel RPAREN:rp {: RESULT = new AST_FUNC_INVO(i, oel, null); :}
+      | var:v DOT:d ID:i LPAREN:lp opt_exp_list:oel RPAREN:rp {: RESULT = new AST_FUNC_INVO(v,i,oel); :}
+      | ID:i LPAREN:lp opt_exp_list:oel RPAREN:rp {: RESULT = new AST_FUNC_INVO(i, oel); :}
       | num_exp:ne            {: RESULT = ne; :}
       | NIL:n                 {: RESULT = new AST_LIT_STRING("NIL"); :}
       | STRING:str            {: RESULT = new AST_LIT_STRING((String)str); :};
@@ -193,8 +193,8 @@ opt_exp_list ::=
 exp_list ::= exp:e {: RESULT = new AST_EXP_LIST(e); :}
            | exp_list:el COMMA:c exp:e {: el.list.add(e); RESULT = el; :};
 
-num_exp ::= INT:in          {: RESULT = new AST_LIT_NUMBER(null, in); :}
-          | MINUS:m INT:in  {: RESULT = new AST_LIT_NUMBER((String)m, in); :};
+num_exp ::= INT:in          {: RESULT = new AST_LIT_NUMBER(false, in); :}
+          | MINUS:m INT:in  {: RESULT = new AST_LIT_NUMBER(true, in); :};
 
 stmt ::= varDec:v {: RESULT = new AST_STMT_VAR_DECL(v); :}
        | var:v ASSIGN:a exp:e SEMICOLON:se {: RESULT = new AST_STMT_ASSIGN(v, e); :}
@@ -203,9 +203,9 @@ stmt ::= varDec:v {: RESULT = new AST_STMT_VAR_DECL(v); :}
        | RETURN:r SEMICOLON:se {: RESULT = new AST_STMT_RETURN(null); :}
        | IF:i LPAREN:lp exp:e RPAREN:rp LBRACE:lb stmt_list:sl RBRACE:rb {: RESULT = new AST_STMT_IF(e, sl); :}
        | WHILE:w LPAREN:lp exp:e RPAREN:rp LBRACE:lb stmt_list:sl RBRACE:rb {: RESULT = new AST_STMT_WHILE(e, sl); :}
-       | var:v DOT:d ID:i LPAREN:lp opt_exp_list:oel RPAREN:rp SEMICOLON:se {: RESULT = new AST_STMT_FUNC_INVO(v, i, oel); :}
-       | ID:i LPAREN:lp opt_exp_list:oel RPAREN:rp SEMICOLON:se {: RESULT = new AST_STMT_FUNC_INVO(i, oel); :};
+       | var:v DOT:d ID:i LPAREN:lp opt_exp_list:oel RPAREN:rp SEMICOLON:se {: RESULT = new AST_STMT_FUNC_INVO(new AST_FUNC_INVO(v, i, oel)); :}
+       | ID:i LPAREN:lp opt_exp_list:oel RPAREN:rp SEMICOLON:se {: RESULT = new AST_STMT_FUNC_INVO(new AST_FUNC_INVO(i, oel)); :};
 
 stmt_list ::=
     {: RESULT = new AST_STMT_LIST(null,null); :}
-  | stmt:s stmt_list:sl {: sl.list.add(s); RESULT = sl; :};
+  | stmt:s stmt_list:sl {: sl.list.add(0,s); RESULT = sl; :};

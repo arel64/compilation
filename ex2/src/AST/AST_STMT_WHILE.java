@@ -1,5 +1,4 @@
 package AST;
-import java.util.List;
 
 public class AST_STMT_WHILE extends AST_STMT {
     public AST_EXP condition;
@@ -14,13 +13,10 @@ public class AST_STMT_WHILE extends AST_STMT {
     
     @Override
     public void PrintMe() {
-
-        if (condition != null) {
-            condition.PrintMe();
-        }
         AST_GRAPHVIZ.getInstance().logEdge(SerialNumber,body.SerialNumber);
+        AST_GRAPHVIZ.getInstance().logNode(
+            SerialNumber,
+            "WHILE("+condition+")");
         body.PrintMe();
-
-        
     }
 }

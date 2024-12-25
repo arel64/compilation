@@ -14,8 +14,10 @@ public class AST_VAR_FIELD extends AST_VAR
 		String var = this.val;
 		AST_GRAPHVIZ.getInstance().logNode(
 			SerialNumber,
-			String.format("FIELD\nVAR\n...->%s",fieldName));
-		
-		if (var != null) AST_GRAPHVIZ.getInstance().logEdge(SerialNumber,SerialNumber);//fix var
+			String.format("VAR FIELD\n %s",toString()));
+	}
+	@Override
+	public String toString() {
+		return String.format("%s.%s",this.val,fieldName);
 	}
 }

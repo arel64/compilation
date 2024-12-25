@@ -7,4 +7,8 @@ public class AST_VAR extends AST_Node
         SerialNumber = AST_Node_Serial_Number.getFresh();
         this.val = val;
     }
+    @Override
+    public String toString() {
+        return val;
+    }
 }

@@ -16,13 +16,9 @@ public class AST_EXP_BINOP extends AST_EXP
 	
 	public void PrintMe()
 	{
-
-		if (left != null) left.PrintMe();
-		if (right != null) right.PrintMe();
-		this.binop.PrintMe();
 		AST_GRAPHVIZ.getInstance().logNode(
 			SerialNumber,
-			"BINOP"
+			"BINOP\n"+this.toString()
 			);
 		
 		if (left  != null)
@@ -30,10 +26,18 @@ public class AST_EXP_BINOP extends AST_EXP
 			AST_GRAPHVIZ.getInstance().logEdge(SerialNumber,left.SerialNumber);
 			left.PrintMe();
 		} 
+		AST_GRAPHVIZ.getInstance().logEdge(SerialNumber,binop.SerialNumber);	
+		this.binop.PrintMe();
 		if (right != null)
 		{
 			AST_GRAPHVIZ.getInstance().logEdge(SerialNumber,right.SerialNumber);	
 			right.PrintMe();
-		} 
+		}
+		
+
+	}
+	@Override
+	public String toString() {
+		return left.toString()+binop.toString()+right.toString();
 	}
 }

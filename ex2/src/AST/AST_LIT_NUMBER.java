@@ -4,10 +4,10 @@ public class AST_LIT_NUMBER extends AST_LIT
 {
     public int val;
     
-    public AST_LIT_NUMBER(String isNeg, int val){
+    public AST_LIT_NUMBER(boolean isNeg, int val){
         SerialNumber = AST_Node_Serial_Number.getFresh();
         this.val = val;
-        if (isNeg != null || isNeg != ""){
+        if (isNeg){
             this.val = -1 * val;
         }
     }

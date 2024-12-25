@@ -14,14 +14,20 @@ public class AST_CLASS_DEC extends AST_DEC {
 
     @Override
     public void PrintMe() {
-        super.PrintMe();
-        if (parentClassName != null) {
-            AST_GRAPHVIZ.getInstance().logNode(
-                SerialNumber,
-                "Parent \n("+parentClassName+")"
-            );     
-        }
+        AST_GRAPHVIZ.getInstance().logNode(
+            SerialNumber,
+            toString()
+        );     
         AST_GRAPHVIZ.getInstance().logEdge(SerialNumber,fields.SerialNumber);
         fields.PrintMe();
+    }
+    @Override
+    public String toString() {
+        String represtation = String.format("class %s",super.getName());
+        if (parentClassName != null)
+        {
+            represtation += " extends " + parentClassName;
+        }
+        return represtation;
     }
 }

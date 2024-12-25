@@ -25,7 +25,7 @@ public class AST_STMT_ASSIGN extends AST_STMT
 
 		AST_GRAPHVIZ.getInstance().logNode(
 			SerialNumber,
-			"ASSIGN\nleft := right\n");
+			"STMT ASSIGN\n"+var+" := "+ exp+"\n");
 		
 		AST_GRAPHVIZ.getInstance().logEdge(SerialNumber,var.SerialNumber);
 		AST_GRAPHVIZ.getInstance().logEdge(SerialNumber,exp.SerialNumber);

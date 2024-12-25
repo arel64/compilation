@@ -9,8 +9,12 @@ public class AST_STMT_RETURN extends AST_STMT {
 
     @Override
     public void PrintMe() {
-        if (exp != null) {
-            exp.PrintMe();
-        }
+        AST_GRAPHVIZ.getInstance().logNode(
+            SerialNumber,
+            "RETURN "+exp    
+        );
+        AST_GRAPHVIZ.getInstance().logEdge(SerialNumber, exp.SerialNumber);
+        exp.PrintMe();
+        
     }
 }

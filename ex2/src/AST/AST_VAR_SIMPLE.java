@@ -15,4 +15,8 @@ public class AST_VAR_SIMPLE extends AST_VAR
 			SerialNumber,
 			String.format("SIMPLE\nVAR\n(%s)",this.val));
 	}
+	@Override
+	public String toString() {
+		return this.val;
+	}
 }

@@ -17,6 +17,6 @@ public abstract class AST_DEC extends AST_Node {
     {
         AST_GRAPHVIZ.getInstance().logNode(
 			SerialNumber,
-			"AST_DEC\nNAME\n"+getName());		
+			"AST_DEC\nParmeter name: \n"+getName());		
     }
 }
