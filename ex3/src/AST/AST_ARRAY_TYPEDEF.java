@@ -20,9 +20,12 @@ public class AST_ARRAY_TYPEDEF extends AST_DEC {
     @Override
     public TYPE SemantMe(){
         //check if the type is a valid type
-        TYPE arrayType = baseType.semantMe()
-        
+        TYPE arrayType = baseType.SemantMe();
+        int index = SYMBOL_TABLE.getInstance().getCurrentScopeIndex();
+        if (arrayType == TYPE_VOID || index != 0){
+            //throw error
+        }
+        SYMBOL_TABLE.getInstance().enter(arrayName, arrayType);
+        return arrayType;
     }
-    
 }
-=
