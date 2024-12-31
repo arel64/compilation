@@ -16,4 +16,7 @@ public class TYPE_LIST
 		this.head = head;
 		this.tail = tail;
 	}
+	public boolean equals(TYPE_LIST obj) {
+		return this.head == obj.head && tail.equals(obj); 
+	}
 }

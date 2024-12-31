@@ -21,4 +21,9 @@ public class TYPE_FUNCTION extends TYPE
 		this.returnType = returnType;
 		this.params = params;
 	}
+
+    public boolean isOverriding(TYPE_FUNCTION t) {
+		return this.name == t.name && t.params.equals(params) && this.returnType == t.returnType;
+    }
+	
 }

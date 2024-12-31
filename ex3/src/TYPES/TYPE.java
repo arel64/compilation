@@ -7,13 +7,11 @@ public abstract class TYPE
 	/******************************/
 	public String name;
 
-	/*************/
-	/* isClass() */
-	/*************/
 	public boolean isClass(){ return false;}
 
-	/*************/
-	/* isArray() */
-	/*************/
 	public boolean isArray(){ return false;}
+
+	public boolean equals(TYPE obj) {
+		return name == obj.name;
+	}
 }

@@ -1,5 +1,6 @@
 package AST;
-
+import SYMBOL_TABLE.SemanticException;
+import TYPES.*;
 public abstract class AST_Node
 {
 	/*******************************************/
@@ -16,6 +17,6 @@ public abstract class AST_Node
 	{
 	}
 
-	public abstract TYPE SemantMe();
+	public abstract TYPE SemantMe() throws SemanticException;
 
 }

@@ -1,5 +1,4 @@
 package AST;
-import TYPES.*;
 
 public class AST_DEC_LIST extends AST_LIST<AST_DEC>{
 

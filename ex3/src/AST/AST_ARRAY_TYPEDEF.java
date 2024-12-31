@@ -1,4 +1,5 @@
 package AST;
+import SYMBOL_TABLE.SYMBOL_TABLE;
 import TYPES.*;
 
 public class AST_ARRAY_TYPEDEF extends AST_DEC {
@@ -25,7 +26,7 @@ public class AST_ARRAY_TYPEDEF extends AST_DEC {
         if (arrayType == TYPE_VOID || index != 0){
             //throw error
         }
-        SYMBOL_TABLE.getInstance().enter(arrayName, arrayType);
+        SYMBOL_TABLE.getInstance().enter(this.getName(), arrayType);
         return arrayType;
     }
 }
