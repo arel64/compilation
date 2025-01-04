@@ -48,7 +48,6 @@ public class AST_CLASS_DEC extends AST_DEC {
 		}
 		TYPE_CLASS currentClass = new TYPE_CLASS(parentClassName, this.getName(),new TYPE_CLASS_VAR_DEC_LIST(this.fields));
 		symbol_table.enter(currentClass.name,currentClass);
-
-		
+		return currentClass.name;   //check if this should be symbol.get__
 	}
 }

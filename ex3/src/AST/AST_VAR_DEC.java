@@ -28,13 +28,14 @@ public class AST_VAR_DEC extends AST_DEC {
         return varType.toString()+ " "+getName() + (varValue != null ? "="+varValue:"");
     }
     @Override
-    public TYPE_CLASS_VAR_DEC SemantMe() throws SemanticException{
+    public TYPE SemantMe() throws SemanticException{
         TYPE type = varType.SemantMe();
         TYPE valueType = varValue.SemantMe();
         if(type != valueType)
         {
             throw new SemanticException("VAR DEC MISMATCH TYPE");
         }
-        return new TYPE_CLASS_VAR_DEC(valueType, getName());
+        return null;
+        // return new TYPE_CLASS_VAR_DEC(valueType, getName());  //this is not only used for class 
     }
 }

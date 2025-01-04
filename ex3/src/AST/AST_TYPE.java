@@ -26,7 +26,7 @@ public class AST_TYPE extends AST_Node
         if (curr == null)
         {
            System.out.println("The type does not exist.");
-        //    throw new SemanticErrorException("" + lineNumber);
+           throw new SemanticException("" + lineNumber);
         }
         return curr;
 	}

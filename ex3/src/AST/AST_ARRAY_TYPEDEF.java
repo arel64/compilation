@@ -20,13 +20,17 @@ public class AST_ARRAY_TYPEDEF extends AST_DEC {
 
     @Override
     public TYPE SemantMe(){
-        //check if the type is a valid type
+		SYMBOL_TABLE symbol_table = SYMBOL_TABLE.getInstance();
+		int scope = symbol_table.getCurrentScopeIndex();
+		if (scope != 0){
+			throw new SemanticException("Scope mismatch found scope:" +scope);
+		}
         TYPE arrayType = baseType.SemantMe();
-        int index = SYMBOL_TABLE.getInstance().getCurrentScopeIndex();
-        if (arrayType == TYPE_VOID || index != 0){
-            //throw error
+        if (arrayType == TYPE_VOID){
+            throw new SemanticException("Array of type void" +this.getName());
         }
-        SYMBOL_TABLE.getInstance().enter(this.getName(), arrayType);
-        return arrayType;
+        symbol_table.enter(this.getName(), arrayType);
+        return null;  //maybe create an array type? 
     }
+    //where do we ckeck if the type is equal to the arrayType?
 }

@@ -31,4 +31,12 @@ public class AST_FUNC_DEC extends AST_DEC {
             body.PrintMe();
         }
     }
+
+    @Override
+    public TYPE SemantMe(){
+        Type returnT = returnType.SemantMe();
+        String name = this.getName();
+        TYPE_LIST paramsType = params.SemantMe();
+        return new TYPE_FUNCTION(returnT, name, paramsType);
+    }
 }

@@ -77,14 +77,16 @@ public class AST_LIST<T extends AST_Node> extends AST_Node{
         if (this.list.isEmpty()) {
             return null;
         }
-        for(T dec : this.list)
-        {
-            TYPE curr = dec.SemantMe();
-            if (curr == null){
-                //throw an error
+        TYPE_LIST result = null;
+        for (int i = this.list.size() - 1; i >= 0; i--) {
+            T node = this.list.get(i);
+            TYPE currType = node.SemantMe();  // Get the TYPE of the current node
+            if (currType == null) {
+                // Handle the error case where the SemantMe of the node returns null
+                throw new SemanticException("WTF");
             }
+            result = new TYPE_LIST(currType, result);
         }
-        return null;
+        return result;
     }
- 
 }

@@ -171,7 +171,8 @@ cField ::= varDec:v  {: RESULT = v; :}
          | funcDec:f  {: RESULT = f; :};
 
 newExp ::= NEW:n type:t {: RESULT = new AST_NEW_EXP(t); :}
-         | NEW:n type:t LBRACK:lb exp:ex RBRACK:rb {: RESULT = new AST_NEW_EXP(t, ex); :};
+         | NEW:n type:t LBRACK:lb num_exp:ex RBRACK:rb %prec DOT {: RESULT = new AST_NEW_EXP(t, ex, 0); :};
+         | NEW:n type:t LBRACK:lb exp:ex RBRACK:rb {: RESULT = new AST_NEW_EXP(t, ex, 1); :};
 
 var ::= ID:i {: RESULT = new AST_VAR_SIMPLE(i); :}
       | var:v DOT:d ID:i {: RESULT = new AST_VAR_FIELD(v, i); :}

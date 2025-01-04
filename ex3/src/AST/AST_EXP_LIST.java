@@ -11,8 +11,8 @@ public class AST_EXP_LIST extends AST_LIST<AST_EXP>{
         super(prev,next,AST_EXP.class);
     }
 
-    @Override
-    public TYPE SemantMe(){
-        //loop through all the e that we have in the list and check if there type is equal to what we want in the list
-    }
+    // @Override
+    // public TYPE SemantMe(){
+    //     //loop through all the e that we have in the list and check if there type is equal to what we want in the list
+    // }
 }

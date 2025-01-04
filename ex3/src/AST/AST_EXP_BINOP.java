@@ -1,5 +1,7 @@
 package AST;
 import TYPES.*;
+import SYMBOL_TABLE.SemanticException;
+
 
 public class AST_EXP_BINOP extends AST_EXP
 {
@@ -34,9 +36,8 @@ public class AST_EXP_BINOP extends AST_EXP
 			AST_GRAPHVIZ.getInstance().logEdge(SerialNumber,right.SerialNumber);	
 			right.PrintMe();
 		}
-		
-
 	}
+
 	@Override
 	public String toString() {
 		return left.toString()+binop.toString()+right.toString();
@@ -46,34 +47,27 @@ public class AST_EXP_BINOP extends AST_EXP
 	public TYPE SemantMe(){
 		TYPE leftType = left.SemantMe();
 		TYPE rightType = right.SemantMe();
-
-		// if op = + - * 
-		//if op is + allow also string 
-			// Addition or string concatenation
+        if (binop.op.equals("+") && leftType == TYPE_STRING && rightType == TYPE_STRING){
+			return TYPE_STRING;  // String concatenation
+		}
+		String operator = binop.toString();
+		if (binop.op.equals("<") || binop.op.equals(">") || binop.op.equals("+") || binop.op.equals("-") || binop.op.equals("*"))
 			if (leftType == TYPE_INT && rightType == TYPE_INT) {
-				return TYPE_INT; // Integer addition
+				return TYPE_INT;
 			} else {
-				// throw new SemanticError("Invalid types for '+' operator"); //TODO implement the error 
+				throw new SemanticException("Invalid types for binary operator '" + operator + "'");
 			}
 		if (binop.op.equals("/")) {
-			// Arithmetic operations
 			if (leftType == TYPE_INT && rightType == TYPE_INT) {
-				if (right.isZeroConstant()) {
-					throw new SemanticError("Division by zero");
+				if (right == 0) { //TODO do we know this? 
+					throw new SemanticException("Division by zero");
 				}
 				return TYPE_INT;
 			} else {
-				throw new SemanticError("Invalid types for arithmetic operator '" + operator + "'");
-			}
-		} else if (binop.op.equals("<") || binop.op.equals(">")) {
-			if (leftType == TYPE_INT && rightType == TYPE_INT) {
-				return TYPE_INT;
-			} else {
-				throw new SemanticError("Invalid types for comparison operator '" + operator + "'");
+				throw new SemanticException("Invalid types for arithmetic operator '" + operator + "'");
 			}
 		} else {
-			throw new SemanticError("Unsupported binary operator '" + operator + "'");
+			throw new SemanticException("Unsupported binary operator '" + operator + "'");
 		} 
 	}
 }
-//achinoam change naming 
