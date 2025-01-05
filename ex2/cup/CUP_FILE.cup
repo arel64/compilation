@@ -3,7 +3,6 @@
 /*************/
 import java_cup.runtime.*;
 import AST.*;
-
 parser code 
 {:
 	public Lexer lexer;
@@ -27,7 +26,13 @@ parser code
 scan with
 {:
 	Symbol s;
-	s = lexer.next_token();
+  try{
+    s = lexer.next_token();
+  }
+	catch(Exception e)
+  {
+    throw new LexerError(e.getMessage());
+  }
 	
 	return s; 
 :};

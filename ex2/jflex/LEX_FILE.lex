@@ -66,6 +66,20 @@ import java_cup.runtime.*;
 	/**********************************************/
 	public int getTokenStartPosition() { return yycolumn + 1; } 
 	public int getCharPos() { return yycolumn;   }
+	public int parseIntToken()
+	{
+		String representation = yytext();
+		if (representation.length() > 6)
+		{
+			//Prevent very big numbers from overflowing int
+			throw new RuntimeException("Out of bounds integer");
+		}
+        int value = Integer.parseInt(representation);
+		if (value >= 0 && value <= 32767) {
+            return value;
+        } 
+		throw new RuntimeException("Out of bounds integer");
+	}
 %}
 
 /***********************/
@@ -73,7 +87,7 @@ import java_cup.runtime.*;
 /***********************/
 LineTerminator   = \r|\n|\r\n
 WhiteSpace       = {LineTerminator} | [ \t]
-INTEGER          = 0|[1-9][0-9]*
+INTEGER          = -?0|-?[1-9][0-9]*
 STRING           = \"[a-zA-Z]*\"
 ID               = [a-zA-Z_][a-zA-Z0-9_]*
 TYPE_1_COMMENT 	 = \/\/[(|)|\[|\]|{|} | \?|\!|\.|\; | \+|\-|\*|\/ | [0-9] | [a-zA-Z_]]*{WhiteSpace}*
@@ -131,7 +145,7 @@ VALID_COMMENT_CHAR = [a-zA-Z0-9 \t\n\r\(\)\[\]\{\}\?\!\+\-\*/\.;]
 "int"           { return symbol(TokenNames.TYPE_INT); }
 "string"        { return symbol(TokenNames.TYPE_STRING); }
 {TYPE_1_COMMENT} { }
-{INTEGER}       { return symbol(TokenNames.INT, new Integer(yytext())); }
+{INTEGER}       { return symbol(TokenNames.INT, parseIntToken()); }
 {ID}            { return symbol(TokenNames.ID, yytext()); }
 {STRING}        { return symbol(TokenNames.STRING, new String(yytext()));}
 {WhiteSpace}    { /* skip whitespace */ }
