@@ -43,6 +43,7 @@ for input_file in "$INPUT_DIR"/*.txt; do
             diff "$temp_output_file" "$expected_output_file"
         fi
     else
-        echo "Skipping $base_name: No matching expected output."
+        echo "$base_name: No matching expected output."
+
     fi
 done

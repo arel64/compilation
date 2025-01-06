@@ -1,88 +1,72 @@
 package AST;
-
-import java.io.*;
 import java.io.PrintWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class AST_GRAPHVIZ
 {
-	/***********************/
-	/* The file writer ... */
-	/***********************/
 	private PrintWriter fileWriter;
-	
-	/**************************************/
-	/* USUAL SINGLETON IMPLEMENTATION ... */
-	/**************************************/
 	private static AST_GRAPHVIZ instance = null;
-
-	/*****************************/
-	/* PREVENT INSTANTIATION ... */
-	/*****************************/
+	private List<String> lines = new ArrayList<>();
 	private AST_GRAPHVIZ() {}
-
-	/******************************/
-	/* GET SINGLETON INSTANCE ... */
-	/******************************/
 	public static AST_GRAPHVIZ getInstance()
 	{
 		if (instance == null)
 		{
 			instance = new AST_GRAPHVIZ();
-			
-			/****************************/
-			/* Initialize a file writer */
-			/****************************/
 			try
 			{
-				String dirname="./output/";
-				String filename="AST_IN_GRAPHVIZ_DOT_FORMAT.txt";
-				instance.fileWriter = new PrintWriter(dirname+filename);
+				String dirname = "./output/";
+				String filename = "AST_IN_GRAPHVIZ_DOT_FORMAT.txt";
+				instance.fileWriter = new PrintWriter(new FileWriter(dirname + filename, false));
 			}
-			catch (Exception e)
+			catch (IOException e)
 			{
-				e.printStackTrace();
+				throw new RuntimeException(e);
 			}
-
-			/******************************************************/
-			/* Print Directed Graph header in Graphviz dot format */
-			/******************************************************/
-			instance.fileWriter.print("digraph\n");
-			instance.fileWriter.print("{\n");
-			instance.fileWriter.print("graph [ordering = \"out\"]\n");
 		}
 		return instance;
 	}
-
-	/***********************************/
-	/* Log node in graphviz dot format */
-	/***********************************/
-	public void logNode(int nodeSerialNumber,String nodeName)
+	public void logNode(int nodeSerialNumber, String nodeName)
 	{
-		fileWriter.format(
-			"v%d [label = \"%s\"];\n",
-			nodeSerialNumber,
-			nodeName);
+		lines.add("v" + nodeSerialNumber + " [label = \"" + nodeName.replace("\"", "\\\"") + "\"];");
 	}
-
-	/***********************************/
-	/* Log edge in graphviz dot format */
-	/***********************************/
-	public void logEdge(
-		int fatherNodeSerialNumber,
-		int sonNodeSerialNumber)
+	public void metadataNode(int nodeSerialNumber, String metadata)
 	{
-		fileWriter.format(
-			"v%d -> v%d;\n",
-			fatherNodeSerialNumber,
-			sonNodeSerialNumber);
+		for(int i = 0; i < lines.size(); i++)
+		{
+			if(lines.get(i).startsWith("v" + nodeSerialNumber + " [label ="))
+			{
+				String line = lines.get(i);
+				int start = line.indexOf("label = \"");
+				int end = line.lastIndexOf("\"]");
+				if(start != -1 && end != -1)
+				{
+					String labelContent = line.substring(start + 9, end);
+					String newLabelContent = labelContent + "\\n" + metadata.replace("\"", "\\\"");
+					String newLine = line.substring(0, start + 9) + newLabelContent + line.substring(end);
+					lines.set(i, newLine);
+				}
+				break;
+			}
+		}
 	}
-	
-	/******************************/
-	/* Finalize graphviz dot file */
-	/******************************/
+	public void logEdge(int fatherNodeSerialNumber, int sonNodeSerialNumber)
+	{
+		lines.add("v" + fatherNodeSerialNumber + " -> v" + sonNodeSerialNumber + ";");
+	}
 	public void finalizeFile()
 	{
-		fileWriter.print("}\n");
+		fileWriter.println("digraph");
+		fileWriter.println("{");
+		fileWriter.println("graph [ordering = \"out\"]");
+		for(String line : lines)
+		{
+			fileWriter.println(line);
+		}
+		fileWriter.println("}");
 		fileWriter.close();
 	}
 }

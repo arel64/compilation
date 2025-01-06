@@ -46,6 +46,7 @@ public class Main
 				AST = (AST_PROGRAM) p.parse().value;
 				file_writer.write("OK\n");
 				AST.PrintMe();
+				AST.SemantMeLog();
 			}
 			catch(LexerError e)
 			{
@@ -54,7 +55,7 @@ public class Main
 			}
 			catch(Exception e)
 			{
-				// e.printStackTrace();
+				e.printStackTrace();
 				file_writer.write("ERROR(" + p.errorLine + ")\n");
 			}
 			

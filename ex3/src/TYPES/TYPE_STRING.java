@@ -24,4 +24,9 @@ public class TYPE_STRING extends TYPE
 		}
 		return instance;
 	}
+	
+	@Override
+	public String toString() {
+		return "TYPE_STRING";
+	}
 }

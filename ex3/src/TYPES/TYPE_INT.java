@@ -24,4 +24,8 @@ public class TYPE_INT extends TYPE
 		}
 		return instance;
 	}
+	@Override
+	public String toString() {
+		return "TYPE_INT";
+	}
 }

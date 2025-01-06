@@ -35,7 +35,7 @@ public class AST_FUNC_DEC extends AST_CLASS_FIELDS_DEC {
 
     @Override
     public TYPE_CLASS_VAR_DEC SemantMe() throws SemanticException{
-        TYPE returnT = returnType.SemantMe();
+        TYPE returnT = returnType.SemantMeLog();
         String name = this.getName();
         return new TYPE_FUNCTION(returnT, name, new TYPE_LIST(params));
     }

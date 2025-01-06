@@ -38,7 +38,7 @@ public class AST_CLASS_DEC extends AST_DEC {
             return true;
         }      
         SYMBOL_TABLE symbol_table = SYMBOL_TABLE.getInstance();
-        TYPE parent = symbol_table.find(parentClassName);
+        TYPE parent = symbol_table.getTypeInGlobalScope(parentClassName);
         return parent != null;
         
 		
@@ -46,7 +46,7 @@ public class AST_CLASS_DEC extends AST_DEC {
     @Override
 	public TYPE SemantMe() throws SemanticException{
 		SYMBOL_TABLE symbol_table = SYMBOL_TABLE.getInstance();
-		
+
 		if (!symbol_table.isAtGlobalScope()){
 			throw new SemanticException("Scope mismatch found scope:" +symbol_table.getCurrentScopeIndex());
 		}

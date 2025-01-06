@@ -27,6 +27,6 @@ public class AST_PROGRAM extends AST_Node {
 
     @Override
     public TYPE SemantMe() throws SemanticException {
-        return declerationList.SemantMe();
+        return declerationList.SemantMeLog();
     }
 }

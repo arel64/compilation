@@ -1,4 +1,5 @@
 package AST;
+import SYMBOL_TABLE.SYMBOL_TABLE;
 import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
 public abstract class AST_Node
@@ -9,7 +10,7 @@ public abstract class AST_Node
 	/* a graphviz dot format of the AST ...    */
 	/*******************************************/
 	public int SerialNumber;
-	
+	public String metadata;
 	/***********************************************/
 	/* The default message for an unknown AST node */
 	/***********************************************/
@@ -20,5 +21,27 @@ public abstract class AST_Node
             String.format("%s",toString())
         );
 	}
+	public void logMetadata(TYPE myType)
+	{
+		String myTypeName = "No Type";
+		String myTypeClassName ="";
+		if(myType != null)
+		{
+			myTypeName = myType.name;
+			myTypeClassName = (myType.getClass()).toGenericString();
+		}
+		SYMBOL_TABLE instance = SYMBOL_TABLE.getInstance(); 
+		AST_GRAPHVIZ.getInstance().metadataNode(
+			SerialNumber,
+			String.format("Scope Level %s Type name: %S myClass %s",instance.getCurrentScopeIndex(),myTypeName,myTypeClassName)
+		);	
+	}
 	public abstract TYPE SemantMe() throws SemanticException;
+
+	public TYPE SemantMeLog() throws SemanticException
+	{
+		TYPE myType = SemantMe();
+		logMetadata(myType);
+		return myType;
+	}	
 }

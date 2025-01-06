@@ -14,7 +14,7 @@ public class AST_LIST<T extends AST_Node> extends AST_Node implements Iterable<T
     public AST_LIST(T first,Class<T> clazz) {
         this(null,first,clazz);
     }
-    public AST_LIST(AST_LIST<T> prev, T next,Class<T> clazz) {
+    public AST_LIST(AST_LIST<T> prev, T end,Class<T> clazz) {
         this.clazz =clazz;
         if(prev == null)
         {
@@ -25,9 +25,9 @@ public class AST_LIST<T extends AST_Node> extends AST_Node implements Iterable<T
             list = new java.util.ArrayList<T>(prev.list);
         }
         
-        if(next != null)
+        if(end != null)
         {
-            list.add(next);
+            list.add(end);
         }
         
         SerialNumber = AST_Node_Serial_Number.getFresh();
@@ -100,9 +100,9 @@ public class AST_LIST<T extends AST_Node> extends AST_Node implements Iterable<T
         if (this.list.isEmpty()) {
             return null;
         }
-        for (int i = this.list.size() - 1; i >= 0; i--) {
+        for (int i = 0; i < list.size(); i++) {
             T node = this.list.get(i);
-            node.SemantMe();
+            node.SemantMeLog();
         }
         return null;
     }

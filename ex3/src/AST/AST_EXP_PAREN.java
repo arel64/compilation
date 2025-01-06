@@ -25,7 +25,7 @@ public class AST_EXP_PAREN extends AST_EXP {
 
     @Override
     public TYPE SemantMe() throws SemanticException{
-		return exp.SemantMe();
+		return exp.SemantMeLog();
 	}
 
 }

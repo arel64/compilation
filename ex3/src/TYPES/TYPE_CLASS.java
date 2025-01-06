@@ -31,17 +31,20 @@ public class TYPE_CLASS extends TYPE
 	}
 	private TYPE_CLASS(TYPE father, String name, TYPE_CLASS_VAR_DEC_LIST data_members) throws SemanticException
 	{
-		if(!(father instanceof TYPE_CLASS))
+		if(father!=null && !(father instanceof TYPE_CLASS))
 		{
 			throw new SemanticException(String.format("Cannot extends non class type %s",father));
 		}
 		this.name = name;
-		this.father = (TYPE_CLASS)father;
 		this.data_members = data_members;
 		/**
 		 * Verify no overloading, shadow varriables
 		 */
-		data_members.extending(((TYPE_CLASS)father).data_members);		
+		if ( father != null)
+		{
+			this.father = (TYPE_CLASS)father;
+			data_members.extending(((TYPE_CLASS)father).data_members);		
+		}
 	}
 	@Override
 	public boolean isClass() {
@@ -90,5 +93,9 @@ public class TYPE_CLASS extends TYPE
 		}
 		return myFatherShared;
 		
+	}
+	@Override
+	public String toString() {
+		return String.format("Father: %s Name: %s",father,name);
 	}
 }

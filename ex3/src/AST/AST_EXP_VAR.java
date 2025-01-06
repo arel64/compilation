@@ -22,6 +22,6 @@ public class AST_EXP_VAR extends AST_EXP
 
 	@Override
 	public TYPE SemantMe() throws SemanticException {
-		return var.SemantMe();
+		return var.SemantMeLog();
 	}
 }

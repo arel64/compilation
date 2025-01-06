@@ -21,7 +21,7 @@ public class AST_VAR_DEC extends AST_CLASS_FIELDS_DEC {
     public void PrintMe() {
         AST_GRAPHVIZ.getInstance().logNode(
 			SerialNumber,
-			"AST_DEC\n"+ this.toString());	
+			"AST_DEC "+ this.toString());	
     }
     @Override
     public String toString() {
@@ -30,12 +30,15 @@ public class AST_VAR_DEC extends AST_CLASS_FIELDS_DEC {
     @Override
     public TYPE_CLASS_VAR_DEC SemantMe() throws SemanticException{
         TYPE type = varType.SemantMe();
+        if(varValue == null)
+        {
+            return new TYPE_CLASS_VAR_DEC(type,this.getName());
+        }
         TYPE valueType = varValue.SemantMe();
         if(type != valueType)
         {
             throw new SemanticException("VAR DEC MISMATCH TYPE");
         }
         return null;
-        // return new TYPE_CLASS_VAR_DEC(valueType, getName());  //this is not only used for class 
     }
 }

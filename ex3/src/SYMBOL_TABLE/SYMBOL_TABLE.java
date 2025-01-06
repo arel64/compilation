@@ -85,6 +85,10 @@ public class SYMBOL_TABLE
 	/***********************************************/
 	public TYPE find(String name)
 	{
+		if(name == null)
+		{
+			return null;
+		}
 		SYMBOL_TABLE_ENTRY e;
 				
 		for (e = table[hash(name)]; e != null; e = e.next)
@@ -286,10 +290,10 @@ public class SYMBOL_TABLE
         return getCurrentScopeIndex() == 0;
     }
 
-	public boolean findInCurrentScope(String name, TYPE recvType) {
+	public boolean existsInCurrentScope(String name) {
         SYMBOL_TABLE_ENTRY e = top;
         while (e != null && !e.name.equals("SCOPE-BOUNDARY")) {
-            if (e.name.equals(name) && e.type.equals(recvType)) {
+            if (e.name.equals(name) ) {
                return true;
             }
         e = e.prevtop;
@@ -322,7 +326,7 @@ public class SYMBOL_TABLE
             }
             e = e.prevtop;
         }
-        return false;
+        return null;
     }
 
 	// public TYPE findInRange(String name, int minScope, int maxScope) {
@@ -340,7 +344,7 @@ public class SYMBOL_TABLE
     //     return null;
     // } //I don't think we want to get an index for start and end
     
-    public TYPE findInClassHierarchy(String name, TYPE_CLASS currentClass) throws SemanticException {
+    /*public TYPE findInClassHierarchy(String name, TYPE_CLASS currentClass) throws SemanticException {
         TYPE result;
         while (currentClass != null) {
             result = findInRange(name, currentClass.data_members.getScopeStart(), currentClass.data_members.getScopeEnd());
@@ -350,13 +354,13 @@ public class SYMBOL_TABLE
             currentClass = currentClass.father;
         }
         return null;
-    }
+    }*/
 
 	public boolean isInClassScope(String name, TYPE type, TYPE_CLASS currentClass) {
         if (currentClass == null || currentClass.data_members == null)
             return false;
         for (TYPE_CLASS_VAR_DEC member : currentClass.data_members) 
-            if (member.name.equals(name) && member.type.equals(type)) 
+            if (member.name.equals(name) && member.t.equals(type)) 
                 return true;
         return false;
     }
@@ -364,8 +368,10 @@ public class SYMBOL_TABLE
 	public boolean isInFatherClassScope(String name, TYPE type, TYPE_CLASS currentClass){
 		TYPE_CLASS currFather = currentClass.father;
 		while(currFather != null){
-			if isInClassScope(name, type)
+			if (isInClassScope(name, type,currFather))
+			{
 	            return true;
+			}
 		}
 		return false;
 	}

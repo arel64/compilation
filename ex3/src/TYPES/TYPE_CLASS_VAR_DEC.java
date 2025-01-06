@@ -10,4 +10,8 @@ public class TYPE_CLASS_VAR_DEC extends TYPE
 		this.t = t;
 		this.name = name;
 	}
+	@Override
+	public String toString() {
+		return String.format("CLASS VAR DEC %s %s",t,name);
+	}
 }
