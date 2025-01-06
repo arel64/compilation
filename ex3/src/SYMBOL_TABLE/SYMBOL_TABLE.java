@@ -285,4 +285,89 @@ public class SYMBOL_TABLE
     public boolean isAtGlobalScope() {
         return getCurrentScopeIndex() == 0;
     }
+
+	public boolean findInCurrentScope(String name, TYPE recvType) {
+        SYMBOL_TABLE_ENTRY e = top;
+        while (e != null && !e.name.equals("SCOPE-BOUNDARY")) {
+            if (e.name.equals(name) && e.type.equals(recvType)) {
+               return true;
+            }
+        e = e.prevtop;
+        }
+        return false;
+    }
+
+	public boolean isInGlobalScope(String name, TYPE recvType){
+        SYMBOL_TABLE_ENTRY e = top;
+        while (e != null) {
+            if (e.name.equals("SCOPE-BOUNDARY")) {
+               break; //we got to global -- weeepeeeee
+            }
+            if (e.name.equals(name) && e.type.equals(recvType)) {
+               return true;
+            }
+            e = e.prevtop;
+        }
+        return false;
+    }
+
+	public TYPE getTypeInGlobalScope(String name) throws SemanticException{
+        SYMBOL_TABLE_ENTRY e = top;
+        while (e != null) {
+            if (e.name.equals("SCOPE-BOUNDARY")) {
+               break; //we got to global -- weeepeeeee
+            }
+            if (e.name.equals(name)) {
+               return e.type;
+            }
+            e = e.prevtop;
+        }
+        return false;
+    }
+
+	// public TYPE findInRange(String name, int minScope, int maxScope) {
+    //     SYMBOL_TABLE_ENTRY e = top;
+    //     int currentScope = scope_count;
+    //     while (e != null) {
+    //         if (currentScope < minScope)
+    //             break; //Outside the specified range
+    //         if (e.name.equals("SCOPE-BOUNDARY"))
+    //             currentScope--;
+    //         else if (e.name.equals(name) && currentScope <= maxScope)
+    //             return e.type;
+    //         e = e.prevtop;
+    //     }
+    //     return null;
+    // } //I don't think we want to get an index for start and end
+    
+    public TYPE findInClassHierarchy(String name, TYPE_CLASS currentClass) throws SemanticException {
+        TYPE result;
+        while (currentClass != null) {
+            result = findInRange(name, currentClass.data_members.getScopeStart(), currentClass.data_members.getScopeEnd());
+            if (result != null) {
+                return result;
+            }
+            currentClass = currentClass.father;
+        }
+        return null;
+    }
+
+	public boolean isInClassScope(String name, TYPE type, TYPE_CLASS currentClass) {
+        if (currentClass == null || currentClass.data_members == null)
+            return false;
+        for (TYPE_CLASS_VAR_DEC member : currentClass.data_members) 
+            if (member.name.equals(name) && member.type.equals(type)) 
+                return true;
+        return false;
+    }
+
+	public boolean isInFatherClassScope(String name, TYPE type, TYPE_CLASS currentClass){
+		TYPE_CLASS currFather = currentClass.father;
+		while(currFather != null){
+			if isInClassScope(name, type)
+	            return true;
+		}
+		return false;
+	}
+
 }
