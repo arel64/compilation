@@ -53,7 +53,7 @@ public class AST_EXP_BINOP extends AST_EXP
 		TYPE leftType = left.SemantMe();
 		TYPE rightType = right.SemantMe();
 		if (leftType == null || rightType == null){
-			throw new SemanticException("null exp");
+			throw new SemanticException(lineNumber,"null exp");
 		}
 		if(!(leftType.isClass() && rightType.isClass()))
 		{
@@ -76,45 +76,45 @@ public class AST_EXP_BINOP extends AST_EXP
 			TYPE rightType = right.SemantMe();
 			if(!(leftType.isClass() && rightType.isClass()))
 			{
-				throw new SemanticException(String.format("Cannot compare between %s and %s different types and are not classes",leftType,rightType));
+				throw new SemanticException(lineNumber,String.format("Cannot compare between %s and %s different types and are not classes",leftType,rightType));
 			}
 			TYPE_CLASS leftClass = (TYPE_CLASS)leftType;
 			TYPE_CLASS rightClass = (TYPE_CLASS)rightType;
 			String sharedClass = leftClass.getSharedType(rightClass);
 			if(sharedClass == null)
 			{
-				throw new SemanticException(String.format("Cannot compare between %s and %s different types and are not derived",leftType,rightType));
+				throw new SemanticException(lineNumber,String.format("Cannot compare between %s and %s different types and are not derived",leftType,rightType));
 			}
 			return SYMBOL_TABLE.getInstance().find(sharedClass);
 		}
 		TYPE leftType = left.SemantMe();
 		if (!isSameType())
 		{
-			throw new SemanticException("Cannot '" + binopOperation + "' for different types");
+			throw new SemanticException(lineNumber,"Cannot '" + binopOperation + "' for different types");
 		}
 		
 		TYPE varriablesType = leftType;
 		if(varriablesType.isVoid())
 		{
-			throw new SemanticException("Cannot assign to'" + binopOperation + "' where one of the parameters is void");
+			throw new SemanticException(lineNumber,"Cannot assign to'" + binopOperation + "' where one of the parameters is void");
 		}
 
 		if(varriablesType instanceof TYPE_STRING)
 		{
 			if( binopOperation != Operation.PLUS)
 			{
-				throw new SemanticException("Not supported '" + binopOperation + "' for strings");
+				throw new SemanticException(lineNumber,"Not supported '" + binopOperation + "' for strings");
 			}
 			return TYPE_STRING.getInstance();
 		}
 
 		if (!(varriablesType instanceof TYPE_INT)) {
-			throw new SemanticException("Invalid types for binary operator '" + binopOperation + "'");
+			throw new SemanticException(lineNumber,"Invalid types for binary operator '" + binopOperation + "'");
 		}
 
 		if (binopOperation == Operation.DIVIDE ) {
 			if (right instanceof AST_LIT_NUMBER && Integer.parseInt(((AST_LIT_NUMBER)right).getValue()) == 0) {
-				throw new SemanticException("Division by zero");
+				throw new SemanticException(lineNumber,"Division by zero");
 			}
 		}
 		return varriablesType;

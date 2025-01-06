@@ -6,7 +6,6 @@ public class AST_VAR_DEC extends AST_CLASS_FIELDS_DEC {
     
     public AST_TYPE varType;
     public AST_EXP varValue;
-
     public AST_VAR_DEC(String varName, AST_TYPE varType, AST_EXP initialValue) {
         super(varName);
         this.varType = varType;
@@ -32,12 +31,12 @@ public class AST_VAR_DEC extends AST_CLASS_FIELDS_DEC {
         TYPE type = varType.SemantMe();
         if(varValue == null)
         {
-            return new TYPE_CLASS_VAR_DEC(type,this.getName());
+            return new TYPE_CLASS_VAR_DEC(type,this.getName(),lineNumber);
         }
         TYPE valueType = varValue.SemantMe();
         if(type != valueType)
         {
-            throw new SemanticException("VAR DEC MISMATCH TYPE");
+            throw new SemanticException(lineNumber,"VAR DEC MISMATCH TYPE");
         }
         return null;
     }

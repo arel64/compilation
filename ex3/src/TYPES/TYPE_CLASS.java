@@ -16,24 +16,25 @@ public class TYPE_CLASS extends TYPE
 	/* packed together with the class methods         */
 	/**************************************************/
 	public TYPE_CLASS_VAR_DEC_LIST data_members;
+	public int line;
 	
 	/****************/
 	/* CTROR(S) ... */
 	/**
 	 * @throws SemanticException **************/
-	public TYPE_CLASS(TYPE_CLASS father,String name,TYPE_CLASS_VAR_DEC_LIST data_members) throws SemanticException
+	public TYPE_CLASS(TYPE_CLASS father,String name,TYPE_CLASS_VAR_DEC_LIST data_members,int line) throws SemanticException
 	{
-		this((TYPE)father, name, data_members);
+		this((TYPE)father, name, data_members,line);
 	}
-	public TYPE_CLASS(String father,String name,TYPE_CLASS_VAR_DEC_LIST data_members) throws SemanticException
+	public TYPE_CLASS(String father,String name,TYPE_CLASS_VAR_DEC_LIST data_members,int line) throws SemanticException
 	{
-		this(SYMBOL_TABLE.getInstance().find(father),name,data_members);
+		this(SYMBOL_TABLE.getInstance().find(father),name,data_members,line);
 	}
-	private TYPE_CLASS(TYPE father, String name, TYPE_CLASS_VAR_DEC_LIST data_members) throws SemanticException
+	private TYPE_CLASS(TYPE father, String name, TYPE_CLASS_VAR_DEC_LIST data_members,int line) throws SemanticException
 	{
 		if(father!=null && !(father instanceof TYPE_CLASS))
 		{
-			throw new SemanticException(String.format("Cannot extends non class type %s",father));
+			throw new SemanticException(line,String.format("Cannot extends non class type %s",father));
 		}
 		this.name = name;
 		this.data_members = data_members;
@@ -78,7 +79,7 @@ public class TYPE_CLASS extends TYPE
 		SYMBOL_TABLE table = SYMBOL_TABLE.getInstance();
 		if(!table.exists(this.name) || !table.exists(other.name))
 		{
-			throw new SemanticException("Shared check between inexistant classes" + this.name +" "+ other.name);
+			throw new SemanticException(line,"Shared check between inexistant classes" + this.name +" "+ other.name);
 		}
 		if(this.name == other.name)
 		{
@@ -117,12 +118,12 @@ public class TYPE_CLASS extends TYPE
 							continue;
 						if (!currentMember.isFunction() && !ancestorMember.isFunction())
 						{
-							throw new SemanticException(String.format(
+							throw new SemanticException(currentMember.line,String.format(
 								"Shadowing detected: Variable '%s' in class '%s' shadows variable in ancestor class '%s'.",
 								currentMember.name, this.name, father.name
 							));
 						}
-						throw new SemanticException(String.format(
+						throw new SemanticException(currentMember.line,String.format(
 							"Conflict detected: '%s' in class '%s' conflicts with '%s' in ancestor class '%s'.",
 							currentMember.name, this.name, ancestorMember.name, father.name
 						));

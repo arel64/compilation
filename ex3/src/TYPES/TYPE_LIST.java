@@ -19,7 +19,7 @@ public class TYPE_LIST
 	public TYPE_LIST(AST_LIST<? extends AST_Node> list) throws SemanticException
 	{
 		if (list == null) {
-			throw new SemanticException("Not found in the symbol table!!!fooyaaaa");
+			throw new SemanticException(-1,"Not found in the symbol table!!!fooyaaaa");
 		}
 		tail = null;
 		head = null;
@@ -28,7 +28,7 @@ public class TYPE_LIST
 			head = list.at(0).SemantMe();
 			if (head == null)
 			{
-				throw new SemanticException("First element in the list cannot be null");
+				throw new SemanticException(list.lineNumber,"First element in the list cannot be null");
 			}
 			if (list.size() > 1) {
 				tail = new TYPE_LIST(list.from(1));

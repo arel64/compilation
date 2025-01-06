@@ -25,7 +25,7 @@ public class AST_TYPE extends AST_Node
 		TYPE curr = SYMBOL_TABLE.getInstance().find(type);
         if (curr == null)
         {
-           throw new SemanticException("The type does not exist." );
+           throw new SemanticException(lineNumber,"The type does not exist." );
         }
         return curr;
 	}

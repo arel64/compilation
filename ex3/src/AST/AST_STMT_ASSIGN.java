@@ -44,7 +44,7 @@ public class AST_STMT_ASSIGN extends AST_STMT
 			TYPE_CLASS classVar = (TYPE_CLASS)varType;
 			if(!classExpr.isDerivedFrom(classVar))
 			{
-				throw new SemanticException(String.format("Cannot assign class types %s is not derived from %s",classVar,classExpr));
+				throw new SemanticException(lineNumber,String.format("Cannot assign class types %s is not derived from %s",classVar,classExpr));
 			}
 			String sharedType = classVar.getSharedType(classExpr);
 			return SYMBOL_TABLE.getInstance().find(sharedType);
@@ -55,7 +55,7 @@ public class AST_STMT_ASSIGN extends AST_STMT
 		}
 		if(expType != varType)
 		{
-			throw new SemanticException(String.format("Cannot assign incompatible types %s %s",expType,varType));
+			throw new SemanticException(lineNumber,String.format("Cannot assign incompatible types %s %s",expType,varType));
 		}
 		return varType;
 	}

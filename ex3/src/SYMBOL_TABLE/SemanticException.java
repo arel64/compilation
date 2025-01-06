@@ -1,8 +1,10 @@
 package SYMBOL_TABLE;
 public class SemanticException extends Exception {
-    
-    public SemanticException(String error)
+    public int lineNumber;
+    public SemanticException(int line,String error)
     {
         super(error);
+        
+        lineNumber = line;
     }
 }

@@ -37,7 +37,7 @@ public class AST_FUNC_DEC extends AST_CLASS_FIELDS_DEC {
     public TYPE_FUNCTION SemantMe() throws SemanticException{
         TYPE returnT = returnType.SemantMeLog();
         if (returnT == null){
-            throw new SemanticException("Null not good");
+            throw new SemanticException(lineNumber,"Null not good");
         }
         String name = this.getName();
         TYPE_LIST paramTypes = null;
@@ -48,7 +48,7 @@ public class AST_FUNC_DEC extends AST_CLASS_FIELDS_DEC {
             }
         }
 
-        TYPE_FUNCTION t = new TYPE_FUNCTION(returnT, name, paramTypes);
+        TYPE_FUNCTION t = new TYPE_FUNCTION(returnT, name, paramTypes,lineNumber);
         System.out.println(t + " " + returnT.name + " " + name + "-----------------------");
         return t;
 

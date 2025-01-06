@@ -25,12 +25,12 @@ public class TYPE_CLASS_VAR_DEC_LIST implements Iterable<TYPE_CLASS_VAR_DEC>
 			TYPE_CLASS_VAR_DEC currentDeclaration = declaration.SemantMe();
 			if(definedNames.contains(currentDeclaration.name))
 			{
-				throw new SemanticException("Multiple fields with the same name in function");
+				throw new SemanticException(declarationList.lineNumber,"Multiple fields with the same name in function");
 			}
 			definedNames.add(currentDeclaration.name);
 			if (currentDeclaration.isClass() && ! SYMBOL_TABLE.getInstance().existsInCurrentScope(currentDeclaration.name))
 			{
-				throw new SemanticException(String.format("Cannot create a class with undefined varriables types, attempted %s", currentDeclaration));
+				throw new SemanticException(declarationList.lineNumber,String.format("Cannot create a class with undefined varriables types, attempted %s", currentDeclaration));
 			}
 			this.attributes.add(currentDeclaration);
 		}
@@ -59,18 +59,18 @@ public class TYPE_CLASS_VAR_DEC_LIST implements Iterable<TYPE_CLASS_VAR_DEC>
 			}
 			if(!classAttribute.t.equals(attribute.t))
 			{
-				throw new SemanticException(String.format("Extended attribute share the same name %s but of diffrent types %s vs %s", classAttribute.t.name,classAttribute.t,attribute.t));
+				throw new SemanticException(classAttribute.line,String.format("Extended attribute share the same name %s but of diffrent types %s vs %s", classAttribute.t.name,classAttribute.t,attribute.t));
 			}
 			if(classAttribute.t instanceof TYPE_FUNCTION)
 			{
 				
 				if(!((TYPE_FUNCTION)classAttribute.t).isOverriding((TYPE_FUNCTION)attribute.t))
 				{
-					throw new SemanticException(String.format("Extended function share the same name and type %s but are not overriding %s vs %s", classAttribute.t.name,classAttribute.t,attribute.t));
+					throw new SemanticException(classAttribute.line,String.format("Extended function share the same name and type %s but are not overriding %s vs %s", classAttribute.t.name,classAttribute.t,attribute.t));
 				}
 				continue;
 			}
-			throw new SemanticException("Unknown class var dec list exception");
+			throw new SemanticException(classAttribute.line,"Unknown class var dec list exception");
 		}
 	}
 	@Override

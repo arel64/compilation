@@ -49,12 +49,12 @@ public class AST_FUNC_INVO extends AST_EXP {
         TYPE symbol = table.find(funcName);
         if(symbol == null)
         {
-            throw new SemanticException(String.format("%s does not exist and cannot be invoked", funcName));
+            throw new SemanticException(lineNumber,String.format("%s does not exist and cannot be invoked", funcName));
         }
 
         if(!(symbol instanceof TYPE_FUNCTION))
         {
-            throw new SemanticException(String.format("%s cannot be used like a function", funcName));
+            throw new SemanticException(lineNumber,String.format("%s cannot be used like a function", funcName));
         }
         TYPE_FUNCTION myFunctionType = (TYPE_FUNCTION)symbol;
         //TODO::

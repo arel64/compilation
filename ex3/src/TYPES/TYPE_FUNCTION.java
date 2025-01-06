@@ -8,9 +8,9 @@ public class TYPE_FUNCTION extends TYPE_CLASS_VAR_DEC
 	/****************/
 	/* CTROR(S) ... */
 	/****************/
-	public TYPE_FUNCTION(TYPE returnType,String name,TYPE_LIST params)
+	public TYPE_FUNCTION(TYPE returnType,String name,TYPE_LIST params,int line)
 	{
-		super(returnType, name);
+		super(returnType, name,line);
 		this.params = params;
 	}
 

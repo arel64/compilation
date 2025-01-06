@@ -280,7 +280,7 @@ public class SYMBOL_TABLE
 					"PrintInt",
 					new TYPE_LIST(
 						TYPE_INT.getInstance(),
-						null)));
+						null), -1));
 			
 		}
 		return instance;

@@ -103,7 +103,7 @@ public class AST_LIST<T extends AST_Node> extends AST_Node implements Iterable<T
         for (int i = 0; i < list.size(); i++) {
             T node = this.list.get(i);
             if (node == null)
-                throw new SemanticException("null arg");
+                throw new SemanticException(lineNumber,"null arg");
             node.SemantMeLog();
         }
         return null;

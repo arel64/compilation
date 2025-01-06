@@ -11,6 +11,7 @@ public abstract class AST_Node
 	/*******************************************/
 	public int SerialNumber;
 	public String metadata;
+	public int lineNumber;
 	/***********************************************/
 	/* The default message for an unknown AST node */
 	/***********************************************/
@@ -37,7 +38,10 @@ public abstract class AST_Node
 		);	
 	}
 	public abstract TYPE SemantMe() throws SemanticException;
-
+	final public void setLineNumber(int lineNumber)
+	{
+		this.lineNumber = lineNumber;
+	}
 	public TYPE SemantMeLog() throws SemanticException
 	{
 		TYPE myType = SemantMe();

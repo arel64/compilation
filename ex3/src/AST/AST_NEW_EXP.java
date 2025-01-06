@@ -26,16 +26,16 @@ public class AST_NEW_EXP extends AST_EXP {
     public TYPE SemantMe() throws SemanticException{
         TYPE expType = exp.SemantMe();
         if (expType != TYPE_INT.getInstance()){
-            throw new SemanticException("New expr type is not int");
+            throw new SemanticException(lineNumber,"New expr type is not int");
         }
         if(expType.isVoid())
         {
-            throw new SemanticException("New expr type cannot be void");
+            throw new SemanticException(lineNumber,"New expr type cannot be void");
         }
         if ((exp instanceof AST_LIT_NUMBER)){
             int value = Integer.parseInt(((AST_LIT_NUMBER)exp).getValue());
             if (value <= 0)
-               throw new SemanticException("LEN<=0 for array length");
+               throw new SemanticException(lineNumber,"LEN<=0 for array length");
         }
         return type.SemantMe();
     }

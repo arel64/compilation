@@ -3,6 +3,7 @@ import java.io.*;
 
 import java_cup.runtime.Symbol;
 import AST.*;
+import SYMBOL_TABLE.SemanticException;
 
 public class Main
 {
@@ -44,14 +45,19 @@ public class Main
 			/***********************************/
 			try{
 				AST = (AST_PROGRAM) p.parse().value;
-				file_writer.write("OK\n");
 				AST.PrintMe();
 				AST.SemantMeLog();
+				file_writer.write("OK\n");
 			}
 			catch(LexerError e)
 			{
 				System.out.println(e.getMessage());
 				file_writer.write("ERROR");
+			}
+			catch(SemanticException e)
+			{
+				e.printStackTrace();
+				file_writer.write("ERROR(" + (e.lineNumber-1) + ")\n");
 			}
 			catch(Exception e)
 			{
@@ -74,7 +80,6 @@ public class Main
 			/*************************************/
 			AST_GRAPHVIZ.getInstance().finalizeFile();
     	}
-			     
 		catch (Exception e)
 		{
 			e.printStackTrace();

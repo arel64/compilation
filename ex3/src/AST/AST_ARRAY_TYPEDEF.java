@@ -24,11 +24,11 @@ public class AST_ARRAY_TYPEDEF extends AST_DEC {
     public TYPE_ARRAY SemantMe() throws SemanticException{
 		SYMBOL_TABLE symbol_table = SYMBOL_TABLE.getInstance();
 		if (!symbol_table.isAtGlobalScope()){
-			throw new SemanticException("Scope mismatch found scope:" +  symbol_table.getCurrentScopeIndex());
+			throw new SemanticException(lineNumber,"Scope mismatch found scope:" +  symbol_table.getCurrentScopeIndex());
 		}
         TYPE_ARRAY arrayType = new TYPE_ARRAY(baseType.SemantMeLog());
         if (arrayType.isVoid()){
-            throw new SemanticException("Array of type void" +this.getName());
+            throw new SemanticException(lineNumber,"Array of type void" +this.getName());
         }
         symbol_table.enter(this.getName(), arrayType);
         return arrayType;
