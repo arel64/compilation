@@ -43,6 +43,7 @@ public class TYPE_CLASS extends TYPE
 		if ( father != null)
 		{
 			this.father = (TYPE_CLASS)father;
+			checkForShadowing(data_members, this.father);
 			data_members.extending(((TYPE_CLASS)father).data_members);		
 		}
 	}
@@ -94,8 +95,42 @@ public class TYPE_CLASS extends TYPE
 		return myFatherShared;
 		
 	}
+
 	@Override
 	public String toString() {
 		return String.format("Father: %s Name: %s",father,name);
 	}
+
+	private void checkForShadowing(TYPE_CLASS_VAR_DEC_LIST currentDataMembers, TYPE_CLASS father) throws SemanticException
+	{
+		while (father != null)
+		{
+			TYPE_CLASS_VAR_DEC_LIST ancestorDataMembers = father.data_members;
+			for (TYPE_CLASS_VAR_DEC currentMember : currentDataMembers)
+			{
+				for (TYPE_CLASS_VAR_DEC ancestorMember : ancestorDataMembers)
+				{
+					if (currentMember.name.equals(ancestorMember.name))
+					{
+						System.out.println(currentMember);
+						if (currentMember.isFunction() && ancestorMember.isFunction())  //overriding is ok
+							continue;
+						if (!currentMember.isFunction() && !ancestorMember.isFunction())
+						{
+							throw new SemanticException(String.format(
+								"Shadowing detected: Variable '%s' in class '%s' shadows variable in ancestor class '%s'.",
+								currentMember.name, this.name, father.name
+							));
+						}
+						throw new SemanticException(String.format(
+							"Conflict detected: '%s' in class '%s' conflicts with '%s' in ancestor class '%s'.",
+							currentMember.name, this.name, ancestorMember.name, father.name
+						));
+					}
+				}
+			}
+			father = father.father;
+		}
+	}
+
 }

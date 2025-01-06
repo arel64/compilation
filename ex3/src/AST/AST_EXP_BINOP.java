@@ -52,6 +52,9 @@ public class AST_EXP_BINOP extends AST_EXP
 	{
 		TYPE leftType = left.SemantMe();
 		TYPE rightType = right.SemantMe();
+		if (leftType == null || rightType == null){
+			throw new SemanticException("null exp");
+		}
 		if(!(leftType.isClass() && rightType.isClass()))
 		{
 			return false;

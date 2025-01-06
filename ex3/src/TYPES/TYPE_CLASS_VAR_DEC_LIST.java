@@ -7,6 +7,7 @@ import java.util.Set;
 
 import AST.AST_CLASS_FIELDS_DEC;
 import AST.AST_LIST;
+import AST.AST_FUNC_DEC;
 import SYMBOL_TABLE.SYMBOL_TABLE;
 import SYMBOL_TABLE.SemanticException;
 
@@ -56,7 +57,7 @@ public class TYPE_CLASS_VAR_DEC_LIST implements Iterable<TYPE_CLASS_VAR_DEC>
 				addedAttributes.add(classAttribute);
 				continue;
 			}
-			if(classAttribute.t != attribute.t)
+			if(!classAttribute.t.equals(attribute.t))
 			{
 				throw new SemanticException(String.format("Extended attribute share the same name %s but of diffrent types %s vs %s", classAttribute.t.name,classAttribute.t,attribute.t));
 			}

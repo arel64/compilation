@@ -34,9 +34,23 @@ public class AST_FUNC_DEC extends AST_CLASS_FIELDS_DEC {
     }
 
     @Override
-    public TYPE_CLASS_VAR_DEC SemantMe() throws SemanticException{
+    public TYPE_FUNCTION SemantMe() throws SemanticException{
         TYPE returnT = returnType.SemantMeLog();
+        if (returnT == null){
+            throw new SemanticException("Null not good");
+        }
         String name = this.getName();
-        return new TYPE_FUNCTION(returnT, name, new TYPE_LIST(params));
+        TYPE_LIST paramTypes = null;
+        if (params != null) {
+            for (AST_VAR_DEC param : params) {
+                TYPE paramType = param.SemantMe();
+                paramTypes = new TYPE_LIST(paramType, paramTypes);
+            }
+        }
+
+        TYPE_FUNCTION t = new TYPE_FUNCTION(returnT, name, paramTypes);
+        System.out.println(t + " " + returnT.name + " " + name + "-----------------------");
+        return t;
+
     }
 }

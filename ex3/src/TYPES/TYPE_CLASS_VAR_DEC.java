@@ -14,4 +14,9 @@ public class TYPE_CLASS_VAR_DEC extends TYPE
 	public String toString() {
 		return String.format("CLASS VAR DEC %s %s",t,name);
 	}
+	public boolean isFunction() {
+		System.out.println(name +" " + " " + t.toString());
+		return this.t instanceof TYPE_FUNCTION;
+	}
+
 }
