@@ -1,12 +1,4 @@
 package AST;
 import TYPES.*;
 
-public abstract class AST_STMT extends AST_Node
-{
-	/*********************************************************/
-	/* The default message for an unknown AST statement node */
-	/*********************************************************/
-	public void PrintMe()
-	{
-	}
-}
+public abstract class AST_STMT extends AST_Node{}

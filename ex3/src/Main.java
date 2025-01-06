@@ -47,6 +47,11 @@ public class Main
 				file_writer.write("OK\n");
 				AST.PrintMe();
 			}
+			catch(LexerError e)
+			{
+				System.out.println(e.getMessage());
+				file_writer.write("ERROR");
+			}
 			catch(Exception e)
 			{
 				// e.printStackTrace();

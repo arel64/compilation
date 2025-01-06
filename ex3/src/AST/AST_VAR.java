@@ -1,7 +1,6 @@
 package AST;
-import TYPES.*;
 
-public class AST_VAR extends AST_Node
+public abstract class AST_VAR extends AST_Node
 {
     public String val;
     public AST_VAR(String val){

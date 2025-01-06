@@ -1,4 +1,5 @@
 package AST;
+import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
 
 public class AST_EXP_PAREN extends AST_EXP {
@@ -23,7 +24,7 @@ public class AST_EXP_PAREN extends AST_EXP {
     }
 
     @Override
-	public TYPE SemantMe(){
+    public TYPE SemantMe() throws SemanticException{
 		return exp.SemantMe();
 	}
 

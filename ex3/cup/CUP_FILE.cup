@@ -27,8 +27,13 @@ parser code
 scan with
 {:
 	Symbol s;
-	s = lexer.next_token();
-	
+	try{
+    s = lexer.next_token();
+  }
+	catch(Exception e)
+  {
+    throw new LexerError(e.getMessage());
+  }
 	return s; 
 :};
 
@@ -81,16 +86,16 @@ non terminal AST_EXP exp;
 non terminal AST_VAR var;
 non terminal AST_STMT stmt;
 non terminal AST_NEW_EXP newExp;
-non terminal AST_DEC cField;
+non terminal AST_CLASS_FIELDS_DEC cField;
 non terminal AST_BINOP binop;
-non terminal AST_DEC_LIST dec_list;
-non terminal AST_DEC_LIST opt_param_list;
-non terminal AST_DEC_LIST param_list;
-non terminal AST_STMT_LIST stmt_list;
+non terminal AST_LIST<AST_DEC> dec_list;
+non terminal AST_LIST<AST_VAR_DEC> opt_param_list;
+non terminal AST_LIST<AST_VAR_DEC> param_list;
+non terminal AST_LIST<AST_STMT> stmt_list;
 non terminal String extends_opt;
-non terminal AST_DEC_LIST cField_list;
-non terminal AST_EXP_LIST opt_exp_list;
-non terminal AST_EXP_LIST exp_list;
+non terminal AST_LIST<AST_CLASS_FIELDS_DEC> cField_list;
+non terminal AST_LIST<AST_EXP> opt_exp_list;
+non terminal AST_LIST<AST_EXP> exp_list;
 non terminal AST_EXP num_exp;
 
 /***********************/
@@ -116,8 +121,8 @@ start with program;
 
 program ::= dec_list:sl {: RESULT = new AST_PROGRAM(sl); :};
 
-dec_list ::= dec:d {: RESULT = new AST_DEC_LIST(d); :}
-           | dec_list:dl dec:d {: RESULT = new AST_DEC_LIST(dl,d); :};
+dec_list ::= dec:d {: RESULT = new AST_LIST<AST_DEC>(d,AST_DEC.class); :}
+           | dec_list:dl dec:d {: RESULT = new AST_LIST<AST_DEC>(dl,d,AST_DEC.class); :};
 
 binop ::= PLUS:p    {: RESULT = new AST_BINOP("+"); :}
         | MINUS:m   {: RESULT = new AST_BINOP("-"); :}
@@ -149,8 +154,8 @@ opt_param_list ::=
     {: RESULT = null; :}
   | param_list:pl {: RESULT = pl; :};
 
-param_list ::= type:t ID:i {: RESULT = new AST_DEC_LIST(new AST_VAR_DEC(i,t)); :}
-             | param_list:pl COMMA:c type:t ID:i {: pl.list.add(new AST_VAR_DEC(i,t)); RESULT = pl; :};
+param_list ::= type:t ID:i {: RESULT = new AST_LIST<AST_VAR_DEC>(new AST_VAR_DEC(i,t),AST_VAR_DEC.class); :}
+             | param_list:pl COMMA:c type:t ID:i {: pl.add(new AST_VAR_DEC(i,t)); RESULT = pl; :};
 
 classDec ::= CLASS:c ID:i extends_opt:eo LBRACE:lb cField_list:cf RBRACE:rb
              {: RESULT = new AST_CLASS_DEC(i, eo, cf); :};
@@ -159,8 +164,8 @@ extends_opt ::=
     {: RESULT = null; :}
   | EXTENDS:e ID:i {: RESULT = i; :};
 
-cField_list ::= cField:cf {: RESULT = new AST_DEC_LIST(cf); :}
-              | cField_list:cfl cField:cf {: RESULT = new AST_DEC_LIST(cfl, cf); :};
+cField_list ::= cField:cf {: RESULT = new AST_LIST<AST_CLASS_FIELDS_DEC>(cf,AST_CLASS_FIELDS_DEC.class); :}
+              | cField_list:cfl cField:cf {: RESULT = new AST_LIST<AST_CLASS_FIELDS_DEC>(cfl, cf,AST_CLASS_FIELDS_DEC.class); :};
 
 dec ::= varDec:v   {: RESULT = v; :}
      | funcDec:f   {: RESULT = f; :}
@@ -171,8 +176,7 @@ cField ::= varDec:v  {: RESULT = v; :}
          | funcDec:f  {: RESULT = f; :};
 
 newExp ::= NEW:n type:t {: RESULT = new AST_NEW_EXP(t); :}
-         | NEW:n type:t LBRACK:lb num_exp:ex RBRACK:rb %prec DOT {: RESULT = new AST_NEW_EXP(t, ex, 0); :};
-         | NEW:n type:t LBRACK:lb exp:ex RBRACK:rb {: RESULT = new AST_NEW_EXP(t, ex, 1); :};
+         | NEW:n type:t LBRACK:lb exp:ex RBRACK:rb {: RESULT = new AST_NEW_EXP(t, ex); :};
 
 var ::= ID:i {: RESULT = new AST_VAR_SIMPLE(i); :}
       | var:v DOT:d ID:i {: RESULT = new AST_VAR_FIELD(v, i); :}
@@ -191,8 +195,8 @@ opt_exp_list ::=
     {: RESULT = null; :}
   | exp_list:el {: RESULT = el; :};
 
-exp_list ::= exp:e {: RESULT = new AST_EXP_LIST(e); :}
-           | exp_list:el COMMA:c exp:e {: el.list.add(e); RESULT = el; :};
+exp_list ::= exp:e {: RESULT = new AST_LIST<AST_EXP>(e,AST_EXP.class); :}
+           | exp_list:el COMMA:c exp:e {: el.add(e); RESULT = el; :};
 
 num_exp ::= INT:in          {: RESULT = new AST_LIT_NUMBER(false, in); :}
           | MINUS:m INT:in  {: RESULT = new AST_LIT_NUMBER(true, in); :};
@@ -208,5 +212,5 @@ stmt ::= varDec:v {: RESULT = new AST_STMT_VAR_DECL(v); :}
        | ID:i LPAREN:lp opt_exp_list:oel RPAREN:rp SEMICOLON:se {: RESULT = new AST_STMT_FUNC_INVO(new AST_FUNC_INVO(i, oel)); :};
 
 stmt_list ::=
-    {: RESULT = new AST_STMT_LIST(null,null); :}
-  | stmt:s stmt_list:sl {: sl.list.add(0,s); RESULT = sl; :};
+    {: RESULT = new AST_LIST<AST_STMT>(null,AST_STMT.class); :}
+  | stmt:s stmt_list:sl {: sl.add(0,s); RESULT = sl; :};

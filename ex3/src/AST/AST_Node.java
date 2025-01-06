@@ -15,8 +15,10 @@ public abstract class AST_Node
 	/***********************************************/
 	public void PrintMe()
 	{
+		AST_GRAPHVIZ.getInstance().logNode(
+            SerialNumber,
+            String.format("%s",toString())
+        );
 	}
-
 	public abstract TYPE SemantMe() throws SemanticException;
-
 }

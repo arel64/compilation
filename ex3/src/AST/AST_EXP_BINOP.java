@@ -1,5 +1,7 @@
 package AST;
 import TYPES.*;
+import AST.AST_BINOP.Operation;
+import SYMBOL_TABLE.SYMBOL_TABLE;
 import SYMBOL_TABLE.SemanticException;
 
 
@@ -42,32 +44,76 @@ public class AST_EXP_BINOP extends AST_EXP
 	public String toString() {
 		return left.toString()+binop.toString()+right.toString();
 	}
-
-	@Override
-	public TYPE SemantMe(){
+	private boolean isSameType()
+	{
+		return left.equals(right);
+	}
+	private boolean isDerivedType() throws SemanticException
+	{
 		TYPE leftType = left.SemantMe();
 		TYPE rightType = right.SemantMe();
-        if (binop.op.equals("+") && leftType == TYPE_STRING && rightType == TYPE_STRING){
-			return TYPE_STRING;  // String concatenation
+		if(!(leftType.isClass() && rightType.isClass()))
+		{
+			return false;
 		}
-		String operator = binop.toString();
-		if (binop.op.equals("<") || binop.op.equals(">") || binop.op.equals("+") || binop.op.equals("-") || binop.op.equals("*"))
-			if (leftType == TYPE_INT && rightType == TYPE_INT) {
-				return TYPE_INT;
-			} else {
-				throw new SemanticException("Invalid types for binary operator '" + operator + "'");
+		TYPE_CLASS leftClass = (TYPE_CLASS)leftType;
+		TYPE_CLASS rightClass = (TYPE_CLASS)rightType;
+		return leftClass.getSharedType(rightClass) != null;
+	}
+	@Override
+	public TYPE SemantMe() throws SemanticException{
+		final Operation binopOperation = binop.operation;
+		if(binopOperation == Operation.EQUALS)
+		{
+			if(isSameType())
+			{
+				return left.SemantMe();
 			}
-		if (binop.op.equals("/")) {
-			if (leftType == TYPE_INT && rightType == TYPE_INT) {
-				if (right == 0) { //TODO do we know this? 
-					throw new SemanticException("Division by zero");
-				}
-				return TYPE_INT;
-			} else {
-				throw new SemanticException("Invalid types for arithmetic operator '" + operator + "'");
+			TYPE leftType = left.SemantMe();
+			TYPE rightType = right.SemantMe();
+			if(!(leftType.isClass() && rightType.isClass()))
+			{
+				throw new SemanticException(String.format("Cannot compare between %s and %s different types and are not classes",leftType,rightType));
 			}
-		} else {
-			throw new SemanticException("Unsupported binary operator '" + operator + "'");
-		} 
+			TYPE_CLASS leftClass = (TYPE_CLASS)leftType;
+			TYPE_CLASS rightClass = (TYPE_CLASS)rightType;
+			String sharedClass = leftClass.getSharedType(rightClass);
+			if(sharedClass == null)
+			{
+				throw new SemanticException(String.format("Cannot compare between %s and %s different types and are not derived",leftType,rightType));
+			}
+			return SYMBOL_TABLE.getInstance().find(sharedClass);
+		}
+		TYPE leftType = left.SemantMe();
+		if (!isSameType())
+		{
+			throw new SemanticException("Cannot '" + binopOperation + "' for different types");
+		}
+		
+		TYPE varriablesType = leftType;
+		if(varriablesType.isVoid())
+		{
+			throw new SemanticException("Cannot assign to'" + binopOperation + "' where one of the parameters is void");
+		}
+
+		if(varriablesType instanceof TYPE_STRING)
+		{
+			if( binopOperation != Operation.PLUS)
+			{
+				throw new SemanticException("Not supported '" + binopOperation + "' for strings");
+			}
+			return TYPE_STRING.getInstance();
+		}
+
+		if (!(varriablesType instanceof TYPE_INT)) {
+			throw new SemanticException("Invalid types for binary operator '" + binopOperation + "'");
+		}
+
+		if (binopOperation == Operation.DIVIDE ) {
+			if (right instanceof AST_LIT_NUMBER && Integer.parseInt(((AST_LIT_NUMBER)right).getValue()) == 0) {
+				throw new SemanticException("Division by zero");
+			}
+		}
+		return varriablesType;
 	}
 }

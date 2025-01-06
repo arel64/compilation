@@ -1,5 +1,4 @@
 package AST;
-import TYPES.*;
 
 public abstract class AST_DEC extends AST_Node {
     private String name;
@@ -19,7 +18,4 @@ public abstract class AST_DEC extends AST_Node {
 			SerialNumber,
 			"AST_DEC\nParmeter name: \n"+getName());		
     }
-
-    public abstract TYPE SemantMe();
-
 }

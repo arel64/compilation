@@ -15,11 +15,8 @@ public class AST_LIT_STRING extends AST_LIT
     }
 
     @Override
-    public TYPE SemantMe(){
-        if( val == 'NIL'){
-            return null;
-        }
-        return new TYPE_STRING();
+    public TYPE_STRING SemantMe(){
+        return TYPE_STRING.getInstance();
     }
    
 }

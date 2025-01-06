@@ -8,4 +8,9 @@ public class TYPE_ARRAY extends TYPE
 	{
 		this.t = t;
 	}
+
+	@Override
+	public boolean isVoid() {
+		return t.isVoid();
+	}
 }

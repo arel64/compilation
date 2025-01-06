@@ -2,10 +2,13 @@ package AST;
 import TYPES.*;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
-public class AST_LIST<T extends AST_Node> extends AST_Node{
-    public java.util.ArrayList<T> list;
+import SYMBOL_TABLE.SemanticException;
+
+public class AST_LIST<T extends AST_Node> extends AST_Node implements Iterable<T>{
+    private java.util.ArrayList<T> list;
     private final Class<T> clazz;
     
     public AST_LIST(T first,Class<T> clazz) {
@@ -35,6 +38,22 @@ public class AST_LIST<T extends AST_Node> extends AST_Node{
         this.list = new ArrayList<T>(list);
         this.clazz = clazz;
         SerialNumber = AST_Node_Serial_Number.getFresh();
+    }
+    public T at(int index){
+        return list.get(index);
+    }
+    public void add(T item)
+    {
+        list.add(item);
+    }
+    public int size()
+    {
+        return list.size();
+    }
+    public AST_LIST<T> from(int index)
+    {
+        List<T> subList = list.subList(index, list.size());
+        return new AST_LIST<>(subList, clazz);
     }
     @Override
     public void PrintMe() {
@@ -71,22 +90,24 @@ public class AST_LIST<T extends AST_Node> extends AST_Node{
         }
         return listRepresentation.substring(0,listRepresentation.length()-1);
     }
-
+    /*
+     * Verifies that all elements in the list do not have semantic violations.
+     * Always returns null
+     * 
+     */
     @Override
-    public TYPE SemantMe(){
+    public TYPE SemantMe() throws SemanticException{
         if (this.list.isEmpty()) {
             return null;
         }
-        TYPE_LIST result = null;
         for (int i = this.list.size() - 1; i >= 0; i--) {
             T node = this.list.get(i);
-            TYPE currType = node.SemantMe();  // Get the TYPE of the current node
-            if (currType == null) {
-                // Handle the error case where the SemantMe of the node returns null
-                throw new SemanticException("WTF");
-            }
-            result = new TYPE_LIST(currType, result);
+            node.SemantMe();
         }
-        return result;
+        return null;
+    }
+    @Override
+    public Iterator<T> iterator() {
+        return list.iterator();
     }
 }

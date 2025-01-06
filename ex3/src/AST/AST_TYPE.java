@@ -14,7 +14,7 @@ public class AST_TYPE extends AST_Node
 		return type;
 	}
 	@Override
-	public TYPE SemantMe(){
+	public TYPE SemantMe() throws SemanticException{
 		if (type == "int")
 			return TYPE_INT.getInstance();
 		if (type == "String")
@@ -25,8 +25,7 @@ public class AST_TYPE extends AST_Node
 		TYPE curr = SYMBOL_TABLE.getInstance().find(type);
         if (curr == null)
         {
-           System.out.println("The type does not exist.");
-           throw new SemanticException("" + lineNumber);
+           throw new SemanticException("The type does not exist." );
         }
         return curr;
 	}

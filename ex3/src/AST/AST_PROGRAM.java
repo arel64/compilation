@@ -1,10 +1,11 @@
 package AST;
+import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
 
 public class AST_PROGRAM extends AST_Node {
-    public AST_DEC_LIST declerationList;
+    public AST_LIST<AST_DEC> declerationList;
 
-    public AST_PROGRAM(AST_DEC_LIST declerationList)
+    public AST_PROGRAM(AST_LIST<AST_DEC> declerationList)
     {
         SerialNumber = AST_Node_Serial_Number.getFresh();
         this.declerationList = declerationList;
@@ -22,5 +23,10 @@ public class AST_PROGRAM extends AST_Node {
             AST_GRAPHVIZ.getInstance().logEdge(SerialNumber, declerationList.SerialNumber);
             declerationList.PrintMe();
         }
+    }
+
+    @Override
+    public TYPE SemantMe() throws SemanticException {
+        return declerationList.SemantMe();
     }
 }

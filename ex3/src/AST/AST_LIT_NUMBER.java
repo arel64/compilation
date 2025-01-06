@@ -18,7 +18,7 @@ public class AST_LIT_NUMBER extends AST_LIT
     }
 
     @Override
-    public TYPE SemantMe(){
-        return new TYPE_INT();
+    public TYPE_INT SemantMe(){
+        return TYPE_INT.getInstance();
     }
 }

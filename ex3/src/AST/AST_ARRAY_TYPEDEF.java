@@ -1,5 +1,6 @@
 package AST;
 import SYMBOL_TABLE.SYMBOL_TABLE;
+import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
 
 public class AST_ARRAY_TYPEDEF extends AST_DEC {
@@ -18,19 +19,18 @@ public class AST_ARRAY_TYPEDEF extends AST_DEC {
         );
     }
 
+    
     @Override
-    public TYPE SemantMe(){
+    public TYPE_ARRAY SemantMe() throws SemanticException{
 		SYMBOL_TABLE symbol_table = SYMBOL_TABLE.getInstance();
-		int scope = symbol_table.getCurrentScopeIndex();
-		if (scope != 0){
-			throw new SemanticException("Scope mismatch found scope:" +scope);
+		if (!symbol_table.isAtGlobalScope()){
+			throw new SemanticException("Scope mismatch found scope:" +  symbol_table.getCurrentScopeIndex());
 		}
-        TYPE arrayType = baseType.SemantMe();
-        if (arrayType == TYPE_VOID){
+        TYPE_ARRAY arrayType = new TYPE_ARRAY(baseType.SemantMe());
+        if (arrayType.isVoid()){
             throw new SemanticException("Array of type void" +this.getName());
         }
         symbol_table.enter(this.getName(), arrayType);
-        return null;  //maybe create an array type? 
+        return arrayType;
     }
-    //where do we ckeck if the type is equal to the arrayType?
 }

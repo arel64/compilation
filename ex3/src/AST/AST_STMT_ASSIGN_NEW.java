@@ -1,4 +1,5 @@
 package AST;
+import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
 
 public class AST_STMT_ASSIGN_NEW extends AST_STMT {
@@ -18,5 +19,15 @@ public class AST_STMT_ASSIGN_NEW extends AST_STMT {
         AST_GRAPHVIZ.getInstance().logEdge(SerialNumber, var.SerialNumber);
         var.PrintMe();
 
+    }
+    @Override
+    public TYPE SemantMe() throws SemanticException {
+        TYPE newExpType = newExp.SemantMe();
+        TYPE varType = var.SemantMe();
+        if(varType != newExpType)
+        {
+            throw new SemanticException(String.format("%s and %s are part of a new statement but of different types", newExpType,varType));
+        }
+        return varType;
     }
 }

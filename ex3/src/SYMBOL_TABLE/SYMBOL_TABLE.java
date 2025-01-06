@@ -120,7 +120,10 @@ public class SYMBOL_TABLE
 
 		scope_count ++;
 	}
-
+	public boolean exists(String name)
+	{
+		return find(name) != null;
+	}
 	/********************************************************************************/
 	/* end scope = Keep popping elements out of the data structure,                 */
 	/* from most recent element entered, until a <NEW-SCOPE> element is encountered */
@@ -278,4 +281,8 @@ public class SYMBOL_TABLE
 		}
 		return instance;
 	}
+
+    public boolean isAtGlobalScope() {
+        return getCurrentScopeIndex() == 0;
+    }
 }

@@ -1,13 +1,14 @@
 package AST;
+import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
 
-public class AST_FUNC_DEC extends AST_DEC {
+public class AST_FUNC_DEC extends AST_CLASS_FIELDS_DEC {
     
     public AST_TYPE returnType;
-    public AST_DEC_LIST params;
-    public AST_STMT_LIST body;
+    public AST_LIST<AST_VAR_DEC> params;
+    public AST_LIST<AST_STMT> body;
 
-    public AST_FUNC_DEC(String funcName, AST_TYPE returnType, AST_DEC_LIST params, AST_STMT_LIST body) {
+    public AST_FUNC_DEC(String funcName, AST_TYPE returnType, AST_LIST<AST_VAR_DEC> params, AST_LIST<AST_STMT> body) {
         super(funcName);
         this.returnType = returnType;
         this.params = params;
@@ -33,10 +34,9 @@ public class AST_FUNC_DEC extends AST_DEC {
     }
 
     @Override
-    public TYPE SemantMe(){
-        Type returnT = returnType.SemantMe();
+    public TYPE SemantMe() throws SemanticException{
+        TYPE returnT = returnType.SemantMe();
         String name = this.getName();
-        TYPE_LIST paramsType = params.SemantMe();
-        return new TYPE_FUNCTION(returnT, name, paramsType);
+        return new TYPE_FUNCTION(returnT, name, new TYPE_LIST(params));
     }
 }

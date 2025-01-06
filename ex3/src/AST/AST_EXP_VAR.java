@@ -1,4 +1,5 @@
 package AST;
+import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
 
 public class AST_EXP_VAR extends AST_EXP
@@ -17,5 +18,10 @@ public class AST_EXP_VAR extends AST_EXP
 	@Override
 	public String toString() {
 		return var.toString();
+	}
+
+	@Override
+	public TYPE SemantMe() throws SemanticException {
+		return var.SemantMe();
 	}
 }

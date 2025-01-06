@@ -1,5 +1,8 @@
 package TYPES;
 
+import SYMBOL_TABLE.SYMBOL_TABLE;
+import SYMBOL_TABLE.SemanticException;
+
 public class TYPE_CLASS extends TYPE
 {
 	/*********************************************************************/
@@ -16,8 +19,9 @@ public class TYPE_CLASS extends TYPE
 	
 	/****************/
 	/* CTROR(S) ... */
-	/****************/
-	public TYPE_CLASS(TYPE_CLASS father,String name,TYPE_CLASS_VAR_DEC_LIST data_members)
+	/**
+	 * @throws SemanticException **************/
+	public TYPE_CLASS(TYPE_CLASS father,String name,TYPE_CLASS_VAR_DEC_LIST data_members) throws SemanticException
 	{
 		this.name = name;
 		this.father = father;
@@ -30,5 +34,49 @@ public class TYPE_CLASS extends TYPE
 	@Override
 	public boolean isClass() {
 		return true;
+	}
+	public boolean isDerivedFrom(TYPE_CLASS other) throws SemanticException
+	{
+		String sharedType = getSharedType(other);
+		if(sharedType == null)
+		{
+			return false;
+		}
+		TYPE_CLASS iterator = this;
+		while(iterator != null)
+		{
+			if(iterator.name == sharedType)
+			{
+				return true;
+			}
+			iterator = iterator.father;
+		}
+		return false;
+	}
+	public String getSharedType(TYPE_CLASS other) throws SemanticException
+	{
+		if(other == null)
+		{
+			return null;
+		}
+		SYMBOL_TABLE table = SYMBOL_TABLE.getInstance();
+		if(!table.exists(this.name) || !table.exists(other.name))
+		{
+			throw new SemanticException("Shared check between inexistant classes" + this.name +" "+ other.name);
+		}
+		if(this.name == other.name)
+		{
+			return this.name;
+		}
+		String otherFatherShared = getSharedType(other.father);
+		String myFatherShared = getSharedType(father);
+		//Impies cycle in inheritence
+		assert(!(otherFatherShared != null && myFatherShared != null));
+		if(myFatherShared == null)
+		{
+			return otherFatherShared;
+		}
+		return myFatherShared;
+		
 	}
 }

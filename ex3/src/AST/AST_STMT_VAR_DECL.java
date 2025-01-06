@@ -1,4 +1,5 @@
 package AST;
+import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
 
 public class AST_STMT_VAR_DECL extends AST_STMT {
@@ -12,5 +13,10 @@ public class AST_STMT_VAR_DECL extends AST_STMT {
     @Override
     public void PrintMe() {
         varDec.PrintMe();
+    }
+
+    @Override
+    public TYPE SemantMe() throws SemanticException {
+        return varDec.SemantMe();
     }
 }

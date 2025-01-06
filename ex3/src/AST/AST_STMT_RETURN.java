@@ -1,4 +1,5 @@
 package AST;
+import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
 
 public class AST_STMT_RETURN extends AST_STMT {
@@ -18,5 +19,10 @@ public class AST_STMT_RETURN extends AST_STMT {
         AST_GRAPHVIZ.getInstance().logEdge(SerialNumber, exp.SerialNumber);
         exp.PrintMe();
         
+    }
+
+    @Override
+    public TYPE SemantMe() throws SemanticException {
+        return exp.SemantMe();
     }
 }

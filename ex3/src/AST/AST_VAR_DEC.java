@@ -2,7 +2,7 @@ package AST;
 import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
 
-public class AST_VAR_DEC extends AST_DEC {
+public class AST_VAR_DEC extends AST_CLASS_FIELDS_DEC {
     
     public AST_TYPE varType;
     public AST_EXP varValue;

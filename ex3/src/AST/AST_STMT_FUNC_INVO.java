@@ -1,4 +1,5 @@
 package AST;
+import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
 
 public class AST_STMT_FUNC_INVO extends AST_STMT {
@@ -16,5 +17,10 @@ public class AST_STMT_FUNC_INVO extends AST_STMT {
             String.format("STMT_FUNC_INVO\n %s",invocation)
         );
         invocation.PrintMe();
+    }
+
+    @Override
+    public TYPE SemantMe() throws SemanticException {
+        return invocation.SemantMe();
     }
 }
