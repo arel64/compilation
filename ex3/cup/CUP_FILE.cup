@@ -213,4 +213,4 @@ stmt ::= varDec:v {: RESULT = new AST_STMT_VAR_DECL(v); :}
 
 stmt_list ::=
     {: RESULT = new AST_LIST<AST_STMT>(null,AST_STMT.class); :}
-  | stmt:s stmt_list:sl {: sl.add(0,s); RESULT = sl; :};
+  | stmt:s stmt_list:sl {: sl.add(s); RESULT = sl; :};

@@ -1,15 +1,8 @@
 package TYPES;
 
-public class TYPE_FUNCTION extends TYPE
+public class TYPE_FUNCTION extends TYPE_CLASS_VAR_DEC
 {
-	/***********************************/
-	/* The return type of the function */
-	/***********************************/
-	public TYPE returnType;
 
-	/*************************/
-	/* types of input params */
-	/*************************/
 	public TYPE_LIST params;
 	
 	/****************/
@@ -17,13 +10,12 @@ public class TYPE_FUNCTION extends TYPE
 	/****************/
 	public TYPE_FUNCTION(TYPE returnType,String name,TYPE_LIST params)
 	{
-		this.name = name;
-		this.returnType = returnType;
+		super(returnType, name);
 		this.params = params;
 	}
 
     public boolean isOverriding(TYPE_FUNCTION t) {
-		return this.name == t.name && t.params.equals(params) && this.returnType == t.returnType;
+		return this.name == t.name && t.params.equals(params) && this.t == t.t;
     }
 	
 }

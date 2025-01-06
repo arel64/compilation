@@ -28,7 +28,7 @@ public class AST_VAR_DEC extends AST_CLASS_FIELDS_DEC {
         return varType.toString()+ " "+getName() + (varValue != null ? "="+varValue:"");
     }
     @Override
-    public TYPE SemantMe() throws SemanticException{
+    public TYPE_CLASS_VAR_DEC SemantMe() throws SemanticException{
         TYPE type = varType.SemantMe();
         TYPE valueType = varValue.SemantMe();
         if(type != valueType)

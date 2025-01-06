@@ -23,13 +23,25 @@ public class TYPE_CLASS extends TYPE
 	 * @throws SemanticException **************/
 	public TYPE_CLASS(TYPE_CLASS father,String name,TYPE_CLASS_VAR_DEC_LIST data_members) throws SemanticException
 	{
+		this((TYPE)father, name, data_members);
+	}
+	public TYPE_CLASS(String father,String name,TYPE_CLASS_VAR_DEC_LIST data_members) throws SemanticException
+	{
+		this(SYMBOL_TABLE.getInstance().find(father),name,data_members);
+	}
+	private TYPE_CLASS(TYPE father, String name, TYPE_CLASS_VAR_DEC_LIST data_members) throws SemanticException
+	{
+		if(!(father instanceof TYPE_CLASS))
+		{
+			throw new SemanticException(String.format("Cannot extends non class type %s",father));
+		}
 		this.name = name;
-		this.father = father;
+		this.father = (TYPE_CLASS)father;
 		this.data_members = data_members;
 		/**
 		 * Verify no overloading, shadow varriables
 		 */
-		data_members.extending(father.data_members);		
+		data_members.extending(((TYPE_CLASS)father).data_members);		
 	}
 	@Override
 	public boolean isClass() {
