@@ -17,6 +17,7 @@ public class TYPE_FUNCTION extends TYPE_CLASS_VAR_DEC
 	}
 
     public boolean isOverriding(TYPE_FUNCTION t) {
+		// System.out.println("this is the t"+ this.t.toString());
 		return this.name == t.name && t.params.equals(params) && this.t == t.t;
     }
 

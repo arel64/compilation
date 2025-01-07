@@ -1,4 +1,5 @@
 package AST;
+import SYMBOL_TABLE.SYMBOL_TABLE;
 import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
 
@@ -30,6 +31,9 @@ public class AST_STMT_IF extends AST_STMT
         {
             throw new SemanticException(lineNumber,String.format("If statement condition must be int, got: %s ",conditionType));
         }
+        SYMBOL_TABLE.getInstance().beginScope();
+        body.SemantMe();
+        SYMBOL_TABLE.getInstance().endScope();
         return conditionType;
     }
 }

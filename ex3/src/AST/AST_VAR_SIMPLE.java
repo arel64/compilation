@@ -1,4 +1,5 @@
 package AST;
+import SYMBOL_TABLE.SYMBOL_TABLE;
 import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
 
@@ -23,7 +24,11 @@ public class AST_VAR_SIMPLE extends AST_VAR
 
 	@Override
 	public TYPE SemantMe() throws SemanticException {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Unimplemented method 'SemantMe'");
+		TYPE t = SYMBOL_TABLE.getInstance().find(this.val);
+		if( t== null)
+		{
+			throw new SemanticException(lineNumber,String.format("Cannot find var: %s ",this.val));
+		}
+		return t;
 	}
 }

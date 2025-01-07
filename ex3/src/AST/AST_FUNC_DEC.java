@@ -49,11 +49,16 @@ public class AST_FUNC_DEC extends AST_CLASS_FIELDS_DEC {
                 paramTypes = new TYPE_LIST(paramType, paramTypes);
             }
         }
-
+        SYMBOL_TABLE instance = SYMBOL_TABLE.getInstance();
         TYPE_FUNCTION t = new TYPE_FUNCTION(returnT, name, paramTypes,lineNumber);
-
-        // SYMBOL_TABLE.getInstance().enter(name, t);
-        // System.out.println(t + "-----------------------");
+        instance.enter(name, t);
+        if(body == null)
+        {
+            return t;
+        }
+        instance.beginScope();
+        body.SemantMeLog();
+        instance.endScope();
         return t;
 
     }

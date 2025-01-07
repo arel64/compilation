@@ -23,7 +23,7 @@ public class TYPE_CLASS extends TYPE
 	 * @throws SemanticException **************/
 	public TYPE_CLASS(TYPE_CLASS father,String name,int line) throws SemanticException
 	{
-		this((TYPE)father, name, line);
+		this((TYPE)father, name,line);
 	}
 	public TYPE_CLASS(String father,String name,int line) throws SemanticException
 	{
@@ -37,12 +37,9 @@ public class TYPE_CLASS extends TYPE
 		}
 
 		this.name = name;
-		/**
-		 * Verify no overloading, shadow varriables
-		 */
 		if ( father != null)
 		{
-			this.father = (TYPE_CLASS)father;
+			this.father = (TYPE_CLASS) father;
 		}
 	}
 	@Override
@@ -96,7 +93,7 @@ public class TYPE_CLASS extends TYPE
 
 	@Override
 	public String toString() {
-		return String.format("Father: %s Name: %s",father,name);
+	 	return String.format("Father: %s Name: %s",father,name);
 	}
 
 	

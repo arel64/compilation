@@ -24,6 +24,9 @@ public class AST_NEW_EXP extends AST_EXP {
 
     @Override
     public TYPE SemantMe() throws SemanticException{
+        if (exp == null) {
+            return null;
+        }
         TYPE expType = exp.SemantMe();
         if (expType != TYPE_INT.getInstance()){
             throw new SemanticException(lineNumber,"New expr type is not int");

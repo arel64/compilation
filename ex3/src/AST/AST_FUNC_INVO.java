@@ -57,6 +57,12 @@ public class AST_FUNC_INVO extends AST_EXP {
             throw new SemanticException(lineNumber,String.format("%s cannot be used like a function", funcName));
         }
         TYPE_FUNCTION myFunctionType = (TYPE_FUNCTION)symbol;
+        table.beginScope();
+        if(params != null)
+        {
+            params.SemantMeLog();
+        }
+        table.endScope();
         //TODO::
         //two cases one for invoc in class (x.()) and one for regular function call
         //check if v has this function id in the scope of the class

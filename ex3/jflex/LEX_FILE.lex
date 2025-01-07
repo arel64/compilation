@@ -59,7 +59,7 @@ import java_cup.runtime.*;
 	/*******************************************/
 	/* Enable line number extraction from main */
 	/*******************************************/
-	public int getLine() { return yyline + 1; } 
+	public int getLine() { return yyline; } 
 
 	/**********************************************/
 	/* Enable token position extraction from main */
@@ -88,7 +88,6 @@ import java_cup.runtime.*;
 LineTerminator   = \r|\n|\r\n
 WhiteSpace       = {LineTerminator} | [ \t]
 INTEGER          = -?0|-?[1-9][0-9]*
-STRING           = \"[a-zA-Z]*\"
 ID               = [a-zA-Z_][a-zA-Z0-9_]*
 TYPE_1_COMMENT 	 = \/\/[(|)|\[|\]|{|} | \?|\!|\.|\; | \+|\-|\*|\/ | [0-9] | [a-zA-Z_]]*{WhiteSpace}*
 VALID_COMMENT_CHAR = [a-zA-Z0-9 \t\n\r\(\)\[\]\{\}\?\!\+\-\*/\.;]
@@ -147,7 +146,7 @@ VALID_COMMENT_CHAR = [a-zA-Z0-9 \t\n\r\(\)\[\]\{\}\?\!\+\-\*/\.;]
 {TYPE_1_COMMENT} { }
 {INTEGER}       { return symbol(TokenNames.INT, parseIntToken()); }
 {ID}            { return symbol(TokenNames.ID, yytext()); }
-{STRING}        { return symbol(TokenNames.STRING, new String(yytext()));}
+// {STRING}        { return symbol(TokenNames.STRING, new String(yytext()));}
 {WhiteSpace}    { /* skip whitespace */ }
 <<EOF>>         { return symbol(TokenNames.EOF); }
 }

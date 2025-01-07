@@ -356,24 +356,24 @@ public class SYMBOL_TABLE
         return null;
     }*/
 
-	public boolean isInClassScope(String name, TYPE type, TYPE_CLASS currentClass) {
-        if (currentClass == null || currentClass.data_members == null)
-            return false;
-        for (TYPE_CLASS_VAR_DEC member : currentClass.data_members) 
-            if (member.name.equals(name) && member.t.equals(type)) 
-                return true;
-        return false;
-    }
+	// public boolean isInClassScope(String name, TYPE type, TYPE_CLASS currentClass) {
+    //     if (currentClass == null || currentClass.data_members == null)
+    //         return false;
+    //     for (TYPE_CLASS_VAR_DEC member : currentClass.data_members) 
+    //         if (member.name.equals(name) && member.t.equals(type)) 
+    //             return true;
+    //     return false;
+    // }
 
-	public boolean isInFatherClassScope(String name, TYPE type, TYPE_CLASS currentClass){
-		TYPE_CLASS currFather = currentClass.father;
-		while(currFather != null){
-			if (isInClassScope(name, type,currFather))
-			{
-	            return true;
-			}
-		}
-		return false;
-	}
+	// public boolean isInFatherClassScope(String name, TYPE type, TYPE_CLASS currentClass){
+	// 	TYPE_CLASS currFather = currentClass.father;
+	// 	while(currFather != null){
+	// 		if (isInClassScope(name, type,currFather))
+	// 		{
+	//             return true;
+	// 		}
+	// 	}
+	// 	return false;
+	// }
 
 }

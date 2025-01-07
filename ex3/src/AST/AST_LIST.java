@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import SYMBOL_TABLE.SYMBOL_TABLE;
 import SYMBOL_TABLE.SemanticException;
 
 public class AST_LIST<T extends AST_Node> extends AST_Node implements Iterable<T>{
@@ -100,11 +101,27 @@ public class AST_LIST<T extends AST_Node> extends AST_Node implements Iterable<T
         if (this.list.isEmpty()) {
             return null;
         }
+        SYMBOL_TABLE instance = SYMBOL_TABLE.getInstance(); 
         for (int i = 0; i < list.size(); i++) {
             T node = this.list.get(i);
             if (node == null)
                 throw new SemanticException(lineNumber,"null arg");
-            node.SemantMeLog();
+            try{
+                TYPE t = node.SemantMeLog();
+                if(t!= null)
+                {
+                    instance.enter(t.name, t);
+                }
+            }
+            catch(SemanticException e)
+            {
+                if (node instanceof AST_STMT)
+                {
+                    throw new SemanticException(node.lineNumber, e.getMessage());
+                }
+                throw e;
+                
+            }
         }
         return null;
     }

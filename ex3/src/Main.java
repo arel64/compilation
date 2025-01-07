@@ -57,7 +57,7 @@ public class Main
 			catch(SemanticException e)
 			{
 				e.printStackTrace();
-				file_writer.write("ERROR(" + (e.lineNumber) + ")\n");
+				file_writer.write("ERROR(" + (e.lineNumber + 1) + ")\n");
 			}
 			catch(Exception e)
 			{

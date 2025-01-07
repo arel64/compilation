@@ -99,121 +99,121 @@ start with program;
 program ::= dec_list:sl
 {:
   AST_PROGRAM node = new AST_PROGRAM(sl);
-  node.setLineNumber(lexer.getLine());
+  node.setLineNumber(0);
   RESULT = node;
 :};
 
 dec_list ::= dec:d
 {:
   AST_LIST<AST_DEC> node = new AST_LIST<AST_DEC>(d,AST_DEC.class);
-  node.setLineNumber(lexer.getLine());
+  node.setLineNumber(dleft);
   RESULT = node;
 :}
 | dec_list:dl dec:d
 {:
   AST_LIST<AST_DEC> node = new AST_LIST<AST_DEC>(dl,d,AST_DEC.class);
-  node.setLineNumber(lexer.getLine());
+  node.setLineNumber(dleft);
   RESULT = node;
 :};
 
 binop ::= PLUS:p
 {:
   AST_BINOP node = new AST_BINOP("+");
-  node.setLineNumber(lexer.getLine());
+  node.setLineNumber(pleft);
   RESULT = node;
 :}
 | MINUS:m
 {:
   AST_BINOP node = new AST_BINOP("-");
-  node.setLineNumber(lexer.getLine());
+  node.setLineNumber(mleft);
   RESULT = node;
 :}
 | TIMES:t
 {:
   AST_BINOP node = new AST_BINOP("*");
-  node.setLineNumber(lexer.getLine());
+  node.setLineNumber(tleft);
   RESULT = node;
 :}
 | DIVIDE:di
 {:
   AST_BINOP node = new AST_BINOP("/");
-  node.setLineNumber(lexer.getLine());
+  node.setLineNumber(dileft);
   RESULT = node;
 :}
 | LT:lt
 {:
   AST_BINOP node = new AST_BINOP("<");
-  node.setLineNumber(lexer.getLine());
+  node.setLineNumber(ltleft);
   RESULT = node;
 :}
 | GT:gt
 {:
   AST_BINOP node = new AST_BINOP(">");
-  node.setLineNumber(lexer.getLine());
+  node.setLineNumber(gtleft);
   RESULT = node;
 :}
 | EQ:eq
 {:
   AST_BINOP node = new AST_BINOP("=");
-  node.setLineNumber(lexer.getLine());
+  node.setLineNumber(eqleft);
   RESULT = node;
 :};
 
 type ::= TYPE_INT:ti
 {:
   AST_TYPE node = new AST_TYPE("int");
-  node.setLineNumber(lexer.getLine());
+  node.setLineNumber(tileft);
   RESULT = node;
 :}
 | TYPE_STRING:ts
 {:
   AST_TYPE node = new AST_TYPE("String");
-  node.setLineNumber(lexer.getLine());
+  node.setLineNumber(tsleft);
   RESULT = node;
 :}
 | TYPE_VOID:tv
 {:
   AST_TYPE node = new AST_TYPE("void");
-  node.setLineNumber(lexer.getLine());
+  node.setLineNumber(tvleft);
   RESULT = node;
 :}
 | ID:i
 {:
   AST_TYPE node = new AST_TYPE(i);
-  node.setLineNumber(lexer.getLine());
+  node.setLineNumber(ileft);
   RESULT = node;
 :};
 
 arrayTypedef ::= ARRAY:a ID:i EQ:e type:t LBRACK:lb RBRACK:rb SEMICOLON:s
 {:
   AST_ARRAY_TYPEDEF node = new AST_ARRAY_TYPEDEF(i, t);
-  node.setLineNumber(lexer.getLine());
+  node.setLineNumber(aleft);
   RESULT = node;
 :};
 
 varDec ::= type:t ID:i ASSIGN:as exp:ex SEMICOLON:se
 {:
   AST_VAR_DEC node = new AST_VAR_DEC(i, t, ex);
-  node.setLineNumber(lexer.getLine());
+  node.setLineNumber(tleft);
   RESULT = node;
 :}
 | type:t ID:i ASSIGN:as newExp:n SEMICOLON:se
 {:
   AST_VAR_DEC node = new AST_VAR_DEC(i, t, n);
-  node.setLineNumber(lexer.getLine());
+  node.setLineNumber(tleft);
   RESULT = node;
 :}
 | type:t ID:i SEMICOLON:se
 {:
   AST_VAR_DEC node = new AST_VAR_DEC(i, t);
-  node.setLineNumber(lexer.getLine());
+  node.setLineNumber(tleft);
   RESULT = node;
 :};
 
 funcDec ::= type:t ID:i LPAREN:lp opt_param_list:opl RPAREN:rp LBRACE:lb stmt_list:sl RBRACE:rb
 {:
   AST_FUNC_DEC node = new AST_FUNC_DEC(i, t, opl, sl);
-  node.setLineNumber(lexer.getLine());
+  node.setLineNumber(tleft);
   RESULT = node;
 :};
 
@@ -230,13 +230,13 @@ param_list ::= type:t ID:i
 {:
   AST_VAR_DEC temp = new AST_VAR_DEC(i,t);
   AST_LIST<AST_VAR_DEC> node = new AST_LIST<AST_VAR_DEC>(temp,AST_VAR_DEC.class);
-  node.setLineNumber(lexer.getLine());
+  node.setLineNumber(tleft);
   RESULT = node;
 :}
 | param_list:pl COMMA:c type:t ID:i
 {:
   AST_VAR_DEC temp = new AST_VAR_DEC(i,t);
-  temp.setLineNumber(lexer.getLine());
+  temp.setLineNumber(tleft);
   pl.add(temp);
   RESULT = pl;
 :};
@@ -244,7 +244,7 @@ param_list ::= type:t ID:i
 classDec ::= CLASS:c ID:i extends_opt:eo LBRACE:lb cField_list:cf RBRACE:rb
 {:
   AST_CLASS_DEC node = new AST_CLASS_DEC(i, eo, cf);
-  node.setLineNumber(lexer.getLine());
+  node.setLineNumber(cleft);
   RESULT = node;
 :};
 
@@ -260,125 +260,125 @@ extends_opt ::=
 cField_list ::= cField:cf
 {:
   AST_LIST<AST_CLASS_FIELDS_DEC> node = new AST_LIST<AST_CLASS_FIELDS_DEC>(cf,AST_CLASS_FIELDS_DEC.class);
-  node.setLineNumber(lexer.getLine());
+  node.setLineNumber(cfleft);
   RESULT = node;
 :}
 | cField_list:cfl cField:cf
 {:
   AST_LIST<AST_CLASS_FIELDS_DEC> node = new AST_LIST<AST_CLASS_FIELDS_DEC>(cfl,cf,AST_CLASS_FIELDS_DEC.class);
-  node.setLineNumber(lexer.getLine());
+  node.setLineNumber(cfleft);
   RESULT = node;
 :};
 
 dec ::= varDec:v
 {:
-  v.setLineNumber(lexer.getLine());
+  v.setLineNumber(vleft);
   RESULT = v;
 :}
 | funcDec:f
 {:
-  f.setLineNumber(lexer.getLine());
+  f.setLineNumber(fleft);
   RESULT = f;
 :}
 | classDec:c
 {:
-  c.setLineNumber(lexer.getLine());
+  c.setLineNumber(cleft);
   RESULT = c;
 :}
 | arrayTypedef:at
 {:
-  at.setLineNumber(lexer.getLine());
+  at.setLineNumber(atleft);
   RESULT = at;
 :};
 
 cField ::= varDec:v
 {:
-  v.setLineNumber(lexer.getLine());
+  v.setLineNumber(vleft);
   RESULT = v;
 :}
 | funcDec:f
 {:
-  f.setLineNumber(lexer.getLine());
+  f.setLineNumber(fleft);
   RESULT = f;
 :};
 
 newExp ::= NEW:n type:t
 {:
   AST_NEW_EXP node = new AST_NEW_EXP(t);
-  node.setLineNumber(lexer.getLine());
+  node.setLineNumber(tleft);
   RESULT = node;
 :}
 | NEW:n type:t LBRACK:lb exp:ex RBRACK:rb
 {:
   AST_NEW_EXP node = new AST_NEW_EXP(t, ex);
-  node.setLineNumber(lexer.getLine());
+  node.setLineNumber(tleft);
   RESULT = node;
 :};
 
 var ::= ID:i
 {:
   AST_VAR_SIMPLE node = new AST_VAR_SIMPLE(i);
-  node.setLineNumber(lexer.getLine());
+  node.setLineNumber(ileft);
   RESULT = node;
 :}
 | var:v DOT:d ID:i
 {:
   AST_VAR_FIELD node = new AST_VAR_FIELD(v, i);
-  node.setLineNumber(lexer.getLine());
+  node.setLineNumber(ileft);
   RESULT = node;
 :}
 | var:v LBRACK:lb exp:ex RBRACK:rb
 {:
   AST_VAR_SUBSCRIPT node = new AST_VAR_SUBSCRIPT(v, ex);
-  node.setLineNumber(lexer.getLine());
+  node.setLineNumber(vleft);
   RESULT = node;
 :};
 
 exp ::= var:v
 {:
   AST_EXP_VAR node = new AST_EXP_VAR(v);
-  node.setLineNumber(lexer.getLine());
+  node.setLineNumber(vleft);
   RESULT = node;
 :}
 | LPAREN:lp exp:e RPAREN:rp
 {:
   AST_EXP_PAREN node = new AST_EXP_PAREN(e);
-  node.setLineNumber(lexer.getLine());
+  node.setLineNumber(lpleft);
   RESULT = node;
 :}
 | exp:e1 binop:b exp:e2
 {:
   AST_EXP_BINOP node = new AST_EXP_BINOP(e1, e2, b);
-  node.setLineNumber(lexer.getLine());
+  node.setLineNumber(bleft);
   RESULT = node;
 :}
 | var:v DOT:d ID:i LPAREN:lp opt_exp_list:oel RPAREN:rp
 {:
   AST_FUNC_INVO node = new AST_FUNC_INVO(v, i, oel);
-  node.setLineNumber(lexer.getLine());
+  node.setLineNumber(dleft);
   RESULT = node;
 :}
 | ID:i LPAREN:lp opt_exp_list:oel RPAREN:rp
 {:
   AST_FUNC_INVO node = new AST_FUNC_INVO(i, oel);
-  node.setLineNumber(lexer.getLine());
+  node.setLineNumber(ileft);
   RESULT = node;
 :}
 | num_exp:ne
 {:
-  ne.setLineNumber(lexer.getLine());
+  ne.setLineNumber(neleft);
   RESULT = ne;
 :}
-| NIL:n
+| NIL:ns
 {:
   AST_LIT_STRING node = new AST_LIT_STRING("NIL");
-  node.setLineNumber(lexer.getLine());
+  node.setLineNumber(nsleft);
   RESULT = node;
 :}
 | STRING:str
 {:
   AST_LIT_STRING node = new AST_LIT_STRING((String)str);
-  node.setLineNumber(lexer.getLine());
+  node.setLineNumber(strleft);
   RESULT = node;
 :};
 
@@ -394,7 +394,7 @@ opt_exp_list ::=
 exp_list ::= exp:e
 {:
   AST_LIST<AST_EXP> node = new AST_LIST<AST_EXP>(e,AST_EXP.class);
-  node.setLineNumber(lexer.getLine());
+  node.setLineNumber(eleft);
   RESULT = node;
 :}
 | exp_list:el COMMA:c exp:e
@@ -406,75 +406,75 @@ exp_list ::= exp:e
 num_exp ::= INT:in
 {:
   AST_LIT_NUMBER node = new AST_LIT_NUMBER(false, in);
-  node.setLineNumber(lexer.getLine());
+  node.setLineNumber(inleft);
   RESULT = node;
 :}
 | MINUS:m INT:in
 {:
   AST_LIT_NUMBER node = new AST_LIT_NUMBER(true, in);
-  node.setLineNumber(lexer.getLine());
+  node.setLineNumber(inleft);
   RESULT = node;
 :};
 
 stmt ::= varDec:v
 {:
   AST_STMT_VAR_DECL node = new AST_STMT_VAR_DECL(v);
-  node.setLineNumber(lexer.getLine());
+  node.setLineNumber(vleft);
   RESULT = node;
 :}
 | var:v ASSIGN:a exp:e SEMICOLON:se
 {:
   AST_STMT_ASSIGN node = new AST_STMT_ASSIGN(v, e);
-  node.setLineNumber(lexer.getLine());
+  node.setLineNumber(eleft);
   RESULT = node;
 :}
 | var:v ASSIGN:a newExp:n SEMICOLON:se
 {:
   AST_STMT_ASSIGN_NEW node = new AST_STMT_ASSIGN_NEW(v, n);
-  node.setLineNumber(lexer.getLine());
+  node.setLineNumber(aleft);
   RESULT = node;
 :}
 | RETURN:r exp:e SEMICOLON:se
 {:
   AST_STMT_RETURN node = new AST_STMT_RETURN(e);
-  node.setLineNumber(lexer.getLine());
+  node.setLineNumber(rleft);
   RESULT = node;
 :}
 | RETURN:r SEMICOLON:se
 {:
   AST_STMT_RETURN node = new AST_STMT_RETURN(null);
-  node.setLineNumber(lexer.getLine());
+  node.setLineNumber(rleft);
   RESULT = node;
 :}
 | IF:i LPAREN:lp exp:e RPAREN:rp LBRACE:lb stmt_list:sl RBRACE:rb
 {:
   AST_STMT_IF node = new AST_STMT_IF(e, sl);
-  node.setLineNumber(lexer.getLine());
+  node.setLineNumber(ileft);
   RESULT = node;
 :}
 | WHILE:w LPAREN:lp exp:e RPAREN:rp LBRACE:lb stmt_list:sl RBRACE:rb
 {:
   AST_STMT_WHILE node = new AST_STMT_WHILE(e, sl);
-  node.setLineNumber(lexer.getLine());
+  node.setLineNumber(wleft);
   RESULT = node;
 :}
 | var:v DOT:d ID:i LPAREN:lp opt_exp_list:oel RPAREN:rp SEMICOLON:se
 {:
   AST_STMT_FUNC_INVO node = new AST_STMT_FUNC_INVO(new AST_FUNC_INVO(v, i, oel));
-  node.setLineNumber(lexer.getLine());
+  node.setLineNumber(vleft);
   RESULT = node;
 :}
 | ID:i LPAREN:lp opt_exp_list:oel RPAREN:rp SEMICOLON:se
 {:
   AST_STMT_FUNC_INVO node = new AST_STMT_FUNC_INVO(new AST_FUNC_INVO(i, oel));
-  node.setLineNumber(lexer.getLine());
+  node.setLineNumber(ileft);
   RESULT = node;
 :};
 
 stmt_list ::=
 {:
   AST_LIST<AST_STMT> node = new AST_LIST<AST_STMT>(null,AST_STMT.class);
-  node.setLineNumber(lexer.getLine());
+  node.setLineNumber(0);
   RESULT = node;
 :}
 | stmt:s stmt_list:sl
