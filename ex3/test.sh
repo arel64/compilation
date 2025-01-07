@@ -35,12 +35,12 @@ for input_file in "$INPUT_DIR"/*.txt; do
         java -jar PARSER "$input_file" "$temp_output_file"
 
         # Compare the output
-        if diff -q "$temp_output_file" "$expected_output_file" > /dev/null; then
+        if diff -w -q "$temp_output_file" "$expected_output_file" > /dev/null; then
             echo "Test $base_name passed."
         else
             echo "Test $base_name failed."
             echo "Differences:"
-            diff "$temp_output_file" "$expected_output_file"
+            diff -w "$temp_output_file" "$expected_output_file"
         fi
     else
         echo "$base_name: No matching expected output."

@@ -21,11 +21,11 @@ public class AST_TYPE extends AST_Node
 			return TYPE_STRING.getInstance();
 		if (type == "void")
 			return TYPE_VOID.getInstance();
-		//if we got to here, type is id:
+			
 		TYPE curr = SYMBOL_TABLE.getInstance().find(type);
         if (curr == null)
         {
-           throw new SemanticException(lineNumber,"The type does not exist." );
+           throw new SemanticException(lineNumber,"The type does not exist."+ toString() );
         }
         return curr;
 	}

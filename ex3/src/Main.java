@@ -47,7 +47,7 @@ public class Main
 				AST = (AST_PROGRAM) p.parse().value;
 				AST.PrintMe();
 				AST.SemantMeLog();
-				file_writer.write("OK\n");
+				file_writer.write("OK");
 			}
 			catch(LexerError e)
 			{
@@ -57,7 +57,7 @@ public class Main
 			catch(SemanticException e)
 			{
 				e.printStackTrace();
-				file_writer.write("ERROR(" + (e.lineNumber-1) + ")\n");
+				file_writer.write("ERROR(" + (e.lineNumber) + ")\n");
 			}
 			catch(Exception e)
 			{

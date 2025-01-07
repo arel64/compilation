@@ -9,9 +9,4 @@ public abstract class AST_CLASS_FIELDS_DEC extends AST_DEC {
     {
         super(name);
     }
-    @Override
-    public TYPE_CLASS_VAR_DEC SemantMe() throws SemanticException {
-        // TODO Auto-generated method stub
-        return null;
-    }
 }

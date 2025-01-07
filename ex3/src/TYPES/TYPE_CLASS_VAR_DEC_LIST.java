@@ -7,7 +7,6 @@ import java.util.Set;
 
 import AST.AST_CLASS_FIELDS_DEC;
 import AST.AST_LIST;
-import AST.AST_FUNC_DEC;
 import SYMBOL_TABLE.SYMBOL_TABLE;
 import SYMBOL_TABLE.SemanticException;
 
@@ -22,7 +21,7 @@ public class TYPE_CLASS_VAR_DEC_LIST implements Iterable<TYPE_CLASS_VAR_DEC>
 		for(AST_CLASS_FIELDS_DEC declaration : declarationList)
 		{
 			
-			TYPE_CLASS_VAR_DEC currentDeclaration = declaration.SemantMe();
+			TYPE_CLASS_VAR_DEC currentDeclaration = (TYPE_CLASS_VAR_DEC)declaration.SemantMeLog();
 			if(definedNames.contains(currentDeclaration.name))
 			{
 				throw new SemanticException(declarationList.lineNumber,"Multiple fields with the same name in function");

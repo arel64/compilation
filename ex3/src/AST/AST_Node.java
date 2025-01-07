@@ -34,7 +34,7 @@ public abstract class AST_Node
 		SYMBOL_TABLE instance = SYMBOL_TABLE.getInstance(); 
 		AST_GRAPHVIZ.getInstance().metadataNode(
 			SerialNumber,
-			String.format("Scope Level %s Type name: %S myClass %s",instance.getCurrentScopeIndex(),myTypeName,myTypeClassName)
+			String.format("Scope Level %s Type name: %s myClass %s linen:%s",instance.getCurrentScopeIndex(),myTypeName,myTypeClassName,lineNumber)
 		);	
 	}
 	public abstract TYPE SemantMe() throws SemanticException;

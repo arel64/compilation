@@ -1,4 +1,5 @@
 package AST;
+import SYMBOL_TABLE.SYMBOL_TABLE;
 import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
 
@@ -28,16 +29,17 @@ public class AST_VAR_DEC extends AST_CLASS_FIELDS_DEC {
     }
     @Override
     public TYPE_CLASS_VAR_DEC SemantMe() throws SemanticException{
-        TYPE type = varType.SemantMe();
+        TYPE type = varType.SemantMeLog();
         if(varValue == null)
         {
             return new TYPE_CLASS_VAR_DEC(type,this.getName(),lineNumber);
         }
-        TYPE valueType = varValue.SemantMe();
+        TYPE valueType = varValue.SemantMeLog();
         if(type != valueType)
         {
             throw new SemanticException(lineNumber,"VAR DEC MISMATCH TYPE");
         }
-        return null;
+        SYMBOL_TABLE.getInstance().enter(getName(), valueType);
+        return new TYPE_CLASS_VAR_DEC(valueType, getName(), lineNumber);
     }
 }

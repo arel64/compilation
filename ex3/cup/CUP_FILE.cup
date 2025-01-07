@@ -11,8 +11,7 @@ parser code {:
   }
   public void report_error(String message, Object info)
   {
-    if (errorLine == -1)
-    {
+    if (errorLine == -1){
       errorLine = lexer.getLine();
     }
   }
