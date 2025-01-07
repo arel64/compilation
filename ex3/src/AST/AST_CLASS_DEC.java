@@ -46,15 +46,15 @@ public class AST_CLASS_DEC extends AST_DEC {
     @Override
 	public TYPE SemantMe() throws SemanticException{
 		SYMBOL_TABLE symbol_table = SYMBOL_TABLE.getInstance();
-
 		if (!symbol_table.isAtGlobalScope()){
 			throw new SemanticException(lineNumber,"Scope mismatch found scope:" +symbol_table.getCurrentScopeIndex());
 		}
 		if(!isParentClassValid())
         {
+			System.out.println(lineNumber);
             throw new SemanticException(lineNumber,"Specified extends class "+ parentClassName+" not found");
         }
-		TYPE_CLASS currentClass = new TYPE_CLASS(parentClassName, this.getName(),new TYPE_CLASS_VAR_DEC_LIST(this.fields),lineNumber);
+		TYPE_CLASS currentClass = new TYPE_CLASS(parentClassName, this.getName(),lineNumber);
         symbol_table.enter(currentClass.name,currentClass);
 		return currentClass;  
 	}

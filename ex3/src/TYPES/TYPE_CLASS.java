@@ -15,37 +15,31 @@ public class TYPE_CLASS extends TYPE
 	/* Note that data members coming from the AST are */
 	/* packed together with the class methods         */
 	/**************************************************/
-	public TYPE_CLASS_VAR_DEC_LIST data_members;
 	public int line;
 	
 	/****************/
 	/* CTROR(S) ... */
 	/**
 	 * @throws SemanticException **************/
-	public TYPE_CLASS(TYPE_CLASS father,String name,TYPE_CLASS_VAR_DEC_LIST data_members,int line) throws SemanticException
+	public TYPE_CLASS(TYPE_CLASS father,String name, int line) throws SemanticException
 	{
-		this((TYPE)father, name, data_members,line);
+		this((TYPE)father, name,line);
 	}
-	public TYPE_CLASS(String father,String name,TYPE_CLASS_VAR_DEC_LIST data_members,int line) throws SemanticException
+	public TYPE_CLASS(String father,String name,int line) throws SemanticException
 	{
-		this(SYMBOL_TABLE.getInstance().find(father),name,data_members,line);
+		this(SYMBOL_TABLE.getInstance().find(father),name,line);
 	}
-	private TYPE_CLASS(TYPE father, String name, TYPE_CLASS_VAR_DEC_LIST data_members,int line) throws SemanticException
+	private TYPE_CLASS(TYPE father, String name,int line) throws SemanticException
 	{
+		//achinoam
 		if(father!=null && !(father instanceof TYPE_CLASS))
 		{
 			throw new SemanticException(line,String.format("Cannot extends non class type %s",father));
 		}
 		this.name = name;
-		this.data_members = data_members;
-		/**
-		 * Verify no overloading, shadow varriables
-		 */
 		if ( father != null)
 		{
-			this.father = (TYPE_CLASS)father;
-			checkForShadowing(data_members, this.father);
-			data_members.extending(((TYPE_CLASS)father).data_members);		
+			this.father = (TYPE_CLASS)father;		
 		}
 	}
 	@Override
@@ -100,43 +94,6 @@ public class TYPE_CLASS extends TYPE
 	@Override
 	public String toString() {
 		return String.format("Father: %s Name: %s",father,name);
-	}
-
-	private void checkForShadowing(TYPE_CLASS_VAR_DEC_LIST currentDataMembers, TYPE_CLASS father) throws SemanticException
-	{
-		while (father != null)
-		{
-			TYPE_CLASS_VAR_DEC_LIST ancestorDataMembers = father.data_members;
-			for (TYPE_CLASS_VAR_DEC currentMember : currentDataMembers)
-			{
-				for (TYPE_CLASS_VAR_DEC ancestorMember : ancestorDataMembers)
-				{
-					if (currentMember.name.equals(ancestorMember.name))
-					{
-						// System.out.println(currentMember);
-						// System.out.println(currentMember.t);
-						// System.out.println("why is this not a funciton for god  "+currentMember.isFunction());
-
-						// System.out.println("this is the print from the function check shadow");
-
-						if (currentMember.isFunction() && ancestorMember.isFunction())  //overriding is ok
-							continue;
-						if (!currentMember.isFunction() && !ancestorMember.isFunction())
-						{
-							throw new SemanticException(currentMember.line,String.format(
-								"Shadowing detected: Variable '%s' in class '%s' shadows variable in ancestor class '%s'.",
-								currentMember.name, this.name, father.name
-							));
-						}
-						throw new SemanticException(currentMember.line,String.format(
-							"Conflict detected: '%s' in class '%s' conflicts with '%s' in ancestor class '%s'.",
-							currentMember.name, this.name, ancestorMember.name, father.name
-						));
-					}
-				}
-			}
-			father = father.father;
-		}
 	}
 
 }

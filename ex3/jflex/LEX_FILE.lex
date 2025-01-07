@@ -59,7 +59,7 @@ import java_cup.runtime.*;
 	/*******************************************/
 	/* Enable line number extraction from main */
 	/*******************************************/
-	public int getLine() { return yyline + 1; } 
+	public int getLine() { return yyline; } 
 
 	/**********************************************/
 	/* Enable token position extraction from main */
@@ -75,7 +75,7 @@ import java_cup.runtime.*;
 			throw new RuntimeException("Out of bounds integer");
 		}
         int value = Integer.parseInt(representation);
-		if (value >= 0 && value <= 32767) {
+		if (value >= -32768 && value <= 32767) {
             return value;
         } 
 		throw new RuntimeException("Out of bounds integer");
