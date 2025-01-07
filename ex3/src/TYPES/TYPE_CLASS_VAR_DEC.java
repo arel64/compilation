@@ -16,8 +16,7 @@ public class TYPE_CLASS_VAR_DEC extends TYPE
 		return String.format("CLASS VAR DEC %s %s",t,name);
 	}
 	public boolean isFunction() {
-		System.out.println(name +" " + " " + t.toString());
-		return this.t instanceof TYPE_FUNCTION;
+		return this instanceof TYPE_FUNCTION;
 	}
 
 }

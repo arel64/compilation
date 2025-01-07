@@ -1,6 +1,8 @@
 package AST;
 import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
+import SYMBOL_TABLE.SYMBOL_TABLE;
+import SYMBOL_TABLE.SemanticException;
 
 public class AST_FUNC_DEC extends AST_CLASS_FIELDS_DEC {
     
@@ -49,7 +51,9 @@ public class AST_FUNC_DEC extends AST_CLASS_FIELDS_DEC {
         }
 
         TYPE_FUNCTION t = new TYPE_FUNCTION(returnT, name, paramTypes,lineNumber);
-        System.out.println(t + " " + returnT.name + " " + name + "-----------------------");
+
+        // SYMBOL_TABLE.getInstance().enter(name, t);
+        // System.out.println(t + "-----------------------");
         return t;
 
     }

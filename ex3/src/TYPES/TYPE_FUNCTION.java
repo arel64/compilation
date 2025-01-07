@@ -1,4 +1,6 @@
 package TYPES;
+import SYMBOL_TABLE.SYMBOL_TABLE;
+import SYMBOL_TABLE.SemanticException;
 
 public class TYPE_FUNCTION extends TYPE_CLASS_VAR_DEC
 {

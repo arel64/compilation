@@ -113,7 +113,12 @@ public class TYPE_CLASS extends TYPE
 				{
 					if (currentMember.name.equals(ancestorMember.name))
 					{
-						System.out.println(currentMember);
+						// System.out.println(currentMember);
+						// System.out.println(currentMember.t);
+						// System.out.println("why is this not a funciton for god  "+currentMember.isFunction());
+
+						// System.out.println("this is the print from the function check shadow");
+
 						if (currentMember.isFunction() && ancestorMember.isFunction())  //overriding is ok
 							continue;
 						if (!currentMember.isFunction() && !ancestorMember.isFunction())
