@@ -28,7 +28,7 @@ public abstract class AST_Node
 		String myTypeClassName ="";
 		if(myType != null)
 		{
-			myTypeName = myType.name;
+			myTypeName = myType.getName();
 			myTypeClassName = (myType.getClass()).toGenericString();
 		}
 		SYMBOL_TABLE instance = SYMBOL_TABLE.getInstance(); 

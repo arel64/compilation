@@ -26,7 +26,7 @@ public class AST_ARRAY_TYPEDEF extends AST_DEC {
 		if (!symbol_table.isAtGlobalScope()){
 			throw new SemanticException(lineNumber,"Scope mismatch found scope:" +  symbol_table.getCurrentScopeIndex());
 		}
-        TYPE_ARRAY arrayType = new TYPE_ARRAY(baseType.SemantMeLog());
+        TYPE_ARRAY arrayType = new TYPE_ARRAY(baseType.SemantMeLog(),this.getName());
         if (arrayType.isVoid()){
             throw new SemanticException(lineNumber,"Array of type void" +this.getName());
         }

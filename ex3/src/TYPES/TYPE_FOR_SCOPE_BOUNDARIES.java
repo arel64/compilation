@@ -1,5 +1,7 @@
 package TYPES;
 
+import SYMBOL_TABLE.SemanticException;
+
 public class TYPE_FOR_SCOPE_BOUNDARIES extends TYPE
 {
 	/****************/
@@ -7,6 +9,11 @@ public class TYPE_FOR_SCOPE_BOUNDARIES extends TYPE
 	/****************/
 	public TYPE_FOR_SCOPE_BOUNDARIES(String name)
 	{
-		this.name = name;
+		super(name);
+	}
+
+	@Override
+	public boolean isAssignable(TYPE other) throws SemanticException {
+		throw new UnsupportedOperationException("Unimplemented method 'isAssignable'");
 	}
 }

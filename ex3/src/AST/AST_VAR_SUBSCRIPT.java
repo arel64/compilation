@@ -30,7 +30,22 @@ public class AST_VAR_SUBSCRIPT extends AST_VAR
 
 	@Override
 	public TYPE SemantMe() throws SemanticException {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Unimplemented method 'SemantMe'");
+
+		TYPE varType = this.var.SemantMeLog();
+		if(!varType.isArray())
+		{
+			throw new SemanticException(lineNumber, String.format("%s is not subscriptable", varType));
+		}
+		TYPE_ARRAY vArray = (TYPE_ARRAY)varType;
+		TYPE subscriptType = subscript.SemantMeLog();
+		if(!(subscriptType instanceof TYPE_INT))
+		{
+			throw new SemanticException(lineNumber, String.format("subscriptable must be integral type, got ", subscriptType));
+		}
+		if(subscript instanceof AST_LIT_NUMBER && ((AST_LIT_NUMBER)subscript).val < 0)
+		{
+			throw new SemanticException(lineNumber, String.format("subscriptable must be gt 0 got ", ((AST_LIT_NUMBER)subscript).val));
+		}
+		return vArray.t;
 	}
 }

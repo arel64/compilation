@@ -24,8 +24,9 @@ public class AST_NEW_EXP extends AST_EXP {
 
     @Override
     public TYPE SemantMe() throws SemanticException{
+        TYPE myType = type.SemantMeLog();
         if (exp == null) {
-            return null;
+            return myType;
         }
         TYPE expType = exp.SemantMe();
         if (expType != TYPE_INT.getInstance()){
@@ -40,6 +41,6 @@ public class AST_NEW_EXP extends AST_EXP {
             if (value <= 0)
                throw new SemanticException(lineNumber,"LEN<=0 for array length");
         }
-        return type.SemantMe();
+        return myType;
     }
 }

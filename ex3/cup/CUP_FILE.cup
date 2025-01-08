@@ -323,7 +323,7 @@ var ::= ID:i
 :}
 | var:v DOT:d ID:i
 {:
-  AST_VAR_FIELD node = new AST_VAR_FIELD(v, i);
+  AST_VAR_FIELD_INVOCATION node = new AST_VAR_FIELD_INVOCATION(v, i);
   node.setLineNumber(ileft);
   RESULT = node;
 :}
@@ -371,7 +371,7 @@ exp ::= var:v
 :}
 | NIL:ns
 {:
-  AST_LIT_STRING node = new AST_LIT_STRING("NIL");
+  AST_LIT_NIL node = new AST_LIT_NIL();
   node.setLineNumber(nsleft);
   RESULT = node;
 :}
@@ -473,11 +473,12 @@ stmt ::= varDec:v
 
 stmt_list ::=
 {:
+
   AST_LIST<AST_STMT> node = new AST_LIST<AST_STMT>(null,AST_STMT.class);
   node.setLineNumber(0);
   RESULT = node;
 :}
-| stmt:s stmt_list:sl
+| stmt_list:sl stmt:s
 {:
   sl.add(s);
   RESULT = sl;

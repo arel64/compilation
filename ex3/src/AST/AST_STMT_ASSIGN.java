@@ -38,6 +38,10 @@ public class AST_STMT_ASSIGN extends AST_STMT
 	public TYPE SemantMe() throws SemanticException {
 		TYPE expType = exp.SemantMe();
 		TYPE varType = var.SemantMe();
+		if(expType instanceof TYPE_NIL && (varType.isArray() || varType.isClass()))
+		{
+			return varType;
+		}
 		if(expType.isClass() && varType.isClass())
 		{
 			TYPE_CLASS classExpr = (TYPE_CLASS)expType;
@@ -49,10 +53,7 @@ public class AST_STMT_ASSIGN extends AST_STMT
 			String sharedType = classVar.getSharedType(classExpr);
 			return SYMBOL_TABLE.getInstance().find(sharedType);
 		}
-		if(expType instanceof TYPE_NIL)
-		{
-			//TODO:: NIL HANDELING
-		}
+		
 		if(expType != varType)
 		{
 			throw new SemanticException(lineNumber,String.format("Cannot assign incompatible types %s %s",expType,varType));

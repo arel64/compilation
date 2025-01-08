@@ -1,12 +1,14 @@
 package TYPES;
 
+import SYMBOL_TABLE.SemanticException;
+
 public class TYPE_NIL extends TYPE{
     private static TYPE_NIL instance = null;
 
 	/*****************************/
 	/* PREVENT INSTANTIATION ... */
 	/*****************************/
-	protected TYPE_NIL() {}
+	protected TYPE_NIL() {super("nil");}
 
 	/******************************/
 	/* GET SINGLETON INSTANCE ... */
@@ -16,16 +18,11 @@ public class TYPE_NIL extends TYPE{
 		if (instance == null)
 		{
 			instance = new TYPE_NIL();
-			instance.name = "nil";
 		}
 		return instance;
 	}
-    @Override
-    public boolean isClass() {
-        return true;
-    }
-    @Override
-    public boolean isArray() {
-        return true;
-    }
+	@Override
+	public boolean isAssignable(TYPE other) throws SemanticException {
+		return false;
+	}
 }

@@ -108,9 +108,10 @@ public class AST_LIST<T extends AST_Node> extends AST_Node implements Iterable<T
                 throw new SemanticException(lineNumber,"null arg");
             try{
                 TYPE t = node.SemantMeLog();
-                if(t!= null)
+                if(t != null)
                 {
-                    instance.enter(t.name, t);
+                    System.out.println(String.format("%s %s %s", t,t.getName(),t.getClass()));
+                    instance.enter(t.getName(), t);
                 }
             }
             catch(SemanticException e)

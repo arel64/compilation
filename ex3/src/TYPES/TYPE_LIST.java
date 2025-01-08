@@ -35,14 +35,36 @@ public class TYPE_LIST
 			}
 		}
 	}
+	public TYPE get(int i)
+	{
 
+		if(i ==0)
+		{
+			return head;
+		}
+		if( head == null)
+		{
+			return null;
+		}
+		return get(i-1);
+
+	}
 	public TYPE_LIST(TYPE head,TYPE_LIST tail)
 	{
 		this.head = head;
 		this.tail = tail;
 	}
 	public boolean equals(TYPE_LIST obj) {
-		return this.head == obj.head && tail.equals(obj); 
+		System.out.printf("list eq %s %s %s \n", this.head,obj.head,this.head.equals( obj.head));
+		if(tail == null)
+		{
+			return this.head .equals( obj.head) && obj.tail == null;
+		}
+		return this.head .equals(  obj.head) && tail.equals(obj); 
+	}
+	@Override
+	public String toString() {
+		return String.format("%s %s",head,tail);
 	}
 
 }

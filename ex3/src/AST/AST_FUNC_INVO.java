@@ -57,17 +57,21 @@ public class AST_FUNC_INVO extends AST_EXP {
             throw new SemanticException(lineNumber,String.format("%s cannot be used like a function", funcName));
         }
         TYPE_FUNCTION myFunctionType = (TYPE_FUNCTION)symbol;
+
         table.beginScope();
         if(params != null)
         {
-            params.SemantMeLog();
+            for(int i = 0 ; i < params.size() ;i ++)
+            {
+                TYPE expType = params.at(i).SemantMeLog();
+                TYPE param = myFunctionType.getParam(i);
+                if(!param.isAssignable(expType))
+                {
+                    throw new SemanticException(lineNumber,String.format("incorrect function %s invocation for location %s param %s", funcName, param,expType));
+                }
+            }
         }
         table.endScope();
-        //TODO::
-        //two cases one for invoc in class (x.()) and one for regular function call
-        //check if v has this function id in the scope of the class
-        //check for each e in the param list if the type returned is like what we want 
-        //return the type returned and check if it is what we declared 
         
         return myFunctionType;
 

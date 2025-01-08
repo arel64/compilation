@@ -1,5 +1,7 @@
 package TYPES;
 
+import SYMBOL_TABLE.SemanticException;
+
 public class TYPE_VOID extends TYPE
 {
 	/**************************************/
@@ -10,7 +12,7 @@ public class TYPE_VOID extends TYPE
 	/*****************************/
 	/* PREVENT INSTANTIATION ... */
 	/*****************************/
-	protected TYPE_VOID() {}
+	protected TYPE_VOID() {super("void");}
 
 	/******************************/
 	/* GET SINGLETON INSTANCE ... */
@@ -26,5 +28,14 @@ public class TYPE_VOID extends TYPE
 	@Override
 	public boolean isVoid() {
 		return true;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		return obj instanceof TYPE_VOID;
+	}
+	@Override
+	public boolean isAssignable(TYPE other) throws SemanticException {
+		return false;
 	}
 }

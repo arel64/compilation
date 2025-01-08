@@ -1,4 +1,7 @@
 package AST;
+import java.util.ArrayList;
+import java.util.List;
+
 import SYMBOL_TABLE.SYMBOL_TABLE;
 import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
@@ -55,13 +58,20 @@ public class AST_CLASS_DEC extends AST_DEC {
         {
             throw new SemanticException(lineNumber,"Specified extends class "+ parentClassName+" not found " + getName());
         }
+        TYPE_CLASS father = (TYPE_CLASS)symbol_table.getTypeInGlobalScope(parentClassName);
 		TYPE_CLASS currentClass = new TYPE_CLASS(parentClassName, this.getName(),lineNumber);
-        SYMBOL_TABLE.getInstance().enter(getName(),currentClass);
+        SYMBOL_TABLE.getInstance().enter(getName(),currentClass);        
         symbol_table.beginScope();
-        /**** Add to scope all fields ***/
-        /** Using isoverriding and *some* of extend */
-        fields.SemantMeLog();
+        TYPE_CLASS_VAR_DEC_LIST declist = new TYPE_CLASS_VAR_DEC_LIST(fields);
+        System.out.println(declist);
         symbol_table.endScope();
+        if(father != null)
+        {
+            System.out.println(String.format("Extending : %s", declist));
+            declist.extendAll(father.getDataMembers());
+        }
+        currentClass.setDataMembers(declist);
+        System.out.println(String.format("Set datamembers for %s %s", currentClass.getName(),declist));
 		return currentClass;  
 	}
     // private void checkForShadowing(TYPE_CLASS_VAR_DEC_LIST currentDataMembers, TYPE_CLASS father) throws SemanticException
@@ -75,12 +85,6 @@ public class AST_CLASS_DEC extends AST_DEC {
 	// 			{
 	// 				if (currentMember.name.equals(ancestorMember.name))
 	// 				{
-	// 					// System.out.println(currentMember);
-	// 					// System.out.println(currentMember.t);
-	// 					// System.out.println("why is this not a funciton for god  "+currentMember.isFunction());
-
-	// 					// System.out.println("this is the print from the function check shadow");
-
 	// 					if (currentMember.isFunction() && ancestorMember.isFunction())  //overriding is ok
 	// 						continue;
 	// 					if (!currentMember.isFunction() && !ancestorMember.isFunction())

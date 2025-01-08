@@ -28,18 +28,28 @@ public class AST_VAR_DEC extends AST_CLASS_FIELDS_DEC {
         return varType.toString()+ " "+getName() + (varValue != null ? "="+varValue:"");
     }
     @Override
-    public TYPE_CLASS_VAR_DEC SemantMe() throws SemanticException{
+    public TYPE SemantMe() throws SemanticException{
         TYPE type = varType.SemantMeLog();
-        if(varValue == null)
+        SYMBOL_TABLE.getInstance().enter(getName(), type);
+        if( varValue == null)
         {
-            return new TYPE_CLASS_VAR_DEC(type,this.getName(),lineNumber);
+            return type;    
         }
         TYPE valueType = varValue.SemantMeLog();
-        if(type != valueType)
+        System.out.printf("comparing %s %s \n" ,valueType,type);
+        if(type.isArray())
         {
-            throw new SemanticException(lineNumber,"VAR DEC MISMATCH TYPE");
+            TYPE_ARRAY ltype = (TYPE_ARRAY)type;
+            if(!ltype.t.equals(valueType))
+            {
+                throw new SemanticException(lineNumber,String.format("Cannot allocate array %s with mismatch type %s", ltype,valueType));    
+            }
+            return ltype;
         }
-        SYMBOL_TABLE.getInstance().enter(getName(), valueType);
-        return new TYPE_CLASS_VAR_DEC(valueType, getName(), lineNumber);
+        if(!type.isAssignable(valueType))
+        {
+            throw new SemanticException(lineNumber,String.format("Initial value %s does not match type %s", valueType,type));
+        }
+        return type;
     }
 }

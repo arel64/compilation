@@ -1,5 +1,10 @@
 package TYPES;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.print.attribute.standard.MediaSize.Other;
+
 import SYMBOL_TABLE.SYMBOL_TABLE;
 import SYMBOL_TABLE.SemanticException;
 
@@ -9,6 +14,7 @@ public class TYPE_CLASS extends TYPE
 	/* If this class does not extend a father class this should be null  */
 	/*********************************************************************/
 	public TYPE_CLASS father;
+	private TYPE_CLASS_VAR_DEC_LIST memberList;
 
 	/**************************************************/
 	/* Gather up all data members in one place        */
@@ -31,12 +37,11 @@ public class TYPE_CLASS extends TYPE
 	}
 	private TYPE_CLASS(TYPE father, String name, int line) throws SemanticException
 	{
+		super(name);
 		if(father!=null && !(father instanceof TYPE_CLASS))
 		{
 			throw new SemanticException(line,String.format("Cannot extends non class type %s",father));
 		}
-
-		this.name = name;
 		if ( father != null)
 		{
 			this.father = (TYPE_CLASS) father;
@@ -56,7 +61,7 @@ public class TYPE_CLASS extends TYPE
 		TYPE_CLASS iterator = this;
 		while(iterator != null)
 		{
-			if(iterator.name == sharedType)
+			if(iterator.getName() == sharedType)
 			{
 				return true;
 			}
@@ -71,31 +76,62 @@ public class TYPE_CLASS extends TYPE
 			return null;
 		}
 		SYMBOL_TABLE table = SYMBOL_TABLE.getInstance();
-		if(!table.exists(this.name) || !table.exists(other.name))
+		if(!table.exists(this.getName()) || !table.exists(other.getName()))
 		{
-			throw new SemanticException(line,"Shared check between inexistant classes" + this.name +" "+ other.name);
+			throw new SemanticException(line,"Shared check between inexistant classes" + this.getName() +" "+ other.getName());
 		}
-		if(this.name == other.name)
+		if(getName() == other.getName())
 		{
-			return this.name;
+			return getName();
 		}
-		String otherFatherShared = getSharedType(other.father);
-		String myFatherShared = getSharedType(father);
-		//Impies cycle in inheritence
-		assert(!(otherFatherShared != null && myFatherShared != null));
-		if(myFatherShared == null)
+		TYPE_CLASS t1 = this;
+		Set<TYPE_CLASS> ancestors = new HashSet<>();
+		while(t1 != null)
 		{
-			return otherFatherShared;
+			ancestors.add(t1);
+			t1 = t1.father;
 		}
-		return myFatherShared;
+		TYPE_CLASS t2 = other;
+		while(t2 != null)
+		{
+			if(ancestors.contains(t2))
+			{
+				return t2.getName();
+			}
+			t2 = t2.father;
+		}
+		return null;
 		
 	}
 
 	@Override
 	public String toString() {
-	 	return String.format("Father: %s Name: %s",father,name);
+	 	return String.format("Father: %s Name: %s",father,getName());
 	}
+	public void setDataMembers(TYPE_CLASS_VAR_DEC_LIST memberList)
+	{		
+		this.memberList = memberList;
+	}
+	public TYPE_CLASS_VAR_DEC_LIST getDataMembers()
+	{
+		return this.memberList;
+	}
+	public TYPE_CLASS_VAR_DEC getDataMember(String name)
+	{
+		for(TYPE_CLASS_VAR_DEC member : memberList)
+		{
+			if(member.getName().equals(name))
+			{
+				return member;
+			}
+		}
+		return null;
 
+	}
+	@Override
+	public boolean isAssignable(TYPE other) throws SemanticException {
+		return other instanceof TYPE_NIL || (other instanceof TYPE_CLASS && ((TYPE_CLASS)other).isDerivedFrom(this));
+	}
 	
 
 }

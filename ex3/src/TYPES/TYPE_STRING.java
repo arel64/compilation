@@ -1,5 +1,7 @@
 package TYPES;
 
+import SYMBOL_TABLE.SemanticException;
+
 public class TYPE_STRING extends TYPE
 {
 	/**************************************/
@@ -10,7 +12,7 @@ public class TYPE_STRING extends TYPE
 	/*****************************/
 	/* PREVENT INSTANTIATION ... */
 	/*****************************/
-	protected TYPE_STRING() {}
+	protected TYPE_STRING() {super("string");}
 
 	/******************************/
 	/* GET SINGLETON INSTANCE ... */
@@ -20,7 +22,6 @@ public class TYPE_STRING extends TYPE
 		if (instance == null)
 		{
 			instance = new TYPE_STRING();
-			instance.name = "string";
 		}
 		return instance;
 	}
@@ -28,5 +29,14 @@ public class TYPE_STRING extends TYPE
 	@Override
 	public String toString() {
 		return "TYPE_STRING";
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		return obj instanceof TYPE_STRING;
+	}
+	@Override
+	public boolean isAssignable(TYPE other) throws SemanticException {
+		return other instanceof TYPE_STRING;
 	}
 }

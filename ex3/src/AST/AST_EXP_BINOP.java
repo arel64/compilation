@@ -1,7 +1,6 @@
 package AST;
 import TYPES.*;
 import AST.AST_BINOP.Operation;
-import SYMBOL_TABLE.SYMBOL_TABLE;
 import SYMBOL_TABLE.SemanticException;
 
 
@@ -44,51 +43,37 @@ public class AST_EXP_BINOP extends AST_EXP
 	public String toString() {
 		return left.toString()+binop.toString()+right.toString();
 	}
-	private boolean isSameType()
-	{
-		return left.equals(right);
-	}
-	private boolean isDerivedType() throws SemanticException
-	{
-		TYPE leftType = left.SemantMe();
-		TYPE rightType = right.SemantMe();
-		if (leftType == null || rightType == null){
-			throw new SemanticException(lineNumber,"null exp");
-		}
-		if(!(leftType.isClass() && rightType.isClass()))
-		{
-			return false;
-		}
-		TYPE_CLASS leftClass = (TYPE_CLASS)leftType;
-		TYPE_CLASS rightClass = (TYPE_CLASS)rightType;
-		return leftClass.getSharedType(rightClass) != null;
-	}
+
 	@Override
 	public TYPE SemantMe() throws SemanticException{
 		final Operation binopOperation = binop.operation;
+		TYPE leftType = left.SemantMe();
+		TYPE rightType = right.SemantMe();
 		if(binopOperation == Operation.EQUALS)
 		{
-			if(isSameType())
+			
+			if(leftType.equals(rightType))
 			{
-				return left.SemantMe();
+				return TYPE_INT.getInstance();
 			}
-			TYPE leftType = left.SemantMe();
-			TYPE rightType = right.SemantMe();
-			if(!(leftType.isClass() && rightType.isClass()))
+			
+			if(!(leftType.isClass() && (rightType.isClass() || rightType instanceof TYPE_NIL)))
 			{
 				throw new SemanticException(lineNumber,String.format("Cannot compare between %s and %s different types and are not classes",leftType,rightType));
 			}
 			TYPE_CLASS leftClass = (TYPE_CLASS)leftType;
+			if(rightType instanceof TYPE_NIL)
+			{
+				return TYPE_INT.getInstance();
+			}
 			TYPE_CLASS rightClass = (TYPE_CLASS)rightType;
-			String sharedClass = leftClass.getSharedType(rightClass);
-			if(sharedClass == null)
+			if(!rightClass.isDerivedFrom(leftClass))
 			{
 				throw new SemanticException(lineNumber,String.format("Cannot compare between %s and %s different types and are not derived",leftType,rightType));
 			}
-			return SYMBOL_TABLE.getInstance().find(sharedClass);
+			return TYPE_INT.getInstance();
 		}
-		TYPE leftType = left.SemantMe();
-		if (!isSameType())
+		if (!leftType.equals(rightType))
 		{
 			throw new SemanticException(lineNumber,"Cannot '" + binopOperation + "' for different types");
 		}

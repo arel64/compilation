@@ -211,7 +211,7 @@ public class SYMBOL_TABLE
 					fileWriter.format("node_%d_%d ",i,j);
 					fileWriter.format("[label=\"<f0>%s|<f1>%s|<f2>prevtop=%d|<f3>next\"];\n",
 						it.name,
-						it.type.name,
+						it.type.getName(),
 						it.prevtop_index);
 
 					if (it.next != null)
