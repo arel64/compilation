@@ -7,7 +7,7 @@ public class AST_CLASS_FIELDS_DEC extends AST_VAR_DEC {
 
     public AST_CLASS_FIELDS_DEC(AST_VAR_DEC v)
     {
-        super(v.getName(),v.varType,v.varValue);
+        super(v.getName(),v.t,v.varValue);
     }
     public AST_CLASS_FIELDS_DEC(String name, AST_TYPE t)
     {
@@ -16,7 +16,6 @@ public class AST_CLASS_FIELDS_DEC extends AST_VAR_DEC {
     @Override
     public TYPE SemantMe() throws SemanticException {
         TYPE myType = super.SemantMe();
-        System.out.println("bla" + myType +"duck " +varValue);
         if(varValue != null && !(this.varValue instanceof AST_LIT))
         {
             throw new SemanticException(lineNumber,String.format("cannot initialize field %s with non constant expr", getName()));

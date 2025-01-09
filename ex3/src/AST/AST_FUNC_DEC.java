@@ -54,30 +54,69 @@ public class AST_FUNC_DEC extends AST_CLASS_FIELDS_DEC {
         instance.enter(t.getName(),(TYPE)t);
         instance.beginScope();
 
-        List<TYPE> paramTypes= new ArrayList<>();
+        TYPE_LIST list =new TYPE_LIST();
         if (params != null) {
             for (AST_DEC param : params) {
                 TYPE paramType = param.SemantMe();
-                System.out.println();
                 if(paramType.isPrimitive())
                 {
                     paramType = new TYPE_VAR_DEC(paramType, param.getName());    
                 }
                 
-                System.out.println("Adding param + "+paramType);
                 instance.enter(paramType.getName(), paramType);
-                paramTypes.add(paramType);
+                list.add(paramType,param.lineNumber);
             }
         }
-        
-        t.setParams(new TYPE_LIST(paramTypes));
+        t.setParams(list);
         if(body == null)
         {
             return t;
         }
-        body.SemantMeLog();
+        for(AST_STMT statement : body)
+        {
+            TYPE statementType =null;
+            statementType = statement.SemantMe();
+            
+            
+            if(statement instanceof AST_STMT_RETURN)
+            {
+                validateReturnType((TYPE_RETURN)statementType,new TYPE_RETURN(returnT),statement.lineNumber);
+            }
+            if(statement instanceof AST_STMT_CONDITIONAL)
+            {
+                TYPE_LIST typeList = (TYPE_LIST)statementType;
+                validateTypeListReturnType(typeList,new TYPE_RETURN(returnT));
+            }
+            
+        }
         instance.endScope();
         return t;
+    }
+    private void validateReturnType(TYPE_RETURN statementType,TYPE_RETURN returnType,int lineNumber) throws SemanticException
+    {
+        if(!returnType.isAssignable(statementType))
+        {
 
+            throw new SemanticException(lineNumber,String.format("you cannot assign %s to %s and thus is invalid return type",statementType,returnType));
+        }
+    }
+    private void validateTypeListReturnType(TYPE_LIST list, TYPE_RETURN returnType)throws SemanticException
+    {
+        if(list == null)
+        {
+            return;
+        }
+        for(int i = 0 ; i < list.size() ; i ++)
+        {
+            TYPE innerStatementType = list.get(i);
+            if(innerStatementType instanceof TYPE_RETURN)
+            {
+                validateReturnType((TYPE_RETURN)innerStatementType,returnType,list.getLineNumber(i));
+            }
+            if( innerStatementType instanceof TYPE_LIST)
+            {
+                validateTypeListReturnType((TYPE_LIST)innerStatementType, returnType);
+            }
+        }
     }
 }

@@ -37,7 +37,6 @@ public class TYPE_STRING extends TYPE
 	}
 	@Override
 	public boolean isAssignable(TYPE other) throws SemanticException {
-		System.out.printf("HERE 6");
 		return other instanceof TYPE_STRING;
 	}
 	

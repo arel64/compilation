@@ -63,7 +63,6 @@ public class AST_CLASS_DEC extends AST_DEC {
         TYPE_CLASS father = (TYPE_CLASS)symbol_table.getTypeInGlobalScope(parentClassName);
 		TYPE_CLASS currentClass = new TYPE_CLASS(parentClassName, this.getName(),lineNumber);
         SYMBOL_TABLE.getInstance().enter(getName(),currentClass);       
-        System.out.println("Start new class");
         symbol_table.beginScope();
         TYPE_CLASS_VAR_DEC_LIST declist = new TYPE_CLASS_VAR_DEC_LIST(fields);
         if( father != null)

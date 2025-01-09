@@ -55,7 +55,6 @@ public class TYPE_FUNCTION extends TYPE_VAR_DEC
 	}
 	@Override
 	public boolean isAssignable(TYPE other) throws SemanticException {
-		System.out.printf("HERE3 ");
 		return false;
 	}
 	public TYPE getReturnType()

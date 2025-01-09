@@ -97,10 +97,11 @@ public class AST_LIST<T extends AST_Node> extends AST_Node implements Iterable<T
      * 
      */
     @Override
-    public TYPE SemantMe() throws SemanticException{
+    public TYPE_LIST SemantMe() throws SemanticException{
         if (this.list.isEmpty()) {
-            return null;
+            return new TYPE_LIST();
         }
+        TYPE_LIST typelist = new TYPE_LIST();
         SYMBOL_TABLE instance = SYMBOL_TABLE.getInstance(); 
         for (int i = 0; i < list.size(); i++) {
             T node = this.list.get(i);
@@ -111,6 +112,7 @@ public class AST_LIST<T extends AST_Node> extends AST_Node implements Iterable<T
                 if(t != null)
                 {
                     instance.enter(t.getName(), t);
+                    typelist.add(t,node.lineNumber);
                 }
             }
             catch(SemanticException e)
@@ -123,7 +125,7 @@ public class AST_LIST<T extends AST_Node> extends AST_Node implements Iterable<T
                 
             }
         }
-        return null;
+        return typelist;
     }
     @Override
     public Iterator<T> iterator() {

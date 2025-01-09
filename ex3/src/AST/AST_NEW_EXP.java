@@ -1,5 +1,4 @@
 package AST;
-import SYMBOL_TABLE.SYMBOL_TABLE;
 import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
 

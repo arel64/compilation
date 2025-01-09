@@ -36,7 +36,6 @@ public class TYPE_VOID extends TYPE
 	}
 	@Override
 	public boolean isAssignable(TYPE other){
-		System.out.printf("HERE 6");
 		return false;
 	}
 	

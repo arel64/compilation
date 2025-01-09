@@ -54,14 +54,16 @@ public class TYPE_CLASS extends TYPE
 	public boolean isDerivedFrom(TYPE_CLASS other) throws SemanticException
 	{
 		String sharedType = getSharedType(other);
+		System.out.printf("Finding shared type for me %s and other  \n" ,this,other);
 		if(sharedType == null)
 		{
 			return false;
 		}
 		TYPE_CLASS iterator = this;
+		System.out.println("Iterator:" + iterator);
 		while(iterator != null)
 		{
-			if(iterator.getName() == sharedType)
+			if(iterator.getName() == other.getName())
 			{
 				return true;
 			}
@@ -106,7 +108,7 @@ public class TYPE_CLASS extends TYPE
 
 	@Override
 	public String toString() {
-	 	return String.format("Father: %s Name: %s",father,getName());
+	 	return String.format("Name: %s",getName());
 	}
 	public TYPE_CLASS_VAR_DEC_LIST getDataMembers()
 	{
@@ -130,7 +132,6 @@ public class TYPE_CLASS extends TYPE
 	}
 	@Override
 	public boolean isAssignable(TYPE other) throws SemanticException {
-		System.out.printf("HERE 2");
 		return other instanceof TYPE_NIL || (other instanceof TYPE_CLASS && ((TYPE_CLASS)other).isDerivedFrom(this));
 	}
 	public void extend(TYPE_CLASS father) throws SemanticException

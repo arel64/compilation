@@ -23,6 +23,9 @@ public class AST_STMT_RETURN extends AST_STMT {
 
     @Override
     public TYPE SemantMe() throws SemanticException {
-        return exp.SemantMe();
+
+        TYPE t = exp.SemantMe();
+        return new TYPE_RETURN(t);
+        
     }
 }

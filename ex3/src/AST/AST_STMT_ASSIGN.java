@@ -38,7 +38,6 @@ public class AST_STMT_ASSIGN extends AST_STMT
 	public TYPE SemantMe() throws SemanticException {
 		TYPE expType = exp.SemantMe();
 		TYPE varType = var.SemantMe();
-		System.out.println(String.format("Vartype %s expr type %s", varType ,expType));
 		if(!varType.isInterchangeableWith(expType))
 		{
 			throw new SemanticException(lineNumber,String.format("Cannot assign incompatible types %s=%s",varType,expType));

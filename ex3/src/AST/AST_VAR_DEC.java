@@ -5,14 +5,14 @@ import TYPES.*;
 
 public class AST_VAR_DEC extends AST_DEC {
     
-    public AST_TYPE varType;
+    public AST_TYPE t;
     public AST_EXP varValue;
     public String varName;
 
     public AST_VAR_DEC(String varName, AST_TYPE varType, AST_EXP initialValue) {
         super(varName);
         this.varName = varName;
-        this.varType = varType;
+        this.t = varType;
         this.varValue = initialValue;
     
     }
@@ -28,7 +28,7 @@ public class AST_VAR_DEC extends AST_DEC {
     }
     @Override
     public String toString() {
-        return varType.toString()+ " "+getName() + (varValue != null ? "="+varValue:"");
+        return t.toString()+ " "+getName() + (varValue != null ? "="+varValue:"");
     }
 
     @Override
@@ -37,7 +37,7 @@ public class AST_VAR_DEC extends AST_DEC {
         {
             throw new SemanticException(lineNumber, String.format("Cannot declare %s was already declared in this scope", getName()));
         }
-        TYPE type = varType.SemantMeLog();
+        TYPE type = t.SemantMeLog();
         if(type.isPrimitive())
         {
             type = new TYPE_VAR_DEC(type,getName());

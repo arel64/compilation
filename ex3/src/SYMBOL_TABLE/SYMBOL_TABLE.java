@@ -275,23 +275,22 @@ public class SYMBOL_TABLE
 			/***************************************/
 			/* [3] Enter library function PrintInt */
 			/***************************************/
-			List<TYPE> types = new ArrayList<>();
-			types.add(new TYPE_VAR_DEC(TYPE_INT.getInstance(),"i"));
+			TYPE_LIST list = new TYPE_LIST();
+			list.add(new TYPE_VAR_DEC(TYPE_INT.getInstance(),"i"),-1);
 			instance.enter(
 				"PrintInt",
 				new TYPE_FUNCTION(
 					TYPE_VOID.getInstance(),
 					"PrintInt",
-					new TYPE_LIST(types), -1));
-			List<TYPE> types2 = new ArrayList<>();
-			types2.add(new TYPE_VAR_DEC(TYPE_STRING.getInstance(),"s"));					
+					list, -1));
+			list = new TYPE_LIST();
+			list.add(new TYPE_VAR_DEC(TYPE_STRING.getInstance(),"s"),-1);					
 			instance.enter(
 				"PrintString",
 				new TYPE_FUNCTION(
 					TYPE_VOID.getInstance(),
 					"PrintString",
-					new TYPE_LIST(
-						types2), -1));
+					list, -1));
 			
 		}
 		return instance;

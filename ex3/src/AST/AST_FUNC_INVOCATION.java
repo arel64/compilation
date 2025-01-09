@@ -46,8 +46,29 @@ public class AST_FUNC_INVOCATION extends AST_EXP {
     @Override
     public TYPE SemantMe() throws SemanticException{
         SYMBOL_TABLE table = SYMBOL_TABLE.getInstance();
-        TYPE functionType = table.find(funcName);
-        System.out.println(functionType);
+        
+        
+        TYPE varType = null;
+        if(var != null)
+        {
+            varType = var.SemantMe();
+        } 
+        if(varType!=null && !varType.isClass())
+        {
+            System.out.println(varType);
+            throw new SemanticException(lineNumber,String.format("%s does not exist and cannot be invoked", varType));
+        }
+        TYPE functionType = null;
+        if(varType == null)
+        {
+            functionType = table.find(funcName);
+        }
+        else
+        {
+            TYPE_CLASS varClass = (TYPE_CLASS)varType;
+            functionType = varClass.getDataMember(funcName).t;
+        }
+        
         if(functionType == null)
         {
             throw new SemanticException(lineNumber,String.format("%s does not exist and cannot be invoked", funcName));
@@ -62,7 +83,6 @@ public class AST_FUNC_INVOCATION extends AST_EXP {
         table.beginScope();
         if(params != null)
         {
-            System.out.println("siz1 "+ params.size() + " size2 "+myFunctionType.getParams().size());
             if(params.size() != myFunctionType.getParams().size())
             {
                 throw new SemanticException(lineNumber,String.format("incorrect function %s invocation, number of parameters", funcName));
@@ -71,7 +91,6 @@ public class AST_FUNC_INVOCATION extends AST_EXP {
             {
                 TYPE expType = params.at(i).SemantMeLog();
                 TYPE param = myFunctionType.getParam(i);
-                System.out.println(expType+ " sd " +param);
                 if(!param.isInterchangeableWith(expType))
                 {
                     throw new SemanticException(lineNumber,String.format("incorrect function %s invocation for value  param %s=%s ", funcName,param,expType));
