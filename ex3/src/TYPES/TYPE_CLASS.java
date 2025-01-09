@@ -120,7 +120,7 @@ public class TYPE_CLASS extends TYPE
 	{
 		for(TYPE_CLASS_FIELD member : memberList)
 		{
-			if(member.name.equals(name))
+			if(member.getName().equals(name))
 			{
 				return member;
 			}

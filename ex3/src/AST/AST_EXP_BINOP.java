@@ -76,9 +76,8 @@ public class AST_EXP_BINOP extends AST_EXP
 				return TYPE_INT.getInstance();
 			}
 
-			TYPE primitiveTypeLeft = (leftType instanceof TYPE_VAR_DEC) ?((TYPE_VAR_DEC)leftType).t : leftType;
-			TYPE primitiveTypeRight = (rightType instanceof TYPE_VAR_DEC) ?((TYPE_VAR_DEC)rightType).t : rightType;
-			if(primitiveTypeLeft.equals(primitiveTypeRight))
+			
+			if(leftType.isAssignable(rightType) || rightType.isAssignable(leftType))
 			{
 				return TYPE_INT.getInstance();
 			}
@@ -98,13 +97,11 @@ public class AST_EXP_BINOP extends AST_EXP
 			throw new SemanticException(lineNumber,String.format("Cannot %s between %s and %s",binopOperation,leftType,rightType));
 		}
 
-		TYPE primitiveTypeLeft = (leftType instanceof TYPE_VAR_DEC) ?((TYPE_VAR_DEC)leftType).t : leftType;
-		TYPE primitiveTypeRight = (rightType instanceof TYPE_VAR_DEC) ?((TYPE_VAR_DEC)rightType).t : rightType;
-		if(!primitiveTypeLeft.equals(primitiveTypeRight))
+		if(!(leftType.isAssignable(rightType) || rightType.isAssignable(leftType)))
 		{
 			throw new SemanticException(lineNumber,String.format("Cannot %s for different primitive types %s %s",binopOperation,leftType,rightType));
 		}
-		if(primitiveTypeLeft instanceof TYPE_STRING)
+		if(leftType.isAssignable(TYPE_STRING.getInstance()))
 		{
 			if( binopOperation != Operation.PLUS)
 			{
@@ -117,6 +114,10 @@ public class AST_EXP_BINOP extends AST_EXP
 				throw new SemanticException(lineNumber,"Division by zero");
 			}
 		}
-		return primitiveTypeLeft;
+		if(leftType.isPrimitive())
+		{
+			return TYPE_INT.getInstance();
+		}
+		return ((TYPE_WRAPPER)(leftType)).t;
 	}
 }

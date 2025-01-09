@@ -49,9 +49,9 @@ public class TYPE_CLASS_VAR_DEC_LIST implements Iterable<TYPE_CLASS_FIELD>
 		{
 			for (TYPE_CLASS_FIELD classAttribute : this.attributes)
 			{
-				String otherName = otherAttribute.name;
+				String otherName = otherAttribute.getName();
 				TYPE classAttributeType = classAttribute.t;
-				if(classAttribute.name.equals(otherName))
+				if(classAttribute.getName().equals(otherName))
 				{
 					if(!(classAttributeType instanceof TYPE_FUNCTION && otherAttribute.t instanceof TYPE_FUNCTION))
 					{
@@ -62,7 +62,7 @@ public class TYPE_CLASS_VAR_DEC_LIST implements Iterable<TYPE_CLASS_FIELD>
 						System.out.println("Line + "+otherAttribute.line);
 						throw new SemanticException(classAttribute.line,String.format("Extended function share the same name and type %s but are not overriding %s vs %s", classAttribute.t.getName(),classAttribute.t,otherAttribute.t));
 					}
-					overridenAttributes.add(classAttribute.name);
+					overridenAttributes.add(classAttribute.getName());
 				}
 			}
 		}
@@ -71,14 +71,14 @@ public class TYPE_CLASS_VAR_DEC_LIST implements Iterable<TYPE_CLASS_FIELD>
 		for(TYPE_CLASS_FIELD attribute :newAtrributes)
 		{
 			System.out.println("Adding to symbol tabel: "+ attribute);
-			if(!overridenAttributes.contains(attribute.name))
+			if(!overridenAttributes.contains(attribute.getName()))
 			{
-				SYMBOL_TABLE.getInstance().enter(attribute.name, attribute.t);
+				SYMBOL_TABLE.getInstance().enter(attribute.getName(), attribute.t);
 			}
 		}
 		for(TYPE_CLASS_FIELD attribute : other.attributes)
 		{
-			if(!overridenAttributes.contains(attribute.name))
+			if(!overridenAttributes.contains(attribute.getName()))
 			{
 				newAtrributes.add(attribute);
 			}

@@ -74,7 +74,7 @@ public class AST_FUNC_INVOCATION extends AST_EXP {
                 System.out.println(expType+ " sd " +param);
                 if(!param.isInterchangeableWith(expType))
                 {
-                    throw new SemanticException(lineNumber,String.format("incorrect function %s invocation for value %s to param %s", funcName, expType,param));
+                    throw new SemanticException(lineNumber,String.format("incorrect function %s invocation for value  param %s=%s ", funcName,param,expType));
                 }
             }
         }

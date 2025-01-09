@@ -4,22 +4,26 @@ import SYMBOL_TABLE.SemanticException;
 
 public abstract class TYPE_WRAPPER extends TYPE
 {
-	private String name;
-	public TYPE_WRAPPER(String name)
+	public TYPE t;
+	public TYPE_WRAPPER(String name,TYPE t)
 	{
 		super(name);
+		this.t = t;
 	}
 
-	public boolean isClass(){ return this instanceof TYPE_CLASS;}
-	public boolean isArray(){ return false;}
-	public boolean isFunction(){ return this instanceof TYPE_FUNCTION;}
-	public boolean isVoid() { return this instanceof TYPE_VOID;};
-	public String getName(){
-		return name;
-	}
-	public boolean isPrimitive(){ return false;}
-	public abstract boolean isAssignable(TYPE other)throws SemanticException;
-	public boolean isInterchangeableWith(TYPE other) throws SemanticException{ 
-		return isAssignable(other);
+	public boolean isAssignable(TYPE other) throws SemanticException
+	{
+		TYPE otherType = null;
+		if(other instanceof TYPE_WRAPPER)
+		{
+			otherType = ((TYPE_WRAPPER)other).t;
+			return t.isAssignable(otherType);
+		}
+		else if(other.isPrimitive())
+		{
+			return t.equals(other);
+		}
+		return false;
+
 	}
 }

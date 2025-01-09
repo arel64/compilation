@@ -1,4 +1,5 @@
 package AST;
+import SYMBOL_TABLE.SYMBOL_TABLE;
 import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
 
@@ -29,7 +30,7 @@ public class AST_VAR_SUBSCRIPT extends AST_VAR
 
 
 	@Override
-	public TYPE_ARRAY_SUBSCRIPT SemantMe() throws SemanticException {
+	public TYPE SemantMe() throws SemanticException {
 
 		TYPE varType = this.var.SemantMeLog();
 		if(!varType.isArray())
@@ -46,7 +47,12 @@ public class AST_VAR_SUBSCRIPT extends AST_VAR
 		{
 			throw new SemanticException(lineNumber, String.format("subscriptable must be gt 0 got ", ((AST_LIT_NUMBER)subscript).val));
 		}
-		System.out.println("Subscript "+ vArray + " " +subscriptType);
-		return new TYPE_ARRAY_SUBSCRIPT(vArray,subscriptType);
+		if(vArray.t.isPrimitive())
+		{
+			return new TYPE_ARRAY_SUBSCRIPT(vArray,subscriptType);
+		}
+		return vArray.t;
+
+		
 	}
 }

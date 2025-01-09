@@ -70,7 +70,7 @@ public class AST_CLASS_DEC extends AST_DEC {
         {
             for(TYPE_CLASS_FIELD field : father.getDataMembers())
             {
-                SYMBOL_TABLE.getInstance().enter(field.name, field.t);
+                SYMBOL_TABLE.getInstance().enter(field.getName(), field.t);
             }
         }
         currentClass.setDataMembers(declist);
