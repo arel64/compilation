@@ -2,12 +2,12 @@ package TYPES;
 
 import SYMBOL_TABLE.SemanticException;
 
-public abstract class TYPE
+public abstract class TYPE_WRAPPER extends TYPE
 {
 	private String name;
-	public TYPE(String name)
+	public TYPE_WRAPPER(String name)
 	{
-		this.name = name;
+		super(name);
 	}
 
 	public boolean isClass(){ return this instanceof TYPE_CLASS;}

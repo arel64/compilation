@@ -35,7 +35,13 @@ public class TYPE_VOID extends TYPE
 		return obj instanceof TYPE_VOID;
 	}
 	@Override
-	public boolean isAssignable(TYPE other) throws SemanticException {
+	public boolean isAssignable(TYPE other){
+		System.out.printf("HERE 6");
 		return false;
+	}
+	
+	@Override
+	public boolean isPrimitive() {
+		return true;
 	}
 }

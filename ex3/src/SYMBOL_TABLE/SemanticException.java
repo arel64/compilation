@@ -10,6 +10,6 @@ public class SemanticException extends Exception {
     @Override
     public void printStackTrace() {
         super.printStackTrace();
-        System.out.println(String.format("Line number %s", lineNumber + 1));
+        System.out.println("Line number "+lineNumber);
     }
 }

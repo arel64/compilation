@@ -15,14 +15,12 @@ public class TYPE_CLASS extends TYPE
 	/*********************************************************************/
 	public TYPE_CLASS father;
 	private TYPE_CLASS_VAR_DEC_LIST memberList;
-
+	public int line;
 	/**************************************************/
 	/* Gather up all data members in one place        */
 	/* Note that data members coming from the AST are */
 	/* packed together with the class methods         */
-	/**************************************************/
-	public int line;
-	
+	/**************************************************/	
 	/****************/
 	/* CTROR(S) ... */
 	/**
@@ -38,6 +36,7 @@ public class TYPE_CLASS extends TYPE
 	private TYPE_CLASS(TYPE father, String name, int line) throws SemanticException
 	{
 		super(name);
+		this.line =line;
 		if(father!=null && !(father instanceof TYPE_CLASS))
 		{
 			throw new SemanticException(line,String.format("Cannot extends non class type %s",father));
@@ -46,6 +45,7 @@ public class TYPE_CLASS extends TYPE
 		{
 			this.father = (TYPE_CLASS) father;
 		}
+
 	}
 	@Override
 	public boolean isClass() {
@@ -108,19 +108,19 @@ public class TYPE_CLASS extends TYPE
 	public String toString() {
 	 	return String.format("Father: %s Name: %s",father,getName());
 	}
-	public void setDataMembers(TYPE_CLASS_VAR_DEC_LIST memberList)
-	{		
-		this.memberList = memberList;
-	}
 	public TYPE_CLASS_VAR_DEC_LIST getDataMembers()
 	{
 		return this.memberList;
 	}
-	public TYPE_CLASS_VAR_DEC getDataMember(String name)
+
+	public void setDataMembers(TYPE_CLASS_VAR_DEC_LIST members){
+		this.memberList = members;
+	}
+	public TYPE_CLASS_FIELD getDataMember(String name)
 	{
-		for(TYPE_CLASS_VAR_DEC member : memberList)
+		for(TYPE_CLASS_FIELD member : memberList)
 		{
-			if(member.getName().equals(name))
+			if(member.name.equals(name))
 			{
 				return member;
 			}
@@ -130,8 +130,13 @@ public class TYPE_CLASS extends TYPE
 	}
 	@Override
 	public boolean isAssignable(TYPE other) throws SemanticException {
+		System.out.printf("HERE 2");
 		return other instanceof TYPE_NIL || (other instanceof TYPE_CLASS && ((TYPE_CLASS)other).isDerivedFrom(this));
 	}
-	
+	public void extend(TYPE_CLASS father) throws SemanticException
+	{
+		TYPE_CLASS_VAR_DEC_LIST members = father.getDataMembers();
+		this.memberList.extendAll(members);
+	}	
 
 }

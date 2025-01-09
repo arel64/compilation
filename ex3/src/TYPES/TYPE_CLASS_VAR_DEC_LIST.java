@@ -10,10 +10,10 @@ import AST.AST_LIST;
 import SYMBOL_TABLE.SYMBOL_TABLE;
 import SYMBOL_TABLE.SemanticException;
 
-public class TYPE_CLASS_VAR_DEC_LIST implements Iterable<TYPE_CLASS_VAR_DEC>
+public class TYPE_CLASS_VAR_DEC_LIST implements Iterable<TYPE_CLASS_FIELD>
 {
-	private List<TYPE_CLASS_VAR_DEC> attributes;
-	public TYPE_CLASS_VAR_DEC_LIST(List<TYPE_CLASS_VAR_DEC> attributes)
+	private List<TYPE_CLASS_FIELD> attributes;
+	public TYPE_CLASS_VAR_DEC_LIST(List<TYPE_CLASS_FIELD> attributes)
 	{
 		this.attributes = attributes;
 	}
@@ -24,67 +24,70 @@ public class TYPE_CLASS_VAR_DEC_LIST implements Iterable<TYPE_CLASS_VAR_DEC>
 		for(AST_CLASS_FIELDS_DEC declaration : declarationList)
 		{
 			TYPE declarationType = declaration.SemantMeLog();
-			System.out.println("Adding "+ declaration + "name: " +declarationType.getName());
 			if(definedNames.contains(declaration.getName()))
 			{
 				throw new SemanticException(declarationList.lineNumber,"Multiple fields with the same name in function");
 			}
 			definedNames.add(declaration.getName());
-			System.out.printf("isclass %s, instance %s",declarationType.isClass(),SYMBOL_TABLE.getInstance().find(declarationType.getName()));
 			if (declarationType.isClass() && SYMBOL_TABLE.getInstance().find(declarationType.getName())==null)
 			{
-				throw new SemanticException(declarationList.lineNumber,String.format("Cannot create a class with undefined varriables types, attempted %s", declarationType));
+				throw new SemanticException(declaration.lineNumber,String.format("Cannot create a class with undefined varriables types, attempted %s", declarationType));
 			}
-			SYMBOL_TABLE.getInstance().enter(declarationType.getName(), declarationType);
-			this.attributes.add(new TYPE_CLASS_VAR_DEC(declarationType,declaration.getName(),declaration.lineNumber));
+			this.attributes.add(new TYPE_CLASS_FIELD(declaration.getName(),declarationType,declaration.lineNumber));
 		}
 	}
-	public List<TYPE_CLASS_VAR_DEC> getAttributes()
+	public List<TYPE_CLASS_FIELD> getAttributes()
 	{
 		return this.attributes;
 	}
 	public void extendAll(TYPE_CLASS_VAR_DEC_LIST other) throws SemanticException
 	{
-		System.out.println(String.format("working on %s 1",other));
 
-		for(TYPE_CLASS_VAR_DEC attribute : other.attributes)
+		Set<String> overridenAttributes = new HashSet<>();
+		
+		for(TYPE_CLASS_FIELD otherAttribute : other.attributes)
 		{
-
-			extend(attribute);
-		}
-	}
-	private void extend(TYPE_CLASS_VAR_DEC attribute) throws SemanticException
-	{
-		List<TYPE_CLASS_VAR_DEC> addedAttributes = new ArrayList<>();
-		String name = attribute.getName();
-		for ( TYPE_CLASS_VAR_DEC classAttribute : this.attributes)
-		{
-			System.out.println(String.format("working on %s with %s",classAttribute,attribute));
-			System.out.println(String.format("names %s %s",classAttribute.getName(),attribute.getName()));
-			TYPE classAttributeType = classAttribute.t;
-			addedAttributes.add(classAttribute);
-			if(!classAttribute.getName().equals(name))
+			for (TYPE_CLASS_FIELD classAttribute : this.attributes)
 			{
-				continue;
-			}
-			if(classAttributeType instanceof TYPE_FUNCTION && attribute.t instanceof TYPE_FUNCTION)
-			{
-				System.out.println(String.format("Checking function overriding for %s",classAttributeType));
-				
-				if(!(classAttributeType.isFunction() && attribute.t.isFunction() && ((TYPE_FUNCTION)classAttributeType).isOverriding((TYPE_FUNCTION)attribute.t)))
+				String otherName = otherAttribute.name;
+				TYPE classAttributeType = classAttribute.t;
+				if(classAttribute.name.equals(otherName))
 				{
-					throw new SemanticException(classAttribute.line,String.format("Extended function share the same name and type %s but are not overriding %s vs %s", classAttribute.t.getName(),classAttribute.t,attribute.t));
+					if(!(classAttributeType instanceof TYPE_FUNCTION && otherAttribute.t instanceof TYPE_FUNCTION))
+					{
+						throw new SemanticException(classAttribute.line,String.format("shadowing for %s is disallowed %s vs %s", classAttribute.t.getName(),classAttribute.t,otherAttribute.t));
+					}
+					if(!((TYPE_FUNCTION)classAttributeType).equals((TYPE_FUNCTION)otherAttribute.t))
+					{
+						System.out.println("Line + "+otherAttribute.line);
+						throw new SemanticException(classAttribute.line,String.format("Extended function share the same name and type %s but are not overriding %s vs %s", classAttribute.t.getName(),classAttribute.t,otherAttribute.t));
+					}
+					overridenAttributes.add(classAttribute.name);
 				}
-				continue;
-			}
-			else 
-			{
-				throw new SemanticException(classAttribute.line,String.format("Extended attribute share the same name %s but of diffrent types %s vs %s", classAttribute.getName(),classAttribute.t,attribute.t));
 			}
 		}
+		List<TYPE_CLASS_FIELD> newAtrributes = new ArrayList<>();
+		newAtrributes.addAll(this.attributes);
+		for(TYPE_CLASS_FIELD attribute :newAtrributes)
+		{
+			System.out.println("Adding to symbol tabel: "+ attribute);
+			if(!overridenAttributes.contains(attribute.name))
+			{
+				SYMBOL_TABLE.getInstance().enter(attribute.name, attribute.t);
+			}
+		}
+		for(TYPE_CLASS_FIELD attribute : other.attributes)
+		{
+			if(!overridenAttributes.contains(attribute.name))
+			{
+				newAtrributes.add(attribute);
+			}
+		}
+		this.attributes = newAtrributes;
 	}
+
 	@Override
-	public Iterator<TYPE_CLASS_VAR_DEC> iterator() {
+	public Iterator<TYPE_CLASS_FIELD> iterator() {
 		return attributes.iterator();
 	}
 	@Override

@@ -23,6 +23,12 @@ public class TYPE_NIL extends TYPE{
 	}
 	@Override
 	public boolean isAssignable(TYPE other) throws SemanticException {
+		System.out.printf("HERE 5");
 		return false;
+	}
+	
+	@Override
+	public boolean isPrimitive() {
+		return true;
 	}
 }

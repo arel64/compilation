@@ -294,7 +294,9 @@ dec ::= varDec:v
 cField ::= varDec:v
 {:
   v.setLineNumber(vleft);
-  RESULT = v;
+  AST_CLASS_FIELDS_DEC node = new AST_CLASS_FIELDS_DEC(v);
+  node.setLineNumber(vleft);
+  RESULT = node;
 :}
 | funcDec:f
 {:
@@ -354,13 +356,13 @@ exp ::= var:v
 :}
 | var:v DOT:d ID:i LPAREN:lp opt_exp_list:oel RPAREN:rp
 {:
-  AST_FUNC_INVO node = new AST_FUNC_INVO(v, i, oel);
+  AST_FUNC_INVOCATION node = new AST_FUNC_INVOCATION(v, i, oel);
   node.setLineNumber(dleft);
   RESULT = node;
 :}
 | ID:i LPAREN:lp opt_exp_list:oel RPAREN:rp
 {:
-  AST_FUNC_INVO node = new AST_FUNC_INVO(i, oel);
+  AST_FUNC_INVOCATION node = new AST_FUNC_INVOCATION(i, oel);
   node.setLineNumber(ileft);
   RESULT = node;
 :}
@@ -460,13 +462,13 @@ stmt ::= varDec:v
 :}
 | var:v DOT:d ID:i LPAREN:lp opt_exp_list:oel RPAREN:rp SEMICOLON:se
 {:
-  AST_STMT_FUNC_INVO node = new AST_STMT_FUNC_INVO(new AST_FUNC_INVO(v, i, oel));
+  AST_STMT_FUNC_INVO node = new AST_STMT_FUNC_INVO(new AST_FUNC_INVOCATION(v, i, oel));
   node.setLineNumber(vleft);
   RESULT = node;
 :}
 | ID:i LPAREN:lp opt_exp_list:oel RPAREN:rp SEMICOLON:se
 {:
-  AST_STMT_FUNC_INVO node = new AST_STMT_FUNC_INVO(new AST_FUNC_INVO(i, oel));
+  AST_STMT_FUNC_INVO node = new AST_STMT_FUNC_INVO(new AST_FUNC_INVOCATION(i, oel));
   node.setLineNumber(ileft);
   RESULT = node;
 :};

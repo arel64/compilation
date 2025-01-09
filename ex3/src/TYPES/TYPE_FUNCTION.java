@@ -2,11 +2,11 @@ package TYPES;
 
 import SYMBOL_TABLE.SemanticException;
 
-public class TYPE_FUNCTION extends TYPE_CLASS_VAR_DEC
+public class TYPE_FUNCTION extends TYPE_VAR_DEC
 {
 
 	private TYPE_LIST params;
-	
+	private int line;
 	/****************/
 	/* CTROR(S) ... */
 	/****************/
@@ -16,9 +16,9 @@ public class TYPE_FUNCTION extends TYPE_CLASS_VAR_DEC
 	}
 	public TYPE_FUNCTION(TYPE returnType,String name,TYPE_LIST params,int line)
 	{
-		super(returnType, name,line);
+		super(returnType, name);
 		this.params = params;
-		System.out.println(String.format("Function type name %s",name));	
+		this.line = line;
 	}
 
     public boolean isOverriding(TYPE_FUNCTION t) {
@@ -55,6 +55,11 @@ public class TYPE_FUNCTION extends TYPE_CLASS_VAR_DEC
 	}
 	@Override
 	public boolean isAssignable(TYPE other) throws SemanticException {
+		System.out.printf("HERE3 ");
 		return false;
+	}
+	public TYPE getReturnType()
+	{
+		return t;
 	}
 }

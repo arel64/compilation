@@ -3,9 +3,9 @@ import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
 
 public class AST_STMT_FUNC_INVO extends AST_STMT {
-    public AST_FUNC_INVO invocation;
+    public AST_FUNC_INVOCATION invocation;
 
-    public AST_STMT_FUNC_INVO(AST_FUNC_INVO invocation) {
+    public AST_STMT_FUNC_INVO(AST_FUNC_INVOCATION invocation) {
         SerialNumber = invocation.SerialNumber;
         this.invocation = invocation;
     }

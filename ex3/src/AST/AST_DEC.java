@@ -1,5 +1,8 @@
 package AST;
 
+import SYMBOL_TABLE.SYMBOL_TABLE;
+
+
 public abstract class AST_DEC extends AST_Node {
     private String name;
     public AST_DEC(String name)
@@ -17,5 +20,9 @@ public abstract class AST_DEC extends AST_Node {
         AST_GRAPHVIZ.getInstance().logNode(
 			SerialNumber,
 			"'AST_DEC\nParmeter name: '"+getName());		
+    }
+    protected boolean isDeclaredInCurrentScope()
+    {
+        return SYMBOL_TABLE.getInstance().existsInCurrentScope(name);
     }
 }

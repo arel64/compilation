@@ -34,4 +34,8 @@ public class TYPE_INT extends TYPE
 	public boolean isAssignable(TYPE other) throws SemanticException {
 		return other instanceof TYPE_INT;
 	}
+	@Override
+	public boolean isPrimitive() {
+		return true;
+	}
 }

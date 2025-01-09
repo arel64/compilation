@@ -3,12 +3,15 @@ import SYMBOL_TABLE.SYMBOL_TABLE;
 import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
 
-public class AST_VAR_DEC extends AST_CLASS_FIELDS_DEC {
+public class AST_VAR_DEC extends AST_DEC {
     
     public AST_TYPE varType;
     public AST_EXP varValue;
+    public String varName;
+
     public AST_VAR_DEC(String varName, AST_TYPE varType, AST_EXP initialValue) {
         super(varName);
+        this.varName = varName;
         this.varType = varType;
         this.varValue = initialValue;
     
@@ -27,28 +30,26 @@ public class AST_VAR_DEC extends AST_CLASS_FIELDS_DEC {
     public String toString() {
         return varType.toString()+ " "+getName() + (varValue != null ? "="+varValue:"");
     }
+
     @Override
     public TYPE SemantMe() throws SemanticException{
+        if(isDeclaredInCurrentScope())
+        {
+            throw new SemanticException(lineNumber, String.format("Cannot declare %s was already declared in this scope", getName()));
+        }
         TYPE type = varType.SemantMeLog();
+        if(type.isPrimitive())
+        {
+            type = new TYPE_VAR_DEC(type,getName());
+        }
         SYMBOL_TABLE.getInstance().enter(getName(), type);
-        if( varValue == null)
+        if( varValue != null)
         {
-            return type;    
-        }
-        TYPE valueType = varValue.SemantMeLog();
-        System.out.printf("comparing %s %s \n" ,valueType,type);
-        if(type.isArray())
-        {
-            TYPE_ARRAY ltype = (TYPE_ARRAY)type;
-            if(!ltype.t.equals(valueType))
+            TYPE valueType = varValue.SemantMeLog();
+            if(!type.isAssignable(valueType))
             {
-                throw new SemanticException(lineNumber,String.format("Cannot allocate array %s with mismatch type %s", ltype,valueType));    
+                throw new SemanticException(lineNumber,String.format("Initial value %s does not match type %s", valueType,type));
             }
-            return ltype;
-        }
-        if(!type.isAssignable(valueType))
-        {
-            throw new SemanticException(lineNumber,String.format("Initial value %s does not match type %s", valueType,type));
         }
         return type;
     }

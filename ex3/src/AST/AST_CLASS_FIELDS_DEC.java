@@ -1,8 +1,27 @@
 package AST;
 
-public abstract class AST_CLASS_FIELDS_DEC extends AST_DEC {
-    public AST_CLASS_FIELDS_DEC(String name)
+import SYMBOL_TABLE.SemanticException;
+import TYPES.TYPE;
+
+public class AST_CLASS_FIELDS_DEC extends AST_VAR_DEC {
+
+    public AST_CLASS_FIELDS_DEC(AST_VAR_DEC v)
     {
-        super(name);
+        super(v.getName(),v.varType,v.varValue);
+    }
+    public AST_CLASS_FIELDS_DEC(String name, AST_TYPE t)
+    {
+        super(name,t);
+    }
+    @Override
+    public TYPE SemantMe() throws SemanticException {
+        TYPE myType = super.SemantMe();
+        System.out.println("bla" + myType +"duck " +varValue);
+        if(varValue != null && !(this.varValue instanceof AST_LIT))
+        {
+            throw new SemanticException(lineNumber,String.format("cannot initialize field %s with non constant expr", getName()));
+        }
+        return myType;
+
     }
 }

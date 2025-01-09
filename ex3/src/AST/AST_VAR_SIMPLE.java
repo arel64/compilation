@@ -24,7 +24,7 @@ public class AST_VAR_SIMPLE extends AST_VAR
 
 	@Override
 	public TYPE SemantMe() throws SemanticException {
-		TYPE t = SYMBOL_TABLE.getInstance().find(this.val);
+		TYPE t = SYMBOL_TABLE.getInstance().find(val);
 		if( t== null)
 		{
 			throw new SemanticException(lineNumber,String.format("Cannot find var: %s ",this.val));

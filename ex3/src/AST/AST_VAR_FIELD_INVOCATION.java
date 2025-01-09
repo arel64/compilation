@@ -4,7 +4,8 @@ import SYMBOL_TABLE.SYMBOL_TABLE;
 import SYMBOL_TABLE.SemanticException;
 import TYPES.TYPE;
 import TYPES.TYPE_CLASS;
-import TYPES.TYPE_CLASS_VAR_DEC;
+import TYPES.TYPE_CLASS_FIELD;
+import TYPES.TYPE_VAR_DEC;
 
 public class AST_VAR_FIELD_INVOCATION extends AST_VAR
 {
@@ -29,7 +30,7 @@ public class AST_VAR_FIELD_INVOCATION extends AST_VAR
 			throw new SemanticException(lineNumber, String.format("Can not invoke %s.%s on a none class type %s", varType.getName(),fieldName,declaredType));
 		}
 		TYPE_CLASS varClass = (TYPE_CLASS)varType;
-		TYPE_CLASS_VAR_DEC member = varClass.getDataMember(fieldName);
+		TYPE_CLASS_FIELD member = varClass.getDataMember(fieldName);
 		if(member == null)
 		{
 			throw new SemanticException(lineNumber, String.format("Can not invoke %s.%s on class type %s, it does not exist",varType.getName(),fieldName,varType));

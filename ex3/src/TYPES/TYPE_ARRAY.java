@@ -1,13 +1,10 @@
 package TYPES;
 
-public class TYPE_ARRAY extends TYPE
+public class TYPE_ARRAY extends TYPE_VAR_DEC
 {
-	public TYPE t;
-	
 	public TYPE_ARRAY(TYPE t,String name)
 	{
-		super(name);
-		this.t = t;
+		super(t,name);
 	}
 
 	@Override
@@ -24,7 +21,18 @@ public class TYPE_ARRAY extends TYPE
 	}
 	@Override
 	public boolean isAssignable(TYPE other) {
-		return other instanceof TYPE_NIL;
+		return isInterchangeableWith(other) || (((TYPE_ARRAY)other).t == t);
+	}
+	@Override
+	public boolean isInterchangeableWith(TYPE other) {
+		return (other instanceof TYPE_NIL)  // Null is assignable to arrrays.
+			|| (other instanceof TYPE_ARRAY) && // Must be array otherwise
+					(other.getName().equals(getName())// If the types have the same name its fine
+			);
+	}
+	@Override
+	public String toString() {
+		return String.format("%s %s[]", t.getName(),getName());
 	}
 
 }

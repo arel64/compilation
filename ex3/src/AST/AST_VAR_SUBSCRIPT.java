@@ -29,7 +29,7 @@ public class AST_VAR_SUBSCRIPT extends AST_VAR
 
 
 	@Override
-	public TYPE SemantMe() throws SemanticException {
+	public TYPE_ARRAY_SUBSCRIPT SemantMe() throws SemanticException {
 
 		TYPE varType = this.var.SemantMeLog();
 		if(!varType.isArray())
@@ -38,7 +38,7 @@ public class AST_VAR_SUBSCRIPT extends AST_VAR
 		}
 		TYPE_ARRAY vArray = (TYPE_ARRAY)varType;
 		TYPE subscriptType = subscript.SemantMeLog();
-		if(!(subscriptType instanceof TYPE_INT))
+		if(!(subscriptType.isAssignable(TYPE_INT.getInstance())))
 		{
 			throw new SemanticException(lineNumber, String.format("subscriptable must be integral type, got ", subscriptType));
 		}
@@ -46,6 +46,7 @@ public class AST_VAR_SUBSCRIPT extends AST_VAR
 		{
 			throw new SemanticException(lineNumber, String.format("subscriptable must be gt 0 got ", ((AST_LIT_NUMBER)subscript).val));
 		}
-		return vArray.t;
+		System.out.println("Subscript "+ vArray + " " +subscriptType);
+		return new TYPE_ARRAY_SUBSCRIPT(vArray,subscriptType);
 	}
 }

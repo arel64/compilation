@@ -1,4 +1,5 @@
 package AST;
+import SYMBOL_TABLE.SYMBOL_TABLE;
 import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
 
@@ -39,8 +40,10 @@ public class AST_NEW_EXP extends AST_EXP {
         if ((exp instanceof AST_LIT_NUMBER)){
             int value = Integer.parseInt(((AST_LIT_NUMBER)exp).getValue());
             if (value <= 0)
-               throw new SemanticException(lineNumber,"LEN<=0 for array length");
+            {
+                throw new SemanticException(lineNumber,"LEN<=0 for array length");
+            }
         }
-        return myType;
+        return new TYPE_ARRAY(myType,myType.getName());
     }
 }

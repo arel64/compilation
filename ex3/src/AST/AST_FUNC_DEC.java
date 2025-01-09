@@ -1,6 +1,10 @@
 package AST;
 import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import SYMBOL_TABLE.SYMBOL_TABLE;
 
 public class AST_FUNC_DEC extends AST_CLASS_FIELDS_DEC {
@@ -10,9 +14,10 @@ public class AST_FUNC_DEC extends AST_CLASS_FIELDS_DEC {
     public AST_LIST<AST_STMT> body;
 
     public AST_FUNC_DEC(String funcName, AST_TYPE returnType, AST_LIST<AST_VAR_DEC> params, AST_LIST<AST_STMT> body) {
-        super(funcName);
+        super(funcName,returnType);
         this.returnType = returnType;
         this.params = params;
+        
         this.body = body;
         
     }
@@ -36,6 +41,10 @@ public class AST_FUNC_DEC extends AST_CLASS_FIELDS_DEC {
 
     @Override
     public TYPE_FUNCTION SemantMe() throws SemanticException{
+        if(isDeclaredInCurrentScope())
+        {
+            throw new SemanticException(lineNumber,String.format("Cannot redeclare function %s", getName()));
+        }
         TYPE returnT = returnType.SemantMeLog();
         if (returnT == null){
             throw new SemanticException(lineNumber,"Null not good");
@@ -45,21 +54,27 @@ public class AST_FUNC_DEC extends AST_CLASS_FIELDS_DEC {
         instance.enter(t.getName(),(TYPE)t);
         instance.beginScope();
 
-        TYPE_LIST paramTypes = null;
+        List<TYPE> paramTypes= new ArrayList<>();
         if (params != null) {
-            for (AST_VAR_DEC param : params) {
+            for (AST_DEC param : params) {
                 TYPE paramType = param.SemantMe();
+                System.out.println();
+                if(paramType.isPrimitive())
+                {
+                    paramType = new TYPE_VAR_DEC(paramType, param.getName());    
+                }
+                
+                System.out.println("Adding param + "+paramType);
                 instance.enter(paramType.getName(), paramType);
-                paramTypes = new TYPE_LIST(paramType, paramTypes);
+                paramTypes.add(paramType);
             }
         }
         
-        t.setParams(paramTypes);
+        t.setParams(new TYPE_LIST(paramTypes));
         if(body == null)
         {
             return t;
         }
-        System.out.println(String.format("Begin semant me body %s", toString()));
         body.SemantMeLog();
         instance.endScope();
         return t;

@@ -110,7 +110,6 @@ public class AST_LIST<T extends AST_Node> extends AST_Node implements Iterable<T
                 TYPE t = node.SemantMeLog();
                 if(t != null)
                 {
-                    System.out.println(String.format("%s %s %s", t,t.getName(),t.getClass()));
                     instance.enter(t.getName(), t);
                 }
             }

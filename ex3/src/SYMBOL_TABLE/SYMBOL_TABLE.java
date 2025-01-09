@@ -7,6 +7,8 @@ package SYMBOL_TABLE;
 /* GENERAL IMPORTS */
 /*******************/
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 /*******************/
 /* PROJECT IMPORTS */
@@ -273,22 +275,23 @@ public class SYMBOL_TABLE
 			/***************************************/
 			/* [3] Enter library function PrintInt */
 			/***************************************/
+			List<TYPE> types = new ArrayList<>();
+			types.add(new TYPE_VAR_DEC(TYPE_INT.getInstance(),"i"));
 			instance.enter(
 				"PrintInt",
 				new TYPE_FUNCTION(
 					TYPE_VOID.getInstance(),
 					"PrintInt",
-					new TYPE_LIST(
-						TYPE_INT.getInstance(),
-						null), -1));
+					new TYPE_LIST(types), -1));
+			List<TYPE> types2 = new ArrayList<>();
+			types2.add(new TYPE_VAR_DEC(TYPE_STRING.getInstance(),"s"));					
 			instance.enter(
 				"PrintString",
 				new TYPE_FUNCTION(
 					TYPE_VOID.getInstance(),
 					"PrintString",
 					new TYPE_LIST(
-						TYPE_STRING.getInstance(),
-						null), -1));
+						types2), -1));
 			
 		}
 		return instance;
@@ -336,52 +339,4 @@ public class SYMBOL_TABLE
         }
         return null;
     }
-
-	// public TYPE findInRange(String name, int minScope, int maxScope) {
-    //     SYMBOL_TABLE_ENTRY e = top;
-    //     int currentScope = scope_count;
-    //     while (e != null) {
-    //         if (currentScope < minScope)
-    //             break; //Outside the specified range
-    //         if (e.name.equals("SCOPE-BOUNDARY"))
-    //             currentScope--;
-    //         else if (e.name.equals(name) && currentScope <= maxScope)
-    //             return e.type;
-    //         e = e.prevtop;
-    //     }
-    //     return null;
-    // } //I don't think we want to get an index for start and end
-    
-    /*public TYPE findInClassHierarchy(String name, TYPE_CLASS currentClass) throws SemanticException {
-        TYPE result;
-        while (currentClass != null) {
-            result = findInRange(name, currentClass.data_members.getScopeStart(), currentClass.data_members.getScopeEnd());
-            if (result != null) {
-                return result;
-            }
-            currentClass = currentClass.father;
-        }
-        return null;
-    }*/
-
-	// public boolean isInClassScope(String name, TYPE type, TYPE_CLASS currentClass) {
-    //     if (currentClass == null || currentClass.data_members == null)
-    //         return false;
-    //     for (TYPE_CLASS_VAR_DEC member : currentClass.data_members) 
-    //         if (member.name.equals(name) && member.t.equals(type)) 
-    //             return true;
-    //     return false;
-    // }
-
-	// public boolean isInFatherClassScope(String name, TYPE type, TYPE_CLASS currentClass){
-	// 	TYPE_CLASS currFather = currentClass.father;
-	// 	while(currFather != null){
-	// 		if (isInClassScope(name, type,currFather))
-	// 		{
-	//             return true;
-	// 		}
-	// 	}
-	// 	return false;
-	// }
-
 }
