@@ -23,6 +23,8 @@ public class AST_VAR_FIELD_INVOCATION extends AST_VAR
 	}
 	@Override
 	public TYPE SemantMe() throws SemanticException {
+
+		//TODO:: Merge code  with func invocation in some capacity
 		TYPE varType = var.SemantMeLog();
 		TYPE declaredType = SYMBOL_TABLE.getInstance().find(varType.getName());
 		if(!declaredType.isClass())

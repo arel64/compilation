@@ -29,6 +29,7 @@ public class AST_NEW_EXP extends AST_EXP {
             return myType;
         }
         TYPE expType = exp.SemantMe();
+        //TODO:: need to be assignable to int ? Check definitions
         if (expType != TYPE_INT.getInstance()){
             throw new SemanticException(lineNumber,"New expr type is not int");
         }

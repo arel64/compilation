@@ -64,7 +64,6 @@ public class AST_CLASS_DEC extends AST_DEC {
 		TYPE_CLASS currentClass = new TYPE_CLASS(parentClassName, this.getName(),lineNumber);
         SYMBOL_TABLE.getInstance().enter(getName(),currentClass);       
         symbol_table.beginScope();
-        TYPE_CLASS_VAR_DEC_LIST declist = new TYPE_CLASS_VAR_DEC_LIST(fields);
         if( father != null)
         {
             for(TYPE_CLASS_FIELD field : father.getDataMembers())
@@ -72,6 +71,7 @@ public class AST_CLASS_DEC extends AST_DEC {
                 SYMBOL_TABLE.getInstance().enter(field.getName(), field.t);
             }
         }
+        TYPE_CLASS_VAR_DEC_LIST declist = new TYPE_CLASS_VAR_DEC_LIST(fields);
         currentClass.setDataMembers(declist);
         if(father != null)
         {
