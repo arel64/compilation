@@ -62,7 +62,7 @@ public class Main
 			catch(Exception e)
 			{
 				e.printStackTrace();
-				file_writer.write("ERROR(" + p.errorLine + ")\n");
+				file_writer.write("ERROR(" + (p.errorLine + 1) + ")\n");
 			}
 			
 			

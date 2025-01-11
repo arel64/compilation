@@ -2,9 +2,6 @@ package AST;
 import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import SYMBOL_TABLE.SYMBOL_TABLE;
 
 public class AST_FUNC_DEC extends AST_CLASS_FIELDS_DEC {

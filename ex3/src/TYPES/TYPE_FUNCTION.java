@@ -26,7 +26,7 @@ public class TYPE_FUNCTION extends TYPE_VAR_DEC
 		{
 			return false;
 		}
-		boolean cond =this.getName().equals(t.getName()) && this.t == t.t;
+		boolean cond =this.getName().equals(t.getName()) && this.t .equals(t.t);
 		if(t.params != null)
 		{
 			cond = cond && t.params.equals(params);

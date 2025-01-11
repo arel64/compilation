@@ -5,7 +5,6 @@ import SYMBOL_TABLE.SemanticException;
 import TYPES.TYPE;
 import TYPES.TYPE_CLASS;
 import TYPES.TYPE_CLASS_FIELD;
-import TYPES.TYPE_VAR_DEC;
 
 public class AST_VAR_FIELD_INVOCATION extends AST_VAR
 {

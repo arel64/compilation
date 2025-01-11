@@ -55,7 +55,6 @@ public class AST_FUNC_INVOCATION extends AST_EXP {
         } 
         if(varType!=null && !varType.isClass())
         {
-            System.out.println(varType);
             throw new SemanticException(lineNumber,String.format("%s does not exist and cannot be invoked", varType));
         }
         TYPE functionType = null;

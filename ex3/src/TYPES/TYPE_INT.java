@@ -32,7 +32,7 @@ public class TYPE_INT extends TYPE
 	}
 	@Override
 	public boolean isAssignable(TYPE other) throws SemanticException {
-		return other instanceof TYPE_INT;
+		return false;
 	}
 	@Override
 	public boolean isPrimitive() {

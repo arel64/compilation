@@ -17,13 +17,12 @@ public abstract class TYPE_WRAPPER extends TYPE
 		if(other instanceof TYPE_WRAPPER)
 		{
 			otherType = ((TYPE_WRAPPER)other).t;
-			return t.isAssignable(otherType);
+			return isAssignable(otherType);
 		}
-		else if(other.isPrimitive())
-		{
-			return t.equals(other);
-		}
-		return false;
+		return (t.equals(other));
+	}
 
+	public boolean isDoubleWrapped() {
+		return t instanceof TYPE_WRAPPER;
 	}
 }

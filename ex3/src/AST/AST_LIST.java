@@ -1,128 +1,97 @@
 package AST;
 import TYPES.*;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
 import SYMBOL_TABLE.SYMBOL_TABLE;
 import SYMBOL_TABLE.SemanticException;
 
 public class AST_LIST<T extends AST_Node> extends AST_Node implements Iterable<T>{
-    private java.util.ArrayList<T> list;
+    private ArrayList<T> list;
     private final Class<T> clazz;
-    
-    public AST_LIST(T first,Class<T> clazz) {
-        this(null,first,clazz);
+    public AST_LIST(T first, Class<T> clazz) {
+        this(null, first, clazz);
     }
-    public AST_LIST(AST_LIST<T> prev, T end,Class<T> clazz) {
-        this.clazz =clazz;
-        if(prev == null)
-        {
-            list = new java.util.ArrayList<T>();
+    public AST_LIST(AST_LIST<T> prev, T end, Class<T> clazz) {
+        this.clazz = clazz;
+        if (prev == null) {
+            list = new ArrayList<>();
+        } else {
+            list = new ArrayList<>(prev.list);
         }
-        else
-        {
-            list = new java.util.ArrayList<T>(prev.list);
-        }
-        
-        if(end != null)
-        {
+        if (end != null) {
             list.add(end);
         }
-        
         SerialNumber = AST_Node_Serial_Number.getFresh();
-        
     }
-    private AST_LIST(List<T> list, Class<T> clazz)
-    {
-        this.list = new ArrayList<T>(list);
+    private AST_LIST(List<T> list, Class<T> clazz) {
+        this.list = new ArrayList<>(list);
         this.clazz = clazz;
         SerialNumber = AST_Node_Serial_Number.getFresh();
     }
     public T at(int index){
         return list.get(index);
     }
-    public void add(T item)
-    {
+    public void add(T item){
         list.add(item);
     }
-    public int size()
-    {
+    public int size(){
         return list.size();
     }
-    public AST_LIST<T> from(int index)
-    {
+    public AST_LIST<T> from(int index){
         List<T> subList = list.subList(index, list.size());
         return new AST_LIST<>(subList, clazz);
     }
     @Override
     public void PrintMe() {
-        if (list.isEmpty())
-        {
+        if (list.isEmpty()) {
             return;
         }
         int removeIndex = 0;
         T next = list.get(removeIndex);
-        AST_GRAPHVIZ.getInstance().logEdge(SerialNumber,next.SerialNumber);
-        AST_GRAPHVIZ.getInstance().logNode(
-            SerialNumber,
-            "LIST<" + clazz.getSimpleName()+">" 
-        );
-        if(removeIndex != list.size() - 1)
-        {
-            
-            List<T> newList = list.subList(removeIndex + 1 , list.size());
-            AST_LIST<T> nestedASTList = new AST_LIST<T>(newList,clazz);
-            AST_GRAPHVIZ.getInstance().logEdge(SerialNumber,nestedASTList.SerialNumber);
+        AST_GRAPHVIZ.getInstance().logEdge(SerialNumber, next.SerialNumber);
+        AST_GRAPHVIZ.getInstance().logNode(SerialNumber, "LIST<" + clazz.getSimpleName()+">");
+        if(removeIndex != list.size() - 1) {
+            List<T> newList = list.subList(removeIndex + 1, list.size());
+            AST_LIST<T> nestedASTList = new AST_LIST<>(newList, clazz);
+            AST_GRAPHVIZ.getInstance().logEdge(SerialNumber, nestedASTList.SerialNumber);
             nestedASTList.PrintMe();
         }
         next.PrintMe();
     }
     @Override
     public String toString() {
-        if (this.list.isEmpty()) {
+        if (list.isEmpty()) {
             return "";
         }
         String listRepresentation = "";
-        for(T dec : this.list)
-        {
-            listRepresentation += dec.toString()+",";
+        for(T dec : list) {
+            listRepresentation += dec.toString() + ",";
         }
-        return listRepresentation.substring(0,listRepresentation.length()-1);
+        return listRepresentation.substring(0, listRepresentation.length() - 1);
     }
-    /*
-     * Verifies that all elements in the list do not have semantic violations.
-     * Always returns null
-     * 
-     */
     @Override
-    public TYPE_LIST SemantMe() throws SemanticException{
-        if (this.list.isEmpty()) {
+    public TYPE_LIST SemantMe() throws SemanticException {
+        if (list.isEmpty()) {
             return new TYPE_LIST();
         }
         TYPE_LIST typelist = new TYPE_LIST();
         SYMBOL_TABLE instance = SYMBOL_TABLE.getInstance(); 
         for (int i = 0; i < list.size(); i++) {
-            T node = this.list.get(i);
+            T node = list.get(i);
             if (node == null)
-                throw new SemanticException(lineNumber,"null arg");
-            try{
+                throw new SemanticException(lineNumber, "null arg");
+            try {
                 TYPE t = node.SemantMeLog();
-                if(t != null)
-                {
+                if(t != null) {
                     instance.enter(t.getName(), t);
-                    typelist.add(t,node.lineNumber);
+                    typelist.add(t, node.lineNumber);
                 }
-            }
-            catch(SemanticException e)
-            {
-                if (node instanceof AST_STMT)
-                {
+            } catch(SemanticException e) {
+                if (node instanceof AST_STMT) {
                     throw new SemanticException(node.lineNumber, e.getMessage());
                 }
                 throw e;
-                
             }
         }
         return typelist;

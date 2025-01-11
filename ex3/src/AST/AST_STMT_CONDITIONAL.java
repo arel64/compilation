@@ -28,7 +28,7 @@ public abstract class AST_STMT_CONDITIONAL extends AST_STMT
     @Override
     public TYPE_LIST SemantMe() throws SemanticException {
         TYPE conditionType = getCondition().SemantMe();
-        if(!(conditionType.isAssignable(TYPE_INT.getInstance())))
+        if(!(conditionType.isAssignable(TYPE_INT.getInstance()) || conditionType.equals(TYPE_INT.getInstance())))
         {
             throw new SemanticException(lineNumber,String.format("Conditional statement condition must be int, got: %s ",conditionType));
         }

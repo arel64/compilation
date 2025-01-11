@@ -66,7 +66,7 @@ public class TYPE_LIST extends TYPE
 		}
 		for(int i =0; i < size(); i++)
 		{
-			if(get(i)!= obj.get(i))
+			if(!get(i).equals(obj.get(i)))
 			{
 				return false;
 			}

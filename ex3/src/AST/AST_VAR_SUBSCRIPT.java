@@ -39,9 +39,9 @@ public class AST_VAR_SUBSCRIPT extends AST_VAR
 		}
 		TYPE_ARRAY vArray = (TYPE_ARRAY)varType;
 		TYPE subscriptType = subscript.SemantMeLog();
-		if(!(subscriptType.isAssignable(TYPE_INT.getInstance())))
+		if(!((subscriptType.isAssignable(TYPE_INT.getInstance())) || subscriptType.equals(TYPE_INT.getInstance())))
 		{
-			throw new SemanticException(lineNumber, String.format("subscriptable must be integral type, got ", subscriptType));
+			throw new SemanticException(lineNumber, String.format("subscriptable must be integral type, got %s", subscriptType));
 		}
 		if(subscript instanceof AST_LIT_NUMBER && ((AST_LIT_NUMBER)subscript).val < 0)
 		{

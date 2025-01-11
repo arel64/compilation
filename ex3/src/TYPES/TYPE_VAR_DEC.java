@@ -13,7 +13,7 @@ public class TYPE_VAR_DEC extends TYPE_WRAPPER
 	}
 	@Override
 	public boolean equals(Object obj) {
-		return obj instanceof TYPE_VAR_DEC && t == ((TYPE_VAR_DEC)obj).t;
+		return obj instanceof TYPE_VAR_DEC && t .equals(((TYPE_VAR_DEC)obj).t);
 	}
 	
 }

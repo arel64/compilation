@@ -16,15 +16,25 @@ public class AST_STMT_RETURN extends AST_STMT {
             SerialNumber,
             "RETURN "+exp    
         );
-        AST_GRAPHVIZ.getInstance().logEdge(SerialNumber, exp.SerialNumber);
-        exp.PrintMe();
+        if(exp != null)
+        {
+            AST_GRAPHVIZ.getInstance().logEdge(SerialNumber, exp.SerialNumber);
+            exp.PrintMe();
+
+        }
+
         
     }
-
+    
     @Override
     public TYPE SemantMe() throws SemanticException {
         //TOOD:: Add scope validation that I am in a funcction / A statement conditinal
-        TYPE t = exp.SemantMe();
+        TYPE t = TYPE_VOID.getInstance();
+        if(exp != null)
+        {
+            t = exp.SemantMe();
+        }
+        
         return new TYPE_RETURN(t);
         
     }

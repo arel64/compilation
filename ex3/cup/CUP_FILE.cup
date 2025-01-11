@@ -462,13 +462,17 @@ stmt ::= varDec:v
 :}
 | var:v DOT:d ID:i LPAREN:lp opt_exp_list:oel RPAREN:rp SEMICOLON:se
 {:
-  AST_STMT_FUNC_INVO node = new AST_STMT_FUNC_INVO(new AST_FUNC_INVOCATION(v, i, oel));
+  AST_FUNC_INVOCATION invocation =  new AST_FUNC_INVOCATION(v, i, oel);
+  invocation.setLineNumber(ileft);
+  AST_STMT_FUNC_INVO node = new AST_STMT_FUNC_INVO(invocation);
   node.setLineNumber(vleft);
   RESULT = node;
 :}
 | ID:i LPAREN:lp opt_exp_list:oel RPAREN:rp SEMICOLON:se
 {:
-  AST_STMT_FUNC_INVO node = new AST_STMT_FUNC_INVO(new AST_FUNC_INVOCATION(i, oel));
+  AST_FUNC_INVOCATION invocation = new AST_FUNC_INVOCATION(i, oel);
+  invocation.setLineNumber(ileft);
+  AST_STMT_FUNC_INVO node = new AST_STMT_FUNC_INVO(invocation);
   node.setLineNumber(ileft);
   RESULT = node;
 :};
