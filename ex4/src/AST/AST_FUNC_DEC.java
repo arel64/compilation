@@ -1,6 +1,7 @@
 package AST;
 import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
+import IR.*;
 
 import SYMBOL_TABLE.SYMBOL_TABLE;
 
@@ -116,4 +117,15 @@ public class AST_FUNC_DEC extends AST_CLASS_FIELDS_DEC {
             }
         }
     }
-}
+//     @Override
+//     public TEMP IRme()
+// 	{
+// 		IR.getInstance().Add_IRcommand(new IRcommand_Allocate(this.varName));
+		
+// 		if (this.varValue != null)
+// 		{
+// 			IR.getInstance().Add_IRcommand(new IRcommand_Store(this.varName,this.varValue.IRme()));
+// 		}
+// 		return null;
+// 	}
+// }

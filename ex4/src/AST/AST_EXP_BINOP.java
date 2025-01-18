@@ -1,5 +1,6 @@
 package AST;
 import TYPES.*;
+import IR.*;
 import AST.AST_BINOP.Operation;
 import SYMBOL_TABLE.SemanticException;
 
@@ -120,4 +121,48 @@ public class AST_EXP_BINOP extends AST_EXP
 		}
 		return ((TYPE_WRAPPER)(leftType)).t;
 	}
+
+	@Override
+	public TEMP IRme()
+	{
+		TEMP t1 = null;
+		TEMP t2 = null;
+		TEMP dst = TEMP_FACTORY.getInstance().getFreshTEMP();
+		final Operation binopOperation = binop.operation;
+				
+		if (left  != null) t1 = left.IRme();
+		if (right != null) t2 = right.IRme();
+		
+		if (binopOperation == Operation.EQUALS)
+		{
+			IR.getInstance().Add_IRcommand(new IRcommand_Binop_EQ_Integers(dst,t1,t2));
+		}
+		if (binopOperation == Operation.GT)
+		{
+			IR.getInstance().Add_IRcommand(new IRcommand_Binop_GT_Integers(dst,t1,t2));
+		}
+		if (binopOperation == Operation.LT)
+		{
+			IR.getInstance().Add_IRcommand(new IRcommand_Binop_LT_Integers(dst,t1,t2));
+		}
+		if (binopOperation == Operation.PLUS)
+		{
+			IR.getInstance().Add_IRcommand(new IRcommand_Binop_Add_Integers(dst,t1,t2));
+		}
+		if (binopOperation == Operation.MINUS)
+		{
+			IR.getInstance().Add_IRcommand(new IRcommand_Binop_Sub_Integers(dst,t1,t2));
+		}
+		if (binopOperation == Operation.MULTIPLY)
+		{
+			IR.getInstance().Add_IRcommand(new IRcommand_Binop_Mul_Integers(dst,t1,t2));
+		}
+		if (binopOperation == Operation.DIVIDE)
+		{
+			IR.getInstance().Add_IRcommand(new IRcommand_Binop_Div_Integers(dst,t1,t2));
+		}
+
+		return dst;
+	}
+
 }
