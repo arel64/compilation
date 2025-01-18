@@ -3,6 +3,7 @@ import java.io.*;
 
 import java_cup.runtime.Symbol;
 import AST.*;
+import IR.IR;
 import SYMBOL_TABLE.SemanticException;
 
 public class Main
@@ -47,6 +48,8 @@ public class Main
 				AST = (AST_PROGRAM) p.parse().value;
 				AST.PrintMe();
 				AST.SemantMeLog();
+				AST.IRme();
+				IR.StaticAnalysis();
 				file_writer.write("OK");
 			}
 			catch(LexerError e)
