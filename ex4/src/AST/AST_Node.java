@@ -2,6 +2,7 @@ package AST;
 import SYMBOL_TABLE.SYMBOL_TABLE;
 import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
+import TEMP.*;
 public abstract class AST_Node
 {
 	/*******************************************/
@@ -22,6 +23,7 @@ public abstract class AST_Node
             String.format("%s",toString())
         );
 	}
+
 	public void logMetadata(TYPE myType)
 	{
 		String myTypeName = "No Type";
@@ -37,15 +39,20 @@ public abstract class AST_Node
 			String.format("Scope Level %s Type name: %s myClass %s linen:%s",instance.getCurrentScopeIndex(),myTypeName,myTypeClassName,lineNumber)
 		);	
 	}
+
 	public abstract TYPE SemantMe() throws SemanticException;
+
+	public abstract TEMP IRme();
+
 	final public void setLineNumber(int lineNumber)
 	{
 		this.lineNumber = lineNumber;
 	}
+
 	public TYPE SemantMeLog() throws SemanticException
 	{
 		TYPE myType = SemantMe();
 		logMetadata(myType);
 		return myType;
-	}	
+	}
 }

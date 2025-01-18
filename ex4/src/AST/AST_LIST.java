@@ -1,5 +1,6 @@
 package AST;
 import TYPES.*;
+import TEMP.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -100,4 +101,16 @@ public class AST_LIST<T extends AST_Node> extends AST_Node implements Iterable<T
     public Iterator<T> iterator() {
         return list.iterator();
     }
+    @Override
+    public TEMP IRme()
+	{
+        for (int i = 0; i < list.size(); i++) {
+            T node = list.get(i);
+            if (node != null) {
+                node.IRme();
+            }
+        }
+		
+		return null;
+	}
 }

@@ -2,6 +2,8 @@ package AST;
 import SYMBOL_TABLE.SYMBOL_TABLE;
 import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
+import TEMP.*;
+import IR.*;
 
 public class AST_VAR_DEC extends AST_DEC {
     
@@ -53,4 +55,15 @@ public class AST_VAR_DEC extends AST_DEC {
         }
         return type;
     }
+    @Override
+    public TEMP IRme()
+	{
+		IR.getInstance().Add_IRcommand(new IRcommand_Allocate(this.varName));
+		
+		if (this.varValue != null)
+		{
+			IR.getInstance().Add_IRcommand(new IRcommand_Store(this.varName,this.varValue.IRme()));
+		}
+		return null;
+	}
 }

@@ -1,6 +1,7 @@
 package AST;
 import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
+import TEMP.*;
 
 public class AST_PROGRAM extends AST_Node {
     public AST_LIST<AST_DEC> declerationList;
@@ -29,4 +30,10 @@ public class AST_PROGRAM extends AST_Node {
     public TYPE SemantMe() throws SemanticException {
         return declerationList.SemantMeLog();
     }
+
+    @Override
+    public TEMP IRme()
+	{
+        return declerationList.IRme();
+	}
 }
