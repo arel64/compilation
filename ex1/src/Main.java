@@ -1,21 +1,18 @@
-   
+
 import java.io.*;
 
 import java_cup.runtime.Symbol;
-   
-public class Main
-{
-	static public void main(String argv[])
-	{
+
+public class Main {
+	static public void main(String argv[]) {
 		Lexer l;
 		Symbol s;
 		FileReader file_reader;
 		PrintWriter file_writer;
 		String inputFilename = argv[0];
 		String outputFilename = argv[1];
-		
-		try
-		{
+
+		try {
 			/********************************/
 			/* [1] Initialize a file reader */
 			/********************************/
@@ -25,7 +22,7 @@ public class Main
 			/* [2] Initialize a file writer */
 			/********************************/
 			file_writer = new PrintWriter(outputFilename);
-			
+
 			/******************************/
 			/* [3] Initialize a new lexer */
 			/******************************/
@@ -35,15 +32,14 @@ public class Main
 			/* [4] Read next token */
 			/***********************/
 			String output = "";
-			try{
+			try {
 
 				s = l.next_token();
-				
+
 				/********************************/
 				/* [5] Main reading tokens loop */
 				/********************************/
-				while (s.sym != TokenNames.EOF)
-				{
+				while (s.sym != TokenNames.EOF) {
 					/************************/
 					/* [6] Print to console */
 					/************************/
@@ -53,39 +49,34 @@ public class Main
 					System.out.print(l.getTokenStartPosition());
 					System.out.print("]:");
 					System.out.print(s.value);
-					System.out.print(" "+TokenNames.getTokenName(s.sym));
+					System.out.print(" " + TokenNames.getTokenName(s.sym));
 					System.out.print("\n");
-					
+
 					/*********************/
 					/* [7] Print to file */
 					/*********************/
-					output+=(TokenNames.getTokenName(s.sym));
-					if(s.value != null)
-					{
-						output+=("("+s.value+")");	
+					output += (TokenNames.getTokenName(s.sym));
+					if (s.value != null) {
+						output += ("(" + s.value + ")");
 					}
-					output+=("[");
-					output+=(l.getLine());
-					output+=(",");
-					output+=(l.getTokenStartPosition());
-					output+=("]");
-					output+=("\n");
-					
+					output += ("[");
+					output += (l.getLine());
+					output += (",");
+					output += (l.getTokenStartPosition());
+					output += ("]");
+					output += ("\n");
+
 					/***********************/
 					/* [8] Read next token */
 					/***********************/
 					s = l.next_token();
 				}
-			}
-			catch(Exception e)
-			{
+			} catch (Throwable e) {
 				output = "ERROR";
-			}
-			finally
-			{
+			} finally {
 				file_writer.print(output);
 			}
-			
+
 			/******************************/
 			/* [9] Close lexer input file */
 			/******************************/
@@ -95,13 +86,10 @@ public class Main
 			/* [10] Close output file */
 			/**************************/
 			file_writer.close();
-    	}
-			     
-		catch (Exception e)
-		{
+		}
+
+		catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 }
-
-

@@ -1,1 +1,2 @@
-hello "hello" new ()
+int a;
+string banana := "asdadasdadasd";
