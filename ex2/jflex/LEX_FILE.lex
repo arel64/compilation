@@ -74,8 +74,8 @@ import java_cup.runtime.*;
 			//Prevent very big numbers from overflowing int
 			throw new RuntimeException("Out of bounds integer");
 		}
-        int value = Integer.parseInt(representation);
-		if (value >= 0 && value <= 32767) {
+        int value = Math.abs(Integer.parseInt(representation));
+		if (value <= 32767) {
             return value;
         } 
 		throw new RuntimeException("Out of bounds integer");
