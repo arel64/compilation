@@ -28,10 +28,9 @@ public class AST_EXP_VAR extends AST_EXP
 	}
 
 	@Override
-	public TEMP IRme() { // TODO understand if and how to load
+	public TEMP IRme() {
 		TEMP dst = TEMP_FACTORY.getInstance().getFreshTEMP();
-		IR.getInstance().Add_IRcommand(new IRcommand_Load((var.val, src)));
-		dst = var.IRme();
+		IR.getInstance().Add_IRcommand(new IRcommand_Load((dst, var.val)));
 		return dst;
 	}
 }
