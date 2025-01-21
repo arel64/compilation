@@ -1,5 +1,6 @@
 package AST;
 import TYPES.*;
+import TEMP.*;
 import IR.*;
 import AST.AST_BINOP.Operation;
 import SYMBOL_TABLE.SemanticException;

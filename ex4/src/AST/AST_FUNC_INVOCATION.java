@@ -2,6 +2,8 @@ package AST;
 import SYMBOL_TABLE.SYMBOL_TABLE;
 import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
+import TEMP.*;
+import IR.*;
 
 public class AST_FUNC_INVOCATION extends AST_EXP {
     
@@ -100,5 +102,28 @@ public class AST_FUNC_INVOCATION extends AST_EXP {
         
         return myFunctionType.getReturnType();
 
+    }
+
+    @Override
+    public TEMP IRme() {
+        for (AST_EXP param : params)
+        {
+            param.IRme();
+        }
+        TEMP dst = TEMP_FACTORY.getInstance().getFreshTEMP();
+        if (var == null)
+        {
+            IR.getInstance().Add_IRcommand(new IRcommand_Func_Call(dst, funcName, params));
+
+        }
+        else
+        {
+            IR.getInstance().Add_IRcommand(new IRcommand_Class_Method_Call(dst, var, funcName, params));
+        }
+
+        // IR.getInstance().Add_IRcommand(new IRcommand_Jump_Label(func_label)); // TODO fix label
+        // IR.getInstance().Add_IRcommand(new IRcommand_Jump_Label(end_label));
+
+        return dst;
     }
 }

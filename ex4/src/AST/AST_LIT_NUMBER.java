@@ -1,5 +1,8 @@
 package AST;
 import TYPES.*;
+import TEMP.*;
+import IR.*;
+
 public class AST_LIT_NUMBER extends AST_LIT
 {
     public int val;
@@ -21,4 +24,5 @@ public class AST_LIT_NUMBER extends AST_LIT
     public TYPE_INT SemantMe(){
         return TYPE_INT.getInstance();
     }
+
 }

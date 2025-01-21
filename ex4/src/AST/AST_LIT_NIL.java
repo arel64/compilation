@@ -1,5 +1,7 @@
 package AST;
 import TYPES.*;
+import TEMP.*;
+import IR.*;
 public class AST_LIT_NIL extends AST_LIT
 {
     
@@ -16,5 +18,5 @@ public class AST_LIT_NIL extends AST_LIT
     public TYPE_NIL SemantMe(){
         return TYPE_NIL.getInstance();
     }
-   
+
 }

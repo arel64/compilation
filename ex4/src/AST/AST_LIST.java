@@ -1,6 +1,7 @@
 package AST;
 import TYPES.*;
 import TEMP.*;
+import IR.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;

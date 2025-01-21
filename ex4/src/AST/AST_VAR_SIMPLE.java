@@ -31,4 +31,5 @@ public class AST_VAR_SIMPLE extends AST_VAR
 		}
 		return t;
 	}
+
 }

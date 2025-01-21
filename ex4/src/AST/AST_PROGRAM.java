@@ -2,6 +2,7 @@ package AST;
 import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
 import TEMP.*;
+import IR.*;
 
 public class AST_PROGRAM extends AST_Node {
     public AST_LIST<AST_DEC> declerationList;

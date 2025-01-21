@@ -77,4 +77,9 @@ public class IR
 		// additionally if the instruction uses a variable it must check if it was initialized based on the declarations set
 		// if not save that variable name for later logging
 	}
+
+	@Override
+	public String toString() {
+		
+	}
 }

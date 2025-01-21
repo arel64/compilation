@@ -1,6 +1,8 @@
 package AST;
 import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
+import TEMP.*;
+import IR.*;
 
 public class AST_EXP_VAR extends AST_EXP
 {
@@ -23,5 +25,13 @@ public class AST_EXP_VAR extends AST_EXP
 	@Override
 	public TYPE SemantMe() throws SemanticException {
 		return var.SemantMeLog();
+	}
+
+	@Override
+	public TEMP IRme() { // TODO understand if and how to load
+		TEMP dst = TEMP_FACTORY.getInstance().getFreshTEMP();
+		IR.getInstance().Add_IRcommand(new IRcommand_Load((var.val, src)));
+		dst = var.IRme();
+		return dst;
 	}
 }

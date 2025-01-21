@@ -59,7 +59,7 @@ import java_cup.runtime.*;
 	/*******************************************/
 	/* Enable line number extraction from main */
 	/*******************************************/
-	public int getLine() { return yyline; } 
+	public int getLine() { return yyline + 1; } 
 
 	/**********************************************/
 	/* Enable token position extraction from main */
@@ -88,8 +88,8 @@ import java_cup.runtime.*;
 LineTerminator   = \r|\n|\r\n
 WhiteSpace       = {LineTerminator} | [ \t]
 INTEGER          = -?0|-?[1-9][0-9]*
-ID               = [a-zA-Z_][a-zA-Z0-9_]*
 STRING           = \"[a-zA-Z]*\"
+ID               = [a-zA-Z_][a-zA-Z0-9_]*
 TYPE_1_COMMENT 	 = \/\/[(|)|\[|\]|{|} | \?|\!|\.|\; | \+|\-|\*|\/ | [0-9] | [a-zA-Z_]]*{WhiteSpace}*
 VALID_COMMENT_CHAR = [a-zA-Z0-9 \t\n\r\(\)\[\]\{\}\?\!\+\-\*/\.;]
 
