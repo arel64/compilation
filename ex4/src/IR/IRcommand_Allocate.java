@@ -21,4 +21,9 @@ public class IRcommand_Allocate extends IRcommand
 		this.var_name = var_name;
 	}
 
+	@Override
+	public String toString() {
+		return "IRcommand_Allocate: Allocate " + var_name;
+	}
+
 }

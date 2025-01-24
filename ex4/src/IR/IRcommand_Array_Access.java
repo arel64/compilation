@@ -24,4 +24,8 @@ public class IRcommand_Array_Access extends IRcommand
 		this.src = src;
 		this.index = index;
 	}
+	@Override
+	public String toString() {
+		return "IRcommand_Array_Access: dst=" + dst + ", src=" + src + ", index=" + index;
+	}
 }

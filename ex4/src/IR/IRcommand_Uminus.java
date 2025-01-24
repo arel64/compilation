@@ -22,4 +22,9 @@ public class IRcommand_Uminus extends IRcommand
 		this.dst = dst;
 		this.src = src;
 	}
+
+	@Override
+    public String toString() {
+        return "IRcommand_Uminus: dst=" + dst + ", src=" + src;
+    }
 }

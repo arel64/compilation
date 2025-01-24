@@ -24,4 +24,9 @@ public class TEMP
 	{
 		return serial;
 	}
+
+	@Override
+	public String toString() {
+        return "TEMP_" + serial;
+    }
 }

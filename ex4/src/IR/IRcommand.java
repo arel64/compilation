@@ -17,8 +17,12 @@ public abstract class IRcommand
 	/* Label Factory */
 	/*****************/
 	protected static int label_counter=0;
-	public    static String getFreshLabel(String msg)
+	public static String getFreshLabel(String msg)
 	{
 		return String.format("Label_%d_%s",label_counter++,msg);
 	}
+	@Override
+    public String toString() {   //do we need this?
+        return "IRcommand: " + this.getClass().getSimpleName();
+    }
 }

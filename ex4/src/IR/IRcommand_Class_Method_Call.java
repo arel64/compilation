@@ -33,5 +33,14 @@ public class IRcommand_Class_Method_Call extends IRcommand
 		this.method = method;
 		this.args = args;
 	}
+	@Override
+    public String toString() {
+        String result = "IRcommand_Class_Method_Call: method=" + method + ", src=" + src;
+        if (dst != null) {
+            result += ", dst=" + dst;
+        }
+        result += ", args=" + args.toString();
+        return result;
+    }
 }
 

@@ -20,4 +20,9 @@ public class IRcommand_Label extends IRcommand
 	{
 		this.label_name = label_name;
 	}
+
+	@Override
+    public String toString() {
+        return "IRcommand_Label: label=" + label_name;
+    }
 }

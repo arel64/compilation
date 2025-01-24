@@ -24,4 +24,10 @@ public class IRcommand_Binop_Mul_Integers extends IRcommand
 		this.t1 = t1;
 		this.t2 = t2;
 	}
+
+	@Override
+	public String toString() {
+		return "IRcommand_Binop_Mul_Integers: dst=" + dst + ", t1=" + t1 + ", t2=" + t2;
+	}
+
 }

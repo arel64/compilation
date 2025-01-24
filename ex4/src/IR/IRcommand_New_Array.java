@@ -22,4 +22,9 @@ public class IRcommand_New_Array extends IRcommand
 		this.dst = dst;
 		this.size = size;
 	}
+
+	@Override
+    public String toString() {
+        return "IRcommand_New_Array: dst=" + dst + ", size=" + size;
+    }
 }

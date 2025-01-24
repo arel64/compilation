@@ -20,4 +20,9 @@ public class IRcommand_Return extends IRcommand
 	{
 		this.register = register;
 	}
+
+	@Override
+    public String toString() {
+        return "IRcommand_Return: register=" + register;
+    }
 }

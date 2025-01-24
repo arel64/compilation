@@ -22,4 +22,9 @@ public class IRcommand_Store extends IRcommand
 		this.src      = src;
 		this.var_name = var_name;
 	}
+
+	@Override
+    public String toString() {
+        return "IRcommand_Store: var_name=" + var_name + ", src=" + src;
+    }
 }

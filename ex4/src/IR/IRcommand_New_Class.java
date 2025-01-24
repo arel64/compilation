@@ -22,4 +22,9 @@ public class IRcommand_New_Class extends IRcommand
 		this.dst = dst;
 		this.type = type;
 	}
+
+	@Override
+    public String toString() {
+        return "IRcommand_New_Class: dst=" + dst + ", type=" + type;
+    }
 }

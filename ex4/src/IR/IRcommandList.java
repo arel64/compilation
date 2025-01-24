@@ -21,4 +21,18 @@ public class IRcommandList
 		this.head = head;
 		this.tail = tail;
 	}
+
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        IRcommandList current = this;
+        
+        while (current != null) {
+            sb.append(current.head).append("\n");
+            current = current.tail;
+        }
+        
+        return sb.toString();
+    }
 }

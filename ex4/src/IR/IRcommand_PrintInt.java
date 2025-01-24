@@ -20,4 +20,9 @@ public class IRcommand_PrintInt extends IRcommand
 	{
 		this.t = t;
 	}
+
+	@Override
+    public String toString() {
+        return "IRcommand_PrintInt: t=" + t;
+    }
 }

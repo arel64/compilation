@@ -24,4 +24,9 @@ public class IRcommand_New_Class extends IRcommand
 		this.src = src;
 		this.field = field;
 	}
+	@Override
+	public String toString() {
+		return "IRcommand_New_Class: dst=" + dst + ", src=" + src + ", field=" + field;
+	}
+
 }

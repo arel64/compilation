@@ -24,4 +24,10 @@ public class IRcommand_Array_Set extends IRcommand
 		this.index = index;
 		this.value = value;
 	}
+	
+	@Override
+	public String toString() {
+		return "IRcommand_Array_Set: array=" + array + ", index=" + index + ", value=" + value;
+	}
+
 }

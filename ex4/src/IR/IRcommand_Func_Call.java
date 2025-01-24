@@ -31,4 +31,13 @@ public class IRcommand_Func_Call extends IRcommand
 		this.func = func;
 		this.args = args;
 	}
+	
+	@Override
+    public String toString() {
+        String result = "IRcommand_Func_Call: func=" + func + ", args=" + args.toString();
+        if (dst != null) {
+            result += ", dst=" + dst;
+        }
+        return result;
+    }
 }

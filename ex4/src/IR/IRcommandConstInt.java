@@ -22,4 +22,9 @@ public class IRcommandConstInt extends IRcommand
 		this.t = t;
 		this.value = value;
 	}
+
+	@Override
+    public String toString() {
+        return "IRcommandConstInt: t=" + t + ", value=" + value;
+    }
 }
