@@ -13,8 +13,8 @@ import java.util.ArrayList;
 
 public class IR
 {
-	private IRcommand head=null;
-	private IRcommandList tail=null;
+	public IRcommand head=null;
+	public IRcommandList tail=null;
 
 	public static ArrayList<int> workList = new ArrayList<int>();
 	public static ArrayList<String> exceptionVariables = new ArrayList<String>();
@@ -80,6 +80,14 @@ public class IR
 
 	@Override
 	public String toString() {
-		
+		IRcommand itr = head;
+		String print = "";
+		while (itr != null)
+		{
+			print += itr.toString();
+			itr = itr.tail;
+			if (itr) itr = itr.head();
+		}
+		return print;
 	}
 }
