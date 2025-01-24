@@ -12,13 +12,13 @@ package IR;
 /*******************/
 import TEMP.*;
 
-public class IRcommand_New_Class extends IRcommand
+public class IRcommand_Class_Field_Access extends IRcommand
 {
 	TEMP dst;
 	TEMP src;
 	String field;
 	
-	public IRcommand_New_Class(TEMP dst, TEMP src, String field)
+	public IRcommand_Class_Field_Access(TEMP dst, TEMP src, String field)
 	{
 		this.dst = dst;
 		this.src = src;
@@ -26,7 +26,7 @@ public class IRcommand_New_Class extends IRcommand
 	}
 	@Override
 	public String toString() {
-		return "IRcommand_New_Class: dst=" + dst + ", src=" + src + ", field=" + field;
+		return "IRcommand_Class_Field_Access: dst=" + dst + ", src=" + src + ", field=" + field;
 	}
 
 }

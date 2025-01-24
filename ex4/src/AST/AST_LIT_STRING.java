@@ -1,5 +1,8 @@
 package AST;
 import TYPES.*;
+import TEMP.*;
+import IR.*;
+
 public class AST_LIT_STRING extends AST_LIT
 {
     public String val;
@@ -18,5 +21,12 @@ public class AST_LIT_STRING extends AST_LIT
     public TYPE_STRING SemantMe(){
         return TYPE_STRING.getInstance();
     }
+
+    @Override
+    public TEMP IRme()
+	{
+	
+		return null;
+	}
    
 }

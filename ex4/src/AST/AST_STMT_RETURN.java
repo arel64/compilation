@@ -1,6 +1,8 @@
 package AST;
 import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
+import TEMP.*;
+import IR.*;
 
 public class AST_STMT_RETURN extends AST_STMT {
     public AST_EXP exp;
@@ -38,4 +40,10 @@ public class AST_STMT_RETURN extends AST_STMT {
         return new TYPE_RETURN(t);
         
     }
+
+    public TEMP IRme()
+	{
+        IR.getInstance().Add_IRcommand(new IRcommand_Return(exp.IRme()));
+		return null;
+	}
 }

@@ -2,7 +2,8 @@ package AST;
 import SYMBOL_TABLE.SYMBOL_TABLE;
 import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
-
+import TEMP.*;
+import IR.*;
 public class AST_ARRAY_TYPEDEF extends AST_DEC {
     public AST_TYPE baseType;
 
@@ -37,4 +38,11 @@ public class AST_ARRAY_TYPEDEF extends AST_DEC {
         symbol_table.enter(getName(), arrayType);
         return arrayType;
     }
+
+    @Override
+    public TEMP IRme()
+	{
+
+		return null;
+	}
 }

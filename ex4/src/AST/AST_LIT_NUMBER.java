@@ -28,7 +28,7 @@ public class AST_LIT_NUMBER extends AST_LIT
     @Override
 	public TEMP IRme() {
 		TEMP dst = TEMP_FACTORY.getInstance().getFreshTEMP();
-		IR.getInstance().Add_IRcommand(new IRcommand_Load((dst, getValue())));
+		IR.getInstance().Add_IRcommand(new IRcommand_Load(dst, getValue()));
 		return dst;
 	}
 }

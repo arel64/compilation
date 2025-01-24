@@ -8,8 +8,8 @@ import TYPES.TYPE_LIST;
 
 public abstract class AST_STMT_CONDITIONAL extends AST_STMT
 {
-    private AST_EXP condition;
-    private AST_LIST<? extends AST_STMT> body;
+    public AST_EXP condition;
+    public AST_LIST<? extends AST_STMT> body;
     public AST_STMT_CONDITIONAL(AST_EXP condition, AST_LIST<AST_STMT> body)
     {
         this.body = body;

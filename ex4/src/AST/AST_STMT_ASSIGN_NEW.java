@@ -1,7 +1,8 @@
 package AST;
 import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
-
+import TEMP.*;
+import IR.*;
 public class AST_STMT_ASSIGN_NEW extends AST_STMT {
     public AST_VAR var;
     public AST_NEW_EXP newExp;
@@ -30,4 +31,9 @@ public class AST_STMT_ASSIGN_NEW extends AST_STMT {
         }
         return varType;
     }
+    public TEMP IRme()
+	{
+	
+		return null;
+	}
 }

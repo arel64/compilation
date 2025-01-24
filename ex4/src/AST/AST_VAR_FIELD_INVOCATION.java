@@ -5,7 +5,8 @@ import SYMBOL_TABLE.SemanticException;
 import TYPES.TYPE;
 import TYPES.TYPE_CLASS;
 import TYPES.TYPE_CLASS_FIELD;
-
+import TEMP.*;
+import IR.*;
 public class AST_VAR_FIELD_INVOCATION extends AST_VAR
 {
 	public String fieldName;
@@ -35,5 +36,11 @@ public class AST_VAR_FIELD_INVOCATION extends AST_VAR
 			throw new SemanticException(lineNumber, String.format("Can not invoke %s.%s on class type %s, it does not exist",varType.getName(),fieldName,varType));
 		}
 		return member.t;
+	}
+
+	public TEMP IRme()
+	{
+	
+		return null;
 	}
 }

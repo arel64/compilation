@@ -6,6 +6,8 @@ import java.util.List;
 import SYMBOL_TABLE.SYMBOL_TABLE;
 import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
+import TEMP.*;
+import IR.*;
 public class AST_CLASS_DEC extends AST_DEC {
       
     public String parentClassName;
@@ -120,5 +122,12 @@ public class AST_CLASS_DEC extends AST_DEC {
         }
         symbol_table.endScope();
 		return currentClass;  
+	}
+
+    @Override
+	public TEMP IRme()
+	{
+	
+		return null;
 	}
 }

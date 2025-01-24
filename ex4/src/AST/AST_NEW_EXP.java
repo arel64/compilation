@@ -1,6 +1,8 @@
 package AST;
 import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
+import TEMP.*;
+import IR.*;
 
 public class AST_NEW_EXP extends AST_EXP {
     public AST_TYPE type;
@@ -46,4 +48,9 @@ public class AST_NEW_EXP extends AST_EXP {
         }
         return new TYPE_ARRAY(myType,myType.getName());
     }
+    public TEMP IRme()
+	{
+	
+		return null;
+	}
 }

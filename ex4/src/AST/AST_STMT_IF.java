@@ -37,7 +37,7 @@ public class AST_STMT_IF extends AST_STMT_CONDITIONAL
 		/********************/
 		/* [3] cond.IRme(); */
 		/********************/
-		TEMP cond_temp = cond.IRme();
+		TEMP cond_temp = condition.IRme();
 
 		/***********************************************/
 		/* [4] Jump after the if block if cond is zero */

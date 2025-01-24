@@ -1,6 +1,8 @@
 package AST;
 import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
+import TEMP.*;
+import IR.*;
 
 public class AST_BINOP extends AST_EXP
 {
@@ -53,5 +55,11 @@ public class AST_BINOP extends AST_EXP
 	public TYPE SemantMe() throws SemanticException {
 		return null;
 	}
-
+	
+	@Override
+	public TEMP IRme()
+	{
+	
+		return null;
+	}
 }

@@ -1,6 +1,8 @@
 package AST;
 import TYPES.*;
 import SYMBOL_TABLE.*;
+import TEMP.*;
+import IR.*;
 
 public class AST_TYPE extends AST_Node
 {
@@ -28,5 +30,12 @@ public class AST_TYPE extends AST_Node
            throw new SemanticException(lineNumber,"The type does not exist."+ toString() );
         }
         return curr;
+	}
+
+	@Override
+	public TEMP IRme()
+	{
+	
+		return null;
 	}
 }

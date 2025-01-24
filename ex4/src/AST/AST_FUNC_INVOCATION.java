@@ -4,7 +4,8 @@ import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
 import TEMP.*;
 import IR.*;
-
+import java.util.ArrayList;
+import java.util.List;
 public class AST_FUNC_INVOCATION extends AST_EXP {
     
     public String funcName;
@@ -106,19 +107,20 @@ public class AST_FUNC_INVOCATION extends AST_EXP {
 
     @Override
     public TEMP IRme() {
+        ArrayList<TEMP> paramsTemp = new ArrayList<TEMP>();
         for (AST_EXP param : params)
         {
-            param.IRme();
+           paramsTemp.add(param.IRme());
         }
         TEMP dst = TEMP_FACTORY.getInstance().getFreshTEMP();
         if (var == null)
         {
-            IR.getInstance().Add_IRcommand(new IRcommand_Func_Call(dst, funcName, params));
+            IR.getInstance().Add_IRcommand(new IRcommand_Func_Call(dst, funcName, paramsTemp));
 
         }
         else
         {
-            IR.getInstance().Add_IRcommand(new IRcommand_Class_Method_Call(dst, var, funcName, params));
+            IR.getInstance().Add_IRcommand(new IRcommand_Class_Method_Call(dst, var.IRme(), funcName, paramsTemp));
         }
 
         // IR.getInstance().Add_IRcommand(new IRcommand_Jump_Label(func_label)); // TODO fix label

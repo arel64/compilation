@@ -2,7 +2,8 @@ package AST;
 import SYMBOL_TABLE.SYMBOL_TABLE;
 import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
-
+import TEMP.*;
+import IR.*;
 public class AST_VAR_SIMPLE extends AST_VAR
 {
 	
@@ -30,6 +31,12 @@ public class AST_VAR_SIMPLE extends AST_VAR
 			throw new SemanticException(lineNumber,String.format("Cannot find var: %s ",this.val));
 		}
 		return t;
+	}
+
+	public TEMP IRme()
+	{
+	
+		return null;
 	}
 
 }

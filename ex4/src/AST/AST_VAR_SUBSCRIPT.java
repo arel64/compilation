@@ -2,7 +2,8 @@ package AST;
 import SYMBOL_TABLE.SYMBOL_TABLE;
 import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
-
+import TEMP.*;
+import IR.*;
 public class AST_VAR_SUBSCRIPT extends AST_VAR
 {
 	public AST_EXP subscript;
@@ -54,5 +55,11 @@ public class AST_VAR_SUBSCRIPT extends AST_VAR
 		return vArray.t;
 
 		
+	}
+
+	public TEMP IRme()
+	{
+	
+		return null;
 	}
 }

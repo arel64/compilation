@@ -16,7 +16,7 @@ public class IR
 	public IRcommand head=null;
 	public IRcommandList tail=null;
 
-	public static ArrayList<int> workList = new ArrayList<int>();
+	public static ArrayList<Integer> workList = new ArrayList<Integer>();
 	public static ArrayList<String> exceptionVariables = new ArrayList<String>();
 
 	/******************/
@@ -80,13 +80,14 @@ public class IR
 
 	@Override
 	public String toString() {
-		IRcommand itr = head;
+		IR head = instance;
+		IRcommandList itr = head.tail;
 		String print = "";
+		print += head.head.toString();
 		while (itr != null)
 		{
-			print += itr.toString();
+			print += itr.head.toString();
 			itr = itr.tail;
-			if (itr) itr = itr.head();
 		}
 		return print;
 	}

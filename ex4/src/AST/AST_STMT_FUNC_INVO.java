@@ -1,7 +1,8 @@
 package AST;
 import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
-
+import TEMP.*;
+import IR.*;
 public class AST_STMT_FUNC_INVO extends AST_STMT {
     public AST_FUNC_INVOCATION invocation;
 
@@ -23,4 +24,10 @@ public class AST_STMT_FUNC_INVO extends AST_STMT {
     public TYPE SemantMe() throws SemanticException {
         return invocation.SemantMe();
     }
+
+    public TEMP IRme()
+	{
+	
+		return null;
+	}
 }
