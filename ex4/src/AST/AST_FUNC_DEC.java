@@ -1,6 +1,7 @@
 package AST;
 import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
+import TEMP.*;
 import IR.*;
 
 import SYMBOL_TABLE.SYMBOL_TABLE;
@@ -118,10 +119,16 @@ public class AST_FUNC_DEC extends AST_CLASS_FIELDS_DEC {
         }
     }
 
-    // @Override
-    // public TEMP IRme() {
-    //     String label_end   = IRcommand.getFreshLabel("end");
-	// 	String label_start = IRcommand.getFreshLabel("start");
-    // }
+    @Override
+    public TEMP IRme() {
+        String label_end   = IRcommand.getFreshLabel("end");
+		String label_start = IRcommand.getFreshLabel("start");
+
+        IR.getInstance().Add_IRcommand(new IRcommand_Label(label_start));
+        IR.getInstance().Add_IRcommand(new IRcommand_New_Func(this.varName, returnType));
+        body.IRme();
+        IR.getInstance().Add_IRcommand(new IRcommand_Label(label_end));
+        return null;
+    }
 }
 

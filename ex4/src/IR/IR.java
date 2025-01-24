@@ -16,6 +16,8 @@ public class IR
 	public IRcommand head=null;
 	public IRcommandList tail=null;
 
+	public static ArrayList<int[]> workflowGraph = new ArrayList<int[]>();
+
 	public static ArrayList<Integer> workList = new ArrayList<Integer>();
 	public static ArrayList<String> exceptionVariables = new ArrayList<String>();
 
@@ -69,6 +71,7 @@ public class IR
 	}
 
 	public static void StaticAnalysis() {
+		//createDataflowGraph();
 		// here we will take our instance that includes a list of instructions
 		// and we will do chaotic iterations over them to find uninitielized uses of variables
 		// we need to maintain a "work list" that holds indexes of instructions that we need to visit
@@ -78,15 +81,28 @@ public class IR
 		// if not save that variable name for later logging
 	}
 
+	// public static void createDataflowGraph() {
+	// 	IRcommand itr = head;
+	// 	int counter = 0;
+	// 	while (itr != null)
+	// 	{
+			
+	// 		if (itr.tail) 
+	// 			itr = itr.tail.head();
+	// 		else 
+	// 			itr = null;
+
+	// 	}
+	// }
+
 	@Override
 	public String toString() {
-		IR head = instance;
-		IRcommandList itr = head.tail;
+		IRcommandList itr = instance.tail;
 		String print = "";
-		print += head.head.toString();
+		print += instance.head.toString() + "\n";
 		while (itr != null)
 		{
-			print += itr.head.toString();
+			print += itr.head.toString() + "\n";
 			itr = itr.tail;
 		}
 		return print;

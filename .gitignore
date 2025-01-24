@@ -3,6 +3,7 @@ Parser.java
 TokenNames.java
 PARSER
 LEXER
+ANALYZER
 bin
 output
 # Compiled class file
