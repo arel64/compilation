@@ -52,8 +52,14 @@ public class IR
 		IRcommand.workList.add(0);
 		instance.commandList.get(IRcommand.workList.get(0)).staticAnanlysis();
 		while (!IRcommand.workList.isEmpty()) {
+			int next = IRcommand.workList.get(0);
 			System.out.println(IRcommand.workList);
-			instance.commandList.get(IRcommand.workList.get(0)).staticAnanlysis();
+			System.out.println("----------");
+			System.out.println("going to call: " + next);
+			if (next >= instance.commandList.size())
+				IRcommand.workList.remove(IRcommand.workList.indexOf(next));
+			else 
+				instance.commandList.get(next).staticAnanlysis();
 		}
 	}
 

@@ -1,2 +1,12 @@
-int x;
-int y := x;
+int a := 1;
+int b := 5;
+int Main() {
+    int x := 1;
+    int b;
+    if (b > 10) {
+        a := 0;
+        int x;
+    }
+    return x;
+}
+

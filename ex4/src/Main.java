@@ -1,5 +1,6 @@
 
 import java.io.*;
+import java.util.*; 
 
 import java_cup.runtime.Symbol;
 import AST.*;
@@ -46,15 +47,16 @@ public class Main {
 				AST.PrintMe();
 				AST.SemantMeLog();
 				AST.IRme();
-				System.out.println(IR.getInstance());
 				IR.StaticAnalysis();
 				if (IRcommand.exceptionVariables.isEmpty()) {
 					file_writer.write("OK");
 				}
 				else {
-					for (String var : IRcommand.exceptionVariables) {
-						file_writer.write(var + "\n");
-					}
+        			List<String> sortedList = new ArrayList<>(IRcommand.exceptionVariables);
+        			Collections.sort(sortedList);
+        			for (String var : sortedList) {
+        			    file_writer.write(var + "\n");
+        			}
 				}
 			} catch (LexerError e) {
 				System.out.println(e.getMessage());

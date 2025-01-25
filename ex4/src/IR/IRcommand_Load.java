@@ -29,20 +29,28 @@ public class IRcommand_Load extends IRcommand
 		workList.remove(workList.indexOf(this.index));
 		HashSet<Init> in = new HashSet<Init>();
 		for (Integer i : prevCommands) {
-			in.addAll(IR.getInstance().commandList.get(i).out);
+			HashSet<Init> temp = IR.getInstance().commandList.get(i).out;
+			if (temp != null)
+				in.addAll(temp);
 		}
-		if (in.stream().allMatch(init -> init.var != var_name)) {
-			exceptionVariables.add(var_name); // do lexi
-		}
-		else {
-			in = in.stream().filter(init -> init.var != var_name).collect(Collectors.toCollection(HashSet::new));
-			in.add(new Init(var_name, this.index));
+		try {
+        	Integer.parseInt(var_name);
+    	} 
+		catch (NumberFormatException e) {
+			if (in.stream().allMatch(init -> init.var != var_name || init.line == -1)) {
+				exceptionVariables.add(var_name); // do lexi
+			}
+			else {
+				in = in.stream().filter(init -> init.var != var_name).collect(Collectors.toCollection(HashSet::new));
+				in.add(new Init(var_name, this.index));
+			}
 		}
 		if (!in.equals(this.out)) {
 			this.out = in;
-			for (int i : nextCommands) {
-				workList.add(i);
-			}
+			if (nextCommands != null)
+				for (int i : nextCommands) {
+					workList.add(i);
+				}
 		}
 	}
 

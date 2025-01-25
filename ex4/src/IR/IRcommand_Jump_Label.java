@@ -33,20 +33,21 @@ public class IRcommand_Jump_Label extends IRcommand
 		workList.remove(workList.indexOf(this.index));
 		HashSet<Init> in = new HashSet<Init>();
 		for (Integer i : prevCommands) {
-			in.addAll(IR.getInstance().commandList.get(i).out);
+			HashSet<Init> temp = IR.getInstance().commandList.get(i).out;
+			if (temp != null)
+				in.addAll(temp);
 		}
 		if (!in.equals(this.out)) {
 			this.out = new HashSet<Init>(in);
-			for (int i : nextCommands) {
-				if (i == -1) {
-					workList.add(findLabel(this.label_name));
-					System.out.println("added " + findLabel(this.label_name) + " to worklist");
+			if (nextCommands != null)
+				for (int i : nextCommands) {
+					if (i == -1) {
+						workList.add(findLabel(this.label_name));
+					}
+					else {
+						workList.add(i);
+					}
 				}
-				else {
-					workList.add(i);
-					System.out.println("added " + i + " to worklist");
-				}
-			}
 		}
 	}
 

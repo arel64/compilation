@@ -16,7 +16,7 @@ public abstract class IRcommand
 {
 	protected static int commandCounter = 0;
 	public static ArrayList<Integer> workList = new ArrayList<Integer>();
-	public static ArrayList<String> exceptionVariables = new ArrayList<String>();
+	public static HashSet<String> exceptionVariables = new HashSet<String>();
 	/*****************/
 	/* Label Factory */
 	/*****************/
@@ -33,27 +33,26 @@ public abstract class IRcommand
 
 	public IRcommand() {
 		this.index = commandCounter++;
-		if (this.index != IR.getInstance().commandList.size() - 1)
-		{
-			this.nextCommands = new int[]{this.index + 1};
-			if (this.index > 0 && !(IR.getInstance().commandList.get(this.index - 1) instanceof IRcommand_Jump_Label))
-				this.prevCommands.add(this.index - 1);
-		}
+		this.nextCommands = new int[]{this.index + 1};
+
+		if (this.index > 0 && !(IR.getInstance().commandList.get(this.index - 1) instanceof IRcommand_Jump_Label))
+			this.prevCommands.add(this.index - 1);
 	}
 
 	public void staticAnanlysis() {
-		System.out.println("analysis in line " + index + " my next command is " + nextCommands[0]);
 		workList.remove(workList.indexOf(this.index));
 		HashSet<Init> in = new HashSet<Init>();
 		for (Integer i : prevCommands) {
-			in.addAll(IR.getInstance().commandList.get(i).out);
+			HashSet<Init> temp = IR.getInstance().commandList.get(i).out;
+			if (temp != null)
+				in.addAll(temp);
 		}
 		if (!in.equals(this.out)) {
 			this.out = new HashSet<Init>(in);
-			for (int i : nextCommands) {
-				workList.add(i);
-				System.out.println("added " + i + " to worklist in command: " + this.index);
-			}
+			if (nextCommands != null)
+				for (int i : nextCommands) {
+					workList.add(i);
+				}
 		}
 	}
 

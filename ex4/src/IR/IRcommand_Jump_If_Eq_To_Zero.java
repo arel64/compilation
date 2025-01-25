@@ -23,7 +23,6 @@ public class IRcommand_Jump_If_Eq_To_Zero extends IRcommand
 		this.t = t;
 		this.label_name = label_name;
 		this.nextCommands = new int[]{this.index + 1, -1};
-		IR.getInstance().commandList.get(this.index + 1).prevCommands.add(this.index);
 	}
 
 	@Override
@@ -36,21 +35,22 @@ public class IRcommand_Jump_If_Eq_To_Zero extends IRcommand
 		workList.remove(workList.indexOf(this.index));
 		HashSet<Init> in = new HashSet<Init>();
 		for (Integer i : prevCommands) {
-			in.addAll(IR.getInstance().commandList.get(i).out);
+			HashSet<Init> temp = IR.getInstance().commandList.get(i).out;
+			if (temp != null)
+				in.addAll(temp);
 		}
 		if (!in.equals(this.out)) {
 			this.out = new HashSet<Init>(in);
-			for (int i : nextCommands) {
-				if (i == -1) {
-					workList.add(findLabel(this.label_name));
-					System.out.println("added " + findLabel(this.label_name) + " to worklist");
+			if (nextCommands != null)
+				for (int i : nextCommands) {
+					if (i == -1) {
+						workList.add(findLabel(this.label_name));
+					}
+					else {
+						workList.add(i);
+					}
+
 				}
-				else {
-					workList.add(i);
-					System.out.println("added " + i + " to worklist");
-				}
-					
-			}
 		}
 	}
 
