@@ -49,22 +49,12 @@ public class IR
 	}
 
 	public static void StaticAnalysis() {
-		//IRcommand.workList.add(instance.head);
-		// while (!IRcommand.workList.isEmpty()) {
-		//	HashSet<Init> out = instance.head.staticAnanlysis(new HashSet<Init>());
-		// 	worklist.staticAnanlysis(new HashSet<Init>());
-		// }
-		// here we will take our instance that includes a list of instructions
-		// and we will do chaotic iterations over them to find uninitielized uses of variables
-		// we need to maintain a "work list" that holds indexes of instructions that we need to visit
-		// we should add to each IR instruction class an analasys function
-		// this function will make the changes in the declarations set and update the work list
-		// additionally if the instruction uses a variable it must check if it was initialized based on the declarations set
-		// if not save that variable name for later logging
-	}
-
-	public static void checkInitializations() {
-		
+		IRcommand.workList.add(0);
+		instance.commandList.get(IRcommand.workList.get(0)).staticAnanlysis();
+		while (!IRcommand.workList.isEmpty()) {
+			System.out.println(IRcommand.workList);
+			instance.commandList.get(IRcommand.workList.get(0)).staticAnanlysis();
+		}
 	}
 
 	@Override

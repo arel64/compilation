@@ -28,25 +28,31 @@ public abstract class IRcommand
 
 	public HashSet<Integer> prevCommands = new HashSet<Integer>();
 	public int[] nextCommands;
-	public HashSet<Init> out;
+	public HashSet<Init> out = null;
 	public int index;
 
 	public IRcommand() {
 		this.index = commandCounter++;
-		this.nextCommands = new int[]{this.index + 1};
+		if (this.index != IR.getInstance().commandList.size() - 1)
+		{
+			this.nextCommands = new int[]{this.index + 1};
+			if (this.index > 0 && !(IR.getInstance().commandList.get(this.index - 1) instanceof IRcommand_Jump_Label))
+				this.prevCommands.add(this.index - 1);
+		}
 	}
 
-	public void staticAnanlysis(IRcommand prev) {
+	public void staticAnanlysis() {
+		System.out.println("analysis in line " + index + " my next command is " + nextCommands[0]);
 		workList.remove(workList.indexOf(this.index));
-		this.prevCommands.add(prev.index);
-		HashSet<Init> in = new HashSet<Init>(prev.out);
+		HashSet<Init> in = new HashSet<Init>();
 		for (Integer i : prevCommands) {
 			in.addAll(IR.getInstance().commandList.get(i).out);
 		}
-		if (!this.out.equals(in)) {
+		if (!in.equals(this.out)) {
 			this.out = new HashSet<Init>(in);
 			for (int i : nextCommands) {
 				workList.add(i);
+				System.out.println("added " + i + " to worklist in command: " + this.index);
 			}
 		}
 	}

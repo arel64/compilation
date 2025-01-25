@@ -3,7 +3,7 @@ import java.io.*;
 
 import java_cup.runtime.Symbol;
 import AST.*;
-import IR.IR;
+import IR.*;
 import SYMBOL_TABLE.SemanticException;
 
 public class Main {
@@ -48,7 +48,14 @@ public class Main {
 				AST.IRme();
 				System.out.println(IR.getInstance());
 				IR.StaticAnalysis();
-				file_writer.write("OK");
+				if (IRcommand.exceptionVariables.isEmpty()) {
+					file_writer.write("OK");
+				}
+				else {
+					for (String var : IRcommand.exceptionVariables) {
+						file_writer.write(var + "\n");
+					}
+				}
 			} catch (LexerError e) {
 				System.out.println(e.getMessage());
 				file_writer.write("ERROR");

@@ -1,8 +1,2 @@
-int x := 1;
-int y := 5 + x;
-int Main() {
-    if (y > 10) {
-        x := 0;
-    }
-    return x;
-}
+int x;
+int y := x;

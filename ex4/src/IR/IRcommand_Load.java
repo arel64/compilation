@@ -25,10 +25,9 @@ public class IRcommand_Load extends IRcommand
 		this.var_name = var_name;
 	}
 
-	public void staticAnanlysis(IRcommand prev) {
+	public void staticAnanlysis() {
 		workList.remove(workList.indexOf(this.index));
-		this.prevCommands.add(prev.index);
-		HashSet<Init> in = new HashSet<Init>(prev.out);
+		HashSet<Init> in = new HashSet<Init>();
 		for (Integer i : prevCommands) {
 			in.addAll(IR.getInstance().commandList.get(i).out);
 		}
@@ -36,11 +35,11 @@ public class IRcommand_Load extends IRcommand
 			exceptionVariables.add(var_name); // do lexi
 		}
 		else {
-			HashSet<Init> newOut = in.stream().filter(init -> init.var != var_name).collect(Collectors.toCollection(HashSet::new));
-			newOut.add(new Init(var_name, this.index));
+			in = in.stream().filter(init -> init.var != var_name).collect(Collectors.toCollection(HashSet::new));
+			in.add(new Init(var_name, this.index));
 		}
-		if (!this.out.equals(newOut)) {
-			this.out = newOut;
+		if (!in.equals(this.out)) {
+			this.out = in;
 			for (int i : nextCommands) {
 				workList.add(i);
 			}
