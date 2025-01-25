@@ -3,6 +3,7 @@
 /***********/
 package IR;
 import java.util.HashSet;
+import java.util.ArrayList;
 /*******************/
 /* GENERAL IMPORTS */
 /*******************/
@@ -14,6 +15,8 @@ import java.util.HashSet;
 public abstract class IRcommand
 {
 	protected static int commandCounter = 0;
+	public static ArrayList<IRcommand> workList = new ArrayList<IRcommand>();
+	public static ArrayList<String> exceptionVariables = new ArrayList<String>();
 	/*****************/
 	/* Label Factory */
 	/*****************/
@@ -23,6 +26,7 @@ public abstract class IRcommand
 		return String.format("Label_%d_%s",label_counter++,msg);
 	}
 
+	public IRcommand[] prevCommands;
 	public int[] nextCommands;
 	public HashSet<Init> out;
 	public int index;
@@ -33,7 +37,8 @@ public abstract class IRcommand
 	}
 
 	public HashSet<Init> staticAnanlysis(HashSet<Init> in) {
-		this.out = in.copy();
+		//this.out = in.copy();
+		// update worklist
 		return this.out;
 	}
 

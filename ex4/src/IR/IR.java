@@ -13,34 +13,14 @@ import java.util.ArrayList;
 
 public class IR
 {
-	public IRcommand head=null;
-	public IRcommandList tail=null;
-
-	public static ArrayList<IRcommand> workList = new ArrayList<IRcommand>();
-	public static ArrayList<String> exceptionVariables = new ArrayList<String>();
-
+	public ArrayList<IRcommand> commandList = new ArrayList<IRcommand>();
+	
 	/******************/
 	/* Add IR command */
 	/******************/
 	public void Add_IRcommand(IRcommand cmd)
 	{
-		if ((head == null) && (tail == null))
-		{
-			this.head = cmd;
-		}
-		else if ((head != null) && (tail == null))
-		{
-			this.tail = new IRcommandList(cmd,null);
-		}
-		else
-		{
-			IRcommandList it = tail;
-			while ((it != null) && (it.tail != null))
-			{
-				it = it.tail;
-			}
-			it.tail = new IRcommandList(cmd,null);
-		}
+		commandList.add(cmd);
 	}
 	
 	/**************************************/
@@ -69,8 +49,9 @@ public class IR
 	}
 
 	public static void StaticAnalysis() {
-		HashSet<Init> out = instance.head.staticAnanlysis(new HashSet<Init>());
-		// while (!workList.isEmpty()) {
+		//IRcommand.workList.add(instance.head);
+		// while (!IRcommand.workList.isEmpty()) {
+		//	HashSet<Init> out = instance.head.staticAnanlysis(new HashSet<Init>());
 		// 	worklist.staticAnanlysis(new HashSet<Init>());
 		// }
 		// here we will take our instance that includes a list of instructions
@@ -84,13 +65,10 @@ public class IR
 
 	@Override
 	public String toString() {
-		IRcommandList itr = instance.tail;
 		String print = "";
-		print += instance.head.toString() + "\n";
-		while (itr != null)
+		for (IRcommand command : commandList)
 		{
-			print += itr.head.toString() + "\n";
-			itr = itr.tail;
+			print += command.toString() + "\n";
 		}
 		return print;
 	}

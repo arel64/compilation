@@ -25,8 +25,8 @@ public class IRcommand_Load extends IRcommand
 	}
 
 	public HashSet<Init> staticAnanlysis(HashSet<Init> in) {
-		this.out = in.copy();
-		this.out.stream().filter(init => init.var != var_name);
+		//this.out = in.copy();
+		this.out.stream().filter(init -> init.var != var_name);
 		this.out.add(new Init(var_name, this.index));
 		return this.out;
 	}
