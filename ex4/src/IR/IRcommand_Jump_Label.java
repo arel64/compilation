@@ -19,6 +19,7 @@ public class IRcommand_Jump_Label extends IRcommand
 	public IRcommand_Jump_Label(String label_name)
 	{
 		this.label_name = label_name;
+		this.nextCommands = new int[]{-1}; // need to create a map of labels to index or something...
 	}
 
 	@Override

@@ -2,6 +2,7 @@
 /* PACKAGE */
 /***********/
 package IR;
+import java.util.HashSet;
 
 /*******************/
 /* GENERAL IMPORTS */
@@ -21,6 +22,13 @@ public class IRcommand_Load extends IRcommand
 	{
 		this.dst = dst;
 		this.var_name = var_name;
+	}
+
+	public HashSet<Init> staticAnanlysis(HashSet<Init> in) {
+		this.out = in.copy();
+		this.out.stream().filter(init => init.var != var_name);
+		this.out.add(new Init(var_name, this.index));
+		return this.out;
 	}
 
 	@Override
