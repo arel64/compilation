@@ -3,6 +3,7 @@
 /***********/
 package IR;
 import java.util.HashSet;
+import java.util.stream.Collectors; 
 
 /*******************/
 /* GENERAL IMPORTS */
@@ -24,11 +25,21 @@ public class IRcommand_Load extends IRcommand
 		this.var_name = var_name;
 	}
 
-	public HashSet<Init> staticAnanlysis(HashSet<Init> in) {
-		//this.out = in.copy();
-		this.out.stream().filter(init -> init.var != var_name);
-		this.out.add(new Init(var_name, this.index));
-		return this.out;
+	public void staticAnanlysis(IRcommand prev) {
+		workList.remove(workList.indexOf(this.index));
+		this.prevCommands.add(prev.index);
+		HashSet<Init> in = new HashSet<Init>(prev.out);
+		for (Integer i : prevCommands) {
+			in.addAll(IR.getInstance().commandList.get(i).out);
+		}
+		HashSet<Init> newOut = in.stream().filter(init -> init.var != var_name).collect(Collectors.toCollection(HashSet::new));
+		newOut.add(new Init(var_name, this.index));
+		if (this.out != newOut) {// need to implement set comparison
+			this.out = newOut;
+			for (int i : nextCommands) {
+				workList.add(i);
+			}
+		}
 	}
 
 	@Override
