@@ -26,7 +26,7 @@ public abstract class IRcommand
 		return String.format("Label_%d_%s",label_counter++,msg);
 	}
 
-	public ArrayList<Integer> prevCommands = new ArrayList<Integer>();
+	public HashSet<Integer> prevCommands = new HashSet<Integer>();
 	public int[] nextCommands;
 	public HashSet<Init> out;
 	public int index;
@@ -43,7 +43,7 @@ public abstract class IRcommand
 		for (Integer i : prevCommands) {
 			in.addAll(IR.getInstance().commandList.get(i).out);
 		}
-		if (this.out != in) {// need to implement set comparison
+		if (!this.out.equals(in)) {
 			this.out = new HashSet<Init>(in);
 			for (int i : nextCommands) {
 				workList.add(i);

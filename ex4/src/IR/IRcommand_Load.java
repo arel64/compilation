@@ -32,9 +32,14 @@ public class IRcommand_Load extends IRcommand
 		for (Integer i : prevCommands) {
 			in.addAll(IR.getInstance().commandList.get(i).out);
 		}
-		HashSet<Init> newOut = in.stream().filter(init -> init.var != var_name).collect(Collectors.toCollection(HashSet::new));
-		newOut.add(new Init(var_name, this.index));
-		if (this.out != newOut) {// need to implement set comparison
+		if (in.stream().allMatch(init -> init.var != var_name)) {
+			exceptionVariables.add(var_name); // do lexi
+		}
+		else {
+			HashSet<Init> newOut = in.stream().filter(init -> init.var != var_name).collect(Collectors.toCollection(HashSet::new));
+			newOut.add(new Init(var_name, this.index));
+		}
+		if (!this.out.equals(newOut)) {
 			this.out = newOut;
 			for (int i : nextCommands) {
 				workList.add(i);

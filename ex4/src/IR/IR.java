@@ -63,6 +63,10 @@ public class IR
 		// if not save that variable name for later logging
 	}
 
+	public static void checkInitializations() {
+		
+	}
+
 	@Override
 	public String toString() {
 		String print = "";

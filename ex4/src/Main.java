@@ -47,7 +47,7 @@ public class Main {
 				AST.SemantMeLog();
 				AST.IRme();
 				System.out.println(IR.getInstance());
-				//IR.StaticAnalysis();
+				IR.StaticAnalysis();
 				file_writer.write("OK");
 			} catch (LexerError e) {
 				System.out.println(e.getMessage());
