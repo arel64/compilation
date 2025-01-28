@@ -1,12 +1,16 @@
-int a := 1;
-int b := 5;
-int Main() {
-    int x := 1;
+int b := 1;
+int a;
+int main() {
     int b;
-    if (b > 10) {
-        a := 0;
-        int x;
+
+    int c := 2 + b + a;
+    c := b;
+    while (c > 8) {
+        int d := b;
+        a := 7;
     }
-    return x;
+
+    return a;
+
 }
 

@@ -30,4 +30,10 @@ public class IRcommand_Binop_Add_Integers extends IRcommand
 		return "IRcommand_Binop_Add_Integers: dst=" + dst + ", t1=" + t1 + ", t2=" + t2;
 	}
 
+	public void staticAnanlysis() {
+		if (!t1.initialized || !t2.initialized)
+			dst.initialized = false;
+		super.staticAnanlysis();
+	}
+
 }

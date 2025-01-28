@@ -29,4 +29,10 @@ public class IRcommand_Class_Field_Set extends IRcommand
     public String toString() {
         return "IRcommand_Class_Field_Set: dst=" + dst + ", field=" + field + ", value=" + value;
     }
+
+	public void staticAnanlysis() {
+		if (!value.initialized)
+			dst.initialized = false;
+		super.staticAnanlysis();
+	}
 }

@@ -7,6 +7,7 @@ package IR;
 /* GENERAL IMPORTS */
 /*******************/
 import java.util.ArrayList;
+import java.util.stream.*;
 /*******************/
 /* PROJECT IMPORTS */
 /*******************/
@@ -42,5 +43,11 @@ public class IRcommand_Class_Method_Call extends IRcommand
         result += ", args=" + args.toString();
         return result;
     }
+
+	public void staticAnanlysis() {
+		if (!src.initialized || args.stream().anyMatch(temp -> !temp.initialized))
+			dst.initialized = false;
+		super.staticAnanlysis();
+	}
 }
 

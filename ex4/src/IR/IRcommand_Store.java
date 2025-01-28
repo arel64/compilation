@@ -41,10 +41,8 @@ public class IRcommand_Store extends IRcommand
 
 		if (src.initialized)
 		{
-			System.out.println("entered here with initilised TEMP");
-			in = in.stream().filter(init -> init.var != var_name).collect(Collectors.toCollection(HashSet::new));
+			in = in.stream().filter(init -> !init.var.equals(var_name)).collect(Collectors.toCollection(HashSet::new));
 			in.add(new Init(var_name, this.index));
-			System.out.println(in.toString());
 		}
 
 		if (!in.equals(this.out)) {

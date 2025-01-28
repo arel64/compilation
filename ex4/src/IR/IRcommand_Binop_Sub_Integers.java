@@ -29,4 +29,10 @@ public class IRcommand_Binop_Sub_Integers extends IRcommand
 	public String toString() {
 		return "IRcommand_Binop_Sub_Integers: dst=" + dst + ", t1=" + t1 + ", t2=" + t2;
 	}
+
+	public void staticAnanlysis() {
+		if (!t1.initialized || !t2.initialized)
+			dst.initialized = false;
+		super.staticAnanlysis();
+	}
 }

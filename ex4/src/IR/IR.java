@@ -53,9 +53,6 @@ public class IR
 		instance.commandList.get(IRcommand.workList.get(0)).staticAnanlysis();
 		while (!IRcommand.workList.isEmpty()) {
 			int next = IRcommand.workList.get(0);
-			System.out.println(IRcommand.workList);
-			System.out.println("----------");
-			System.out.println("going to call: " + next);
 			if (next >= instance.commandList.size())
 				IRcommand.workList.remove(IRcommand.workList.indexOf(next));
 			else 

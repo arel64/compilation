@@ -31,7 +31,7 @@ public class IRcommand_Allocate extends IRcommand
 			if (temp != null)
 				in.addAll(temp);
 		}
-		in = in.stream().filter(init -> init.var != var_name).collect(Collectors.toCollection(HashSet::new));
+		in = in.stream().filter(init -> !init.var.equals(var_name)).collect(Collectors.toCollection(HashSet::new));
 		in.add(new Init(var_name, -1));
 		if (!in.equals(this.out)) {
 			this.out = new HashSet<Init>(in);

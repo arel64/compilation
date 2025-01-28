@@ -47,10 +47,9 @@ public class Main {
 				AST.PrintMe();
 				AST.SemantMeLog();
 				AST.IRme();
-				System.out.println(IR.getInstance().toString());
 				IR.StaticAnalysis();
 				if (IRcommand.exceptionVariables.isEmpty()) {
-					file_writer.write("OK");
+					file_writer.write("!OK");
 				}
 				else {
         			List<String> sortedList = new ArrayList<>(IRcommand.exceptionVariables);

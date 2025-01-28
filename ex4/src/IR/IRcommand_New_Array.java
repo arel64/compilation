@@ -27,4 +27,10 @@ public class IRcommand_New_Array extends IRcommand
     public String toString() {
         return "IRcommand_New_Array: dst=" + dst + ", size=" + size;
     }
+
+	public void staticAnanlysis() {
+		if (!size.initialized)
+			dst.initialized = false;
+		super.staticAnanlysis();
+	}
 }
