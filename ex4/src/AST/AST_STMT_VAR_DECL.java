@@ -21,9 +21,10 @@ public class AST_STMT_VAR_DECL extends AST_STMT {
         return varDec.SemantMe();
     }
 
+    @Override
     public TEMP IRme()
 	{
-	
-		return null;
+		this.varDec.IRme();
+        return null;
 	}
 }

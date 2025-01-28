@@ -38,11 +38,8 @@ public class IRcommand_Load extends IRcommand
     	} 
 		catch (NumberFormatException e) {
 			if (in.stream().allMatch(init -> init.var != var_name || init.line == -1)) {
-				exceptionVariables.add(var_name); // do lexi
-			}
-			else {
-				in = in.stream().filter(init -> init.var != var_name).collect(Collectors.toCollection(HashSet::new));
-				in.add(new Init(var_name, this.index));
+				exceptionVariables.add(var_name);
+				dst.initialized = false;
 			}
 		}
 		if (!in.equals(this.out)) {

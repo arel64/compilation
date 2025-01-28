@@ -74,5 +74,7 @@ public abstract class IRcommand
     	public int hashCode() {
     	    return var.hashCode();
     	}
+		@Override
+		public String toString() { return "( " + var + " , " + line + " )"; }
 	}
 }

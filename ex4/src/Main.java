@@ -47,6 +47,7 @@ public class Main {
 				AST.PrintMe();
 				AST.SemantMeLog();
 				AST.IRme();
+				System.out.println(IR.getInstance().toString());
 				IR.StaticAnalysis();
 				if (IRcommand.exceptionVariables.isEmpty()) {
 					file_writer.write("OK");

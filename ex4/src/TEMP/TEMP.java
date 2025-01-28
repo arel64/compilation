@@ -14,6 +14,7 @@ package TEMP;
 public class TEMP
 {
 	private int serial=0;
+	public boolean initialized = true;
 	
 	public TEMP(int serial)
 	{
