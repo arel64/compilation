@@ -27,7 +27,7 @@ public class AST_STMT_FUNC_INVO extends AST_STMT {
 
     public TEMP IRme()
 	{
-	
+        this.invocation.IRme();
 		return null;
 	}
 }
