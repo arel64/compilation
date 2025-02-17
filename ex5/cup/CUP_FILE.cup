@@ -1,0 +1,491 @@
+import java_cup.runtime.*;
+import AST.*;
+
+parser code {:
+  public Lexer lexer;
+  public int errorLine = -1;
+  public Parser(Lexer lexer)
+  {
+    super(lexer);
+    this.lexer = lexer;
+  }
+  public void report_error(String message, Object info)
+  {
+    if (errorLine == -1){
+      errorLine = lexer.getLine();
+    }
+  }
+:}
+
+scan with {:
+  Symbol s;
+  try
+  {
+    s = lexer.next_token();
+  }
+  catch(Exception e)
+  {
+    throw new LexerError(e.getMessage());
+  }
+  return s;
+:};
+
+terminal Integer INT;
+terminal String ID;
+terminal IF;
+terminal EQ;
+terminal DOT;
+terminal PLUS;
+terminal MINUS;
+terminal TIMES;
+terminal WHILE;
+terminal DIVIDE;
+terminal LPAREN;
+terminal RPAREN;
+terminal LBRACK;
+terminal RBRACK;
+terminal LBRACE;
+terminal RBRACE;
+terminal SEMICOLON;
+terminal ASSIGN;
+terminal COMMA;
+terminal LT;
+terminal GT;
+terminal NIL;
+terminal ARRAY;
+terminal CLASS;
+terminal EXTENDS;
+terminal RETURN;
+terminal NEW;
+terminal TYPE_VOID;
+terminal TYPE_INT;
+terminal TYPE_STRING;
+terminal STRING;
+
+non terminal AST_PROGRAM program;
+non terminal AST_DEC dec;
+non terminal AST_TYPE type;
+non terminal AST_VAR_DEC varDec;
+non terminal AST_FUNC_DEC funcDec;
+non terminal AST_CLASS_DEC classDec;
+non terminal AST_ARRAY_TYPEDEF arrayTypedef;
+non terminal AST_EXP exp;
+non terminal AST_VAR var;
+non terminal AST_STMT stmt;
+non terminal AST_NEW_EXP newExp;
+non terminal AST_CLASS_FIELDS_DEC cField;
+non terminal AST_BINOP binop;
+non terminal AST_LIST<AST_DEC> dec_list;
+non terminal AST_LIST<AST_VAR_DEC> opt_param_list;
+non terminal AST_LIST<AST_VAR_DEC> param_list;
+non terminal AST_LIST<AST_STMT> stmt_list;
+non terminal String extends_opt;
+non terminal AST_LIST<AST_CLASS_FIELDS_DEC> cField_list;
+non terminal AST_LIST<AST_EXP> opt_exp_list;
+non terminal AST_LIST<AST_EXP> exp_list;
+non terminal AST_EXP num_exp;
+
+precedence left DOT;
+precedence left LPAREN;
+precedence left LBRACK;
+precedence left TIMES, DIVIDE;
+precedence left PLUS, MINUS;
+precedence left LT, GT;
+precedence left EQ;
+precedence left ASSIGN;
+
+start with program;
+
+program ::= dec_list:sl
+{:
+  AST_PROGRAM node = new AST_PROGRAM(sl);
+  node.setLineNumber(0);
+  RESULT = node;
+:};
+
+dec_list ::= dec:d
+{:
+  AST_LIST<AST_DEC> node = new AST_LIST<AST_DEC>(d,AST_DEC.class);
+  node.setLineNumber(dleft);
+  RESULT = node;
+:}
+| dec_list:dl dec:d
+{:
+  AST_LIST<AST_DEC> node = new AST_LIST<AST_DEC>(dl,d,AST_DEC.class);
+  node.setLineNumber(dleft);
+  RESULT = node;
+:};
+
+binop ::= PLUS:p
+{:
+  AST_BINOP node = new AST_BINOP("+");
+  node.setLineNumber(pleft);
+  RESULT = node;
+:}
+| MINUS:m
+{:
+  AST_BINOP node = new AST_BINOP("-");
+  node.setLineNumber(mleft);
+  RESULT = node;
+:}
+| TIMES:t
+{:
+  AST_BINOP node = new AST_BINOP("*");
+  node.setLineNumber(tleft);
+  RESULT = node;
+:}
+| DIVIDE:di
+{:
+  AST_BINOP node = new AST_BINOP("/");
+  node.setLineNumber(dileft);
+  RESULT = node;
+:}
+| LT:lt
+{:
+  AST_BINOP node = new AST_BINOP("<");
+  node.setLineNumber(ltleft);
+  RESULT = node;
+:}
+| GT:gt
+{:
+  AST_BINOP node = new AST_BINOP(">");
+  node.setLineNumber(gtleft);
+  RESULT = node;
+:}
+| EQ:eq
+{:
+  AST_BINOP node = new AST_BINOP("=");
+  node.setLineNumber(eqleft);
+  RESULT = node;
+:};
+
+type ::= TYPE_INT:ti
+{:
+  AST_TYPE node = new AST_TYPE("int");
+  node.setLineNumber(tileft);
+  RESULT = node;
+:}
+| TYPE_STRING:ts
+{:
+  AST_TYPE node = new AST_TYPE("String");
+  node.setLineNumber(tsleft);
+  RESULT = node;
+:}
+| TYPE_VOID:tv
+{:
+  AST_TYPE node = new AST_TYPE("void");
+  node.setLineNumber(tvleft);
+  RESULT = node;
+:}
+| ID:i
+{:
+  AST_TYPE node = new AST_TYPE(i);
+  node.setLineNumber(ileft);
+  RESULT = node;
+:};
+
+arrayTypedef ::= ARRAY:a ID:i EQ:e type:t LBRACK:lb RBRACK:rb SEMICOLON:s
+{:
+  AST_ARRAY_TYPEDEF node = new AST_ARRAY_TYPEDEF(i, t);
+  node.setLineNumber(aleft);
+  RESULT = node;
+:};
+
+varDec ::= type:t ID:i ASSIGN:as exp:ex SEMICOLON:se
+{:
+  AST_VAR_DEC node = new AST_VAR_DEC(i, t, ex);
+  node.setLineNumber(tleft);
+  RESULT = node;
+:}
+| type:t ID:i ASSIGN:as newExp:n SEMICOLON:se
+{:
+  AST_VAR_DEC node = new AST_VAR_DEC(i, t, n);
+  node.setLineNumber(tleft);
+  RESULT = node;
+:}
+| type:t ID:i SEMICOLON:se
+{:
+  AST_VAR_DEC node = new AST_VAR_DEC(i, t);
+  node.setLineNumber(tleft);
+  RESULT = node;
+:};
+
+funcDec ::= type:t ID:i LPAREN:lp opt_param_list:opl RPAREN:rp LBRACE:lb stmt_list:sl RBRACE:rb
+{:
+  AST_FUNC_DEC node = new AST_FUNC_DEC(i, t, opl, sl);
+  node.setLineNumber(tleft);
+  RESULT = node;
+:};
+
+opt_param_list ::=
+{:
+  RESULT = null;
+:}
+| param_list:pl
+{:
+  RESULT = pl;
+:};
+
+param_list ::= type:t ID:i
+{:
+  AST_VAR_DEC temp = new AST_VAR_DEC(i,t);
+  AST_LIST<AST_VAR_DEC> node = new AST_LIST<AST_VAR_DEC>(temp,AST_VAR_DEC.class);
+  node.setLineNumber(tleft);
+  RESULT = node;
+:}
+| param_list:pl COMMA:c type:t ID:i
+{:
+  AST_VAR_DEC temp = new AST_VAR_DEC(i,t);
+  temp.setLineNumber(tleft);
+  pl.add(temp);
+  RESULT = pl;
+:};
+
+classDec ::= CLASS:c ID:i extends_opt:eo LBRACE:lb cField_list:cf RBRACE:rb
+{:
+  AST_CLASS_DEC node = new AST_CLASS_DEC(i, eo, cf);
+  node.setLineNumber(cleft);
+  RESULT = node;
+:};
+
+extends_opt ::=
+{:
+  RESULT = null;
+:}
+| EXTENDS:e ID:i
+{:
+  RESULT = i;
+:};
+
+cField_list ::= cField:cf
+{:
+  AST_LIST<AST_CLASS_FIELDS_DEC> node = new AST_LIST<AST_CLASS_FIELDS_DEC>(cf,AST_CLASS_FIELDS_DEC.class);
+  node.setLineNumber(cfleft);
+  RESULT = node;
+:}
+| cField_list:cfl cField:cf
+{:
+  AST_LIST<AST_CLASS_FIELDS_DEC> node = new AST_LIST<AST_CLASS_FIELDS_DEC>(cfl,cf,AST_CLASS_FIELDS_DEC.class);
+  node.setLineNumber(cfleft);
+  RESULT = node;
+:};
+
+dec ::= varDec:v
+{:
+  v.setLineNumber(vleft);
+  RESULT = v;
+:}
+| funcDec:f
+{:
+  f.setLineNumber(fleft);
+  RESULT = f;
+:}
+| classDec:c
+{:
+  c.setLineNumber(cleft);
+  RESULT = c;
+:}
+| arrayTypedef:at
+{:
+  at.setLineNumber(atleft);
+  RESULT = at;
+:};
+
+cField ::= varDec:v
+{:
+  v.setLineNumber(vleft);
+  AST_CLASS_FIELDS_DEC node = new AST_CLASS_FIELDS_DEC(v);
+  node.setLineNumber(vleft);
+  RESULT = node;
+:}
+| funcDec:f
+{:
+  f.setLineNumber(fleft);
+  RESULT = f;
+:};
+
+newExp ::= NEW:n type:t
+{:
+  AST_NEW_EXP node = new AST_NEW_EXP(t);
+  node.setLineNumber(tleft);
+  RESULT = node;
+:}
+| NEW:n type:t LBRACK:lb exp:ex RBRACK:rb
+{:
+  AST_NEW_EXP node = new AST_NEW_EXP(t, ex);
+  node.setLineNumber(tleft);
+  RESULT = node;
+:};
+
+var ::= ID:i
+{:
+  AST_VAR_SIMPLE node = new AST_VAR_SIMPLE(i);
+  node.setLineNumber(ileft);
+  RESULT = node;
+:}
+| var:v DOT:d ID:i
+{:
+  AST_VAR_FIELD_INVOCATION node = new AST_VAR_FIELD_INVOCATION(v, i);
+  node.setLineNumber(ileft);
+  RESULT = node;
+:}
+| var:v LBRACK:lb exp:ex RBRACK:rb
+{:
+  AST_VAR_SUBSCRIPT node = new AST_VAR_SUBSCRIPT(v, ex);
+  node.setLineNumber(vleft);
+  RESULT = node;
+:};
+
+exp ::= var:v
+{:
+  AST_EXP_VAR node = new AST_EXP_VAR(v);
+  node.setLineNumber(vleft);
+  RESULT = node;
+:}
+| LPAREN:lp exp:e RPAREN:rp
+{:
+  AST_EXP_PAREN node = new AST_EXP_PAREN(e);
+  node.setLineNumber(lpleft);
+  RESULT = node;
+:}
+| exp:e1 binop:b exp:e2
+{:
+  AST_EXP_BINOP node = new AST_EXP_BINOP(e1, e2, b);
+  node.setLineNumber(bleft);
+  RESULT = node;
+:}
+| var:v DOT:d ID:i LPAREN:lp opt_exp_list:oel RPAREN:rp
+{:
+  AST_FUNC_INVOCATION node = new AST_FUNC_INVOCATION(v, i, oel);
+  node.setLineNumber(dleft);
+  RESULT = node;
+:}
+| ID:i LPAREN:lp opt_exp_list:oel RPAREN:rp
+{:
+  AST_FUNC_INVOCATION node = new AST_FUNC_INVOCATION(i, oel);
+  node.setLineNumber(ileft);
+  RESULT = node;
+:}
+| num_exp:ne
+{:
+  ne.setLineNumber(neleft);
+  RESULT = ne;
+:}
+| NIL:ns
+{:
+  AST_LIT_NIL node = new AST_LIT_NIL();
+  node.setLineNumber(nsleft);
+  RESULT = node;
+:}
+| STRING:str
+{:
+  AST_LIT_STRING node = new AST_LIT_STRING((String)str);
+  node.setLineNumber(strleft);
+  RESULT = node;
+:};
+
+opt_exp_list ::=
+{:
+  RESULT = null;
+:}
+| exp_list:el
+{:
+  RESULT = el;
+:};
+
+exp_list ::= exp:e
+{:
+  AST_LIST<AST_EXP> node = new AST_LIST<AST_EXP>(e,AST_EXP.class);
+  node.setLineNumber(eleft);
+  RESULT = node;
+:}
+| exp_list:el COMMA:c exp:e
+{:
+  el.add(e);
+  RESULT = el;
+:};
+
+num_exp ::= INT:in
+{:
+  AST_LIT_NUMBER node = new AST_LIT_NUMBER(false, in);
+  node.setLineNumber(inleft);
+  RESULT = node;
+:}
+| MINUS:m INT:in
+{:
+  AST_LIT_NUMBER node = new AST_LIT_NUMBER(true, in);
+  node.setLineNumber(inleft);
+  RESULT = node;
+:};
+
+stmt ::= varDec:v
+{:
+  AST_STMT_VAR_DECL node = new AST_STMT_VAR_DECL(v);
+  node.setLineNumber(vleft);
+  RESULT = node;
+:}
+| var:v ASSIGN:a exp:e SEMICOLON:se
+{:
+  AST_STMT_ASSIGN node = new AST_STMT_ASSIGN(v, e);
+  node.setLineNumber(eleft);
+  RESULT = node;
+:}
+| var:v ASSIGN:a newExp:n SEMICOLON:se
+{:
+  AST_STMT_ASSIGN_NEW node = new AST_STMT_ASSIGN_NEW(v, n);
+  node.setLineNumber(aleft);
+  RESULT = node;
+:}
+| RETURN:r exp:e SEMICOLON:se
+{:
+  AST_STMT_RETURN node = new AST_STMT_RETURN(e);
+  node.setLineNumber(rleft);
+  RESULT = node;
+:}
+| RETURN:r SEMICOLON:se
+{:
+  AST_STMT_RETURN node = new AST_STMT_RETURN(null);
+  node.setLineNumber(rleft);
+  RESULT = node;
+:}
+| IF:i LPAREN:lp exp:e RPAREN:rp LBRACE:lb stmt_list:sl RBRACE:rb
+{:
+  AST_STMT_IF node = new AST_STMT_IF(e, sl);
+  node.setLineNumber(ileft);
+  RESULT = node;
+:}
+| WHILE:w LPAREN:lp exp:e RPAREN:rp LBRACE:lb stmt_list:sl RBRACE:rb
+{:
+  AST_STMT_WHILE node = new AST_STMT_WHILE(e, sl);
+  node.setLineNumber(wleft);
+  RESULT = node;
+:}
+| var:v DOT:d ID:i LPAREN:lp opt_exp_list:oel RPAREN:rp SEMICOLON:se
+{:
+  AST_FUNC_INVOCATION invocation =  new AST_FUNC_INVOCATION(v, i, oel);
+  invocation.setLineNumber(ileft);
+  AST_STMT_FUNC_INVO node = new AST_STMT_FUNC_INVO(invocation);
+  node.setLineNumber(vleft);
+  RESULT = node;
+:}
+| ID:i LPAREN:lp opt_exp_list:oel RPAREN:rp SEMICOLON:se
+{:
+  AST_FUNC_INVOCATION invocation = new AST_FUNC_INVOCATION(i, oel);
+  invocation.setLineNumber(ileft);
+  AST_STMT_FUNC_INVO node = new AST_STMT_FUNC_INVO(invocation);
+  node.setLineNumber(ileft);
+  RESULT = node;
+:};
+
+stmt_list ::=
+{:
+
+  AST_LIST<AST_STMT> node = new AST_LIST<AST_STMT>(null,AST_STMT.class);
+  node.setLineNumber(0);
+  RESULT = node;
+:}
+| stmt_list:sl stmt:s
+{:
+  sl.add(s);
+  RESULT = sl;
+:};
