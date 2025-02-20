@@ -11,6 +11,7 @@ package IR;
 /* PROJECT IMPORTS */
 /*******************/
 import TEMP.*;
+import MIPS.*;
 
 public class IRcommand_Binop_Div_Integers extends IRcommand
 {
@@ -34,6 +35,11 @@ public class IRcommand_Binop_Div_Integers extends IRcommand
 		if (!t1.initialized || !t2.initialized)
 			dst.initialized = false;
 		super.staticAnanlysis();
+	}
+
+	public void MIPSme()
+	{
+		MIPSGenerator.getInstance().div(dst,t1,t2);
 	}
 
 }

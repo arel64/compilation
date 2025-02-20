@@ -127,7 +127,13 @@ public class AST_CLASS_DEC extends AST_DEC {
     @Override
 	public TEMP IRme()
 	{
-	
-		return null;
+        String label_end   = IRcommand.getFreshLabel("end");
+		String label_start = IRcommand.getFreshLabel("start");
+
+        IR.getInstance().Add_IRcommand(new IRcommand_Label(label_start));
+        IR.getInstance().Add_IRcommand(new IRcommand_Class_Dec(this.getName(), this.parentClassName));
+        fields.IRme();
+        IR.getInstance().Add_IRcommand(new IRcommand_Label(label_end));
+        return null;
 	}
 }

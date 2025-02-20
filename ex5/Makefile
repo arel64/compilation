@@ -21,6 +21,7 @@ SRC_FILES                 = ${SRC_DIR}/*.java              \
                             ${SRC_DIR}/IR/*.java           \
                             ${SRC_DIR}/AST/*.java          \
                             ${SRC_DIR}/TEMP/*.java         \
+                            ${SRC_DIR}/MIPS/*.java         \
                             ${SRC_DIR}/TYPES/*.java        \
                             ${SRC_DIR}/SYMBOL_TABLE/*.java
 EXTERNAL_JAR_FILES        = ${EXTERNAL_JARS_DIR}/java-cup-11b-runtime.jar
@@ -54,7 +55,7 @@ CUP_FLAGS =                                \
 # DEFINITIONS :: PARSER #
 #########################
 INPUT    = ${INPUT_DIR}/Input.txt
-OUTPUT   = ${OUTPUT_DIR}/Output.txt
+OUTPUT   = ${OUTPUT_DIR}/MIPS.txt
 
 ##########
 # TARGET #
@@ -64,11 +65,11 @@ compile:
 	@echo "*******************************"
 	@echo "*                             *"
 	@echo "*                             *"
-	@echo "* [0] Remove ANALYZER program *"
+	@echo "* [0] Remove COMPILER program *"
 	@echo "*                             *"
 	@echo "*                             *"
 	@echo "*******************************"
-	rm -rf ANALYZER
+	rm -rf COMPILER
 	@echo "\n"
 	@echo "************************************************************"
 	@echo "*                                                          *"
@@ -116,7 +117,7 @@ compile:
 	@echo "*                                                         *"
 	@echo "*                                                         *"
 	@echo "***********************************************************"
-	jar cfm ANALYZER ${MANIFEST_FILE} -C ${BIN_DIR} .
+	jar cfm COMPILER ${MANIFEST_FILE} -C ${BIN_DIR} .
 	
 everything:
 	clear
@@ -127,7 +128,7 @@ everything:
 	@echo "*                            *"
 	@echo "*                            *"
 	@echo "******************************"
-	rm -rf ANALYZER
+	rm -rf COMPILER
 	@echo "\n"
 	@echo "************************************************************"
 	@echo "*                                                          *"
@@ -175,7 +176,7 @@ everything:
 	@echo "*                                                         *"
 	@echo "*                                                         *"
 	@echo "***********************************************************"
-	jar cfm ANALYZER ${MANIFEST_FILE} -C ${BIN_DIR} .
+	jar cfm COMPILER ${MANIFEST_FILE} -C ${BIN_DIR} .
 	@echo "\n"
 	@echo "*****************************"
 	@echo "*                           *"
@@ -184,5 +185,14 @@ everything:
 	@echo "*                           *"
 	@echo "*                           *"
 	@echo "*****************************"
-	java -jar ANALYZER ${INPUT} ${OUTPUT}
-	@echo "\n"
+	java -jar COMPILER ${INPUT} ${OUTPUT}
+	# @echo "\n"
+	# @echo "****************************************"
+	# @echo "*                                      *"
+	# @echo "*                                      *"
+	# @echo "* [7] Run spim and redirect its output *"
+	# @echo "*                                      *"
+	# @echo "*                                      *"
+	# @echo "****************************************"
+	# spim -f ${OUTPUT_DIR}/MIPS.txt > ${OUTPUT_DIR}/MIPS_OUTPUT.txt
+	# @echo "\n"

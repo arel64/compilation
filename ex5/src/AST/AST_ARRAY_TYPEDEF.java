@@ -42,7 +42,7 @@ public class AST_ARRAY_TYPEDEF extends AST_DEC {
     @Override
     public TEMP IRme()
 	{
-
-		return null;
+        IR.getInstance().Add_IRcommand(new IRcommand_Array_Dec(this.getName(), this.baseType));
+        return null;
 	}
 }

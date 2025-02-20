@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 /* PROJECT IMPORTS */
 /*******************/
 import TEMP.*;
+import MIPS.*;
 
 public class IRcommand_Allocate extends IRcommand
 {
@@ -40,6 +41,10 @@ public class IRcommand_Allocate extends IRcommand
 					workList.add(i);
 				}
 		}
+	}
+
+	public void MIPSme() {
+		MIPSGenerator.getInstance().allocate(var_name);
 	}
 
 	@Override

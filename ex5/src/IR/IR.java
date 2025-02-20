@@ -62,7 +62,7 @@ public class IR
 
 	public static void MIPSme()
 	{
-		for (IRcommand command : commandList) {
+		for (IRcommand command : instance.commandList) {
 			command.MIPSme();
 		}
 	}

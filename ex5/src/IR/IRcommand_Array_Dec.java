@@ -13,12 +13,12 @@ import AST.AST_TYPE;
 /*******************/
 import TEMP.*;
 
-public class IRcommand_New_Func extends IRcommand
+public class IRcommand_Array_Dec extends IRcommand
 {
 	String name;
 	AST_TYPE type;
 	
-	public IRcommand_New_Func(String name, AST_TYPE type)
+	public IRcommand_Array_Dec(String name, AST_TYPE type)
 	{
 		this.name = name;
 		this.type = type;
@@ -26,6 +26,6 @@ public class IRcommand_New_Func extends IRcommand
 
 	@Override
     public String toString() {
-        return "IRcommand_New_Func: name=" + this.name + " type=" + this.type;
+        return "IRcommand_Array_Dec: name=" + this.name + " type=" + this.type;
     }
 }

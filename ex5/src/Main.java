@@ -49,12 +49,14 @@ public class Main {
 				AST.SemantMeLog();
 				AST.IRme();
 				IR.StaticAnalysis();
+				System.out.println(IR.getInstance().toString());
 				if (IRcommand.exceptionVariables.isEmpty()) {
-					IR.getInstance().MIPSme();
-					// liveless analysis
-					// interference graph
-					// allocate 10 registers
-					MIPS.getInstance();
+					file_writer.write("!OK");
+					// IR.getInstance().MIPSme();
+					// // liveless analysis
+					// // interference graph
+					// // allocate 10 registers
+					// MIPS.getInstance();
 				}
 				else {
         			List<String> sortedList = new ArrayList<>(IRcommand.exceptionVariables);
