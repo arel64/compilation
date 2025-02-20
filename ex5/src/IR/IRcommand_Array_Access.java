@@ -28,4 +28,10 @@ public class IRcommand_Array_Access extends IRcommand
 	public String toString() {
 		return "IRcommand_Array_Access: dst=" + dst + ", src=" + src + ", index=" + index;
 	}
+
+	public void staticAnanlysis() {
+		if (!index.initialized || !src.initialized)
+			dst.initialized = false;
+		super.staticAnanlysis();
+	}
 }

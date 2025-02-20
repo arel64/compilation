@@ -33,7 +33,7 @@ public class AST_STMT_ASSIGN_NEW extends AST_STMT {
     }
     public TEMP IRme()
 	{
-        // TODO: implement here the case of new array or class instance
+        IR.getInstance().Add_IRcommand(new IRcommand_Store(this.var.val, newExp.IRme()));
 		return null;
 	}
 }

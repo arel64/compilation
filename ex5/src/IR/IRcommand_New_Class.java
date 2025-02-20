@@ -16,17 +16,15 @@ public class IRcommand_New_Class extends IRcommand
 {
 	TEMP dst;
 	String type;
-	AST_LIST<TEMP> params;
 	
-	public IRcommand_New_Class(TEMP dst, String type, AST_LIST<TEMP> params)
+	public IRcommand_New_Class(TEMP dst, String type)
 	{
 		this.dst = dst;
 		this.type = type;
-		this.params = params;
 	}
 
 	@Override
     public String toString() {
-        return "IRcommand_New_Class: dst=" + dst + ", type=" + type;
+        return "IRcommand_New_Class: dst= " + dst + ", type=" + type;
     }
 }

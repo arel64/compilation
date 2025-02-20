@@ -50,8 +50,12 @@ public class AST_NEW_EXP extends AST_EXP {
     }
     public TEMP IRme()
 	{
-        // TODO: use IRcommand_New_Array or IRcommand_New_Class with dst
-        //IR.getInstance().Add_IRcommand(new IRcommand_New_Array(this.type, this.exp.IRme()));
-		return null;
+        TEMP address = TEMP_FACTORY.getInstance().getFreshTEMP();
+        if (this.exp != null)
+            IR.getInstance().Add_IRcommand(new IRcommand_New_Array(address, this.type.type, this.exp.IRme()));
+
+        else
+            IR.getInstance().Add_IRcommand(new IRcommand_New_Class(address, this.type.type));
+		return address;
 	}
 }
