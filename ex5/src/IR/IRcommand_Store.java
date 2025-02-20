@@ -39,7 +39,7 @@ public class IRcommand_Store extends IRcommand
 				in.addAll(temp);
 		}
 
-		if (src.initialized)
+		if (src != null && src.initialized)
 		{
 			in = in.stream().filter(init -> !init.var.equals(var_name)).collect(Collectors.toCollection(HashSet::new));
 			in.add(new Init(var_name, this.index));

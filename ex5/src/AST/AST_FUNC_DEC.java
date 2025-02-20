@@ -124,7 +124,7 @@ public class AST_FUNC_DEC extends AST_CLASS_FIELDS_DEC {
 		String label_start = IRcommand.getFreshLabel("start");
 
         IR.getInstance().Add_IRcommand(new IRcommand_Label(label_start));
-        IR.getInstance().Add_IRcommand(new IRcommand_Func_Dec(this.varName, returnType));
+        IR.getInstance().Add_IRcommand(new IRcommand_Func_Dec(this.varName, returnType, this.params));
         body.IRme();
         IR.getInstance().Add_IRcommand(new IRcommand_Label(label_end));
         return null;

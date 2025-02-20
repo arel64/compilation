@@ -50,7 +50,8 @@ public class AST_NEW_EXP extends AST_EXP {
     }
     public TEMP IRme()
 	{
-	
+        // TODO: use IRcommand_New_Array or IRcommand_New_Class with dst
+        //IR.getInstance().Add_IRcommand(new IRcommand_New_Array(this.type, this.exp.IRme()));
 		return null;
 	}
 }

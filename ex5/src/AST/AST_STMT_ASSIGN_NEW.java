@@ -33,7 +33,7 @@ public class AST_STMT_ASSIGN_NEW extends AST_STMT {
     }
     public TEMP IRme()
 	{
-	
+        // TODO: implement here the case of new array or class instance
 		return null;
 	}
 }
