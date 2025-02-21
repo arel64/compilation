@@ -22,6 +22,11 @@ public class IRcommand_Label extends IRcommand
 	}
 
 	@Override
+	public void MIPSme() {
+		MIPSGenerator.getInstance().label(label_name);
+	}
+
+	@Override
     public String toString() {
         return "IRcommand_Label: label=" + label_name;
     }
