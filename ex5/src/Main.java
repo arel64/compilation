@@ -52,11 +52,11 @@ public class Main {
 				System.out.println(IR.getInstance().toString());
 				if (IRcommand.exceptionVariables.isEmpty()) {
 					file_writer.write("!OK");
-					// IR.getInstance().MIPSme();
+					IR.getInstance().MIPSme();
 					// // liveless analysis
 					// // interference graph
 					// // allocate 10 registers
-					// MIPS.getInstance();
+					MIPSGenerator.getInstance();
 				}
 				else {
         			List<String> sortedList = new ArrayList<>(IRcommand.exceptionVariables);

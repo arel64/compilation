@@ -29,6 +29,11 @@ public class IRcommand_Array_Access extends IRcommand
 		return "IRcommand_Array_Access: dst=" + dst + ", src=" + src + ", index=" + index;
 	}
 
+	@Override
+	public void MIPSme() {
+		//MIPSGenerator.getInstance().allocate(var_name);
+	}
+
 	public void staticAnanlysis() {
 		if (!index.initialized || !src.initialized)
 			dst.initialized = false;

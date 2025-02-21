@@ -11,6 +11,7 @@ package IR;
 /* PROJECT IMPORTS */
 /*******************/
 import TEMP.*;
+import MIPS.*;
 import java.util.HashSet;
 
 public class IRcommand_Jump_If_Eq_To_Zero extends IRcommand
@@ -52,6 +53,11 @@ public class IRcommand_Jump_If_Eq_To_Zero extends IRcommand
 
 				}
 		}
+	}
+
+	@Override
+	public void MIPSme() {
+		MIPSGenerator.getInstance().beqz(t, label_name);
 	}
 
 	private int findLabel(String name) {

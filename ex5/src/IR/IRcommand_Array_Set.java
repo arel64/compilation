@@ -30,4 +30,9 @@ public class IRcommand_Array_Set extends IRcommand
 		return "IRcommand_Array_Set: array=" + array + ", index=" + index + ", value=" + value;
 	}
 
+	@Override
+	public void MIPSme() {
+		//MIPSGenerator.getInstance().allocate(var_name);
+	}
+
 }

@@ -11,6 +11,7 @@ package IR;
 /* PROJECT IMPORTS */
 /*******************/
 import TEMP.*;
+import MIPS.*;
 import java.util.HashSet;
 
 public class IRcommand_Jump_Label extends IRcommand
@@ -49,6 +50,11 @@ public class IRcommand_Jump_Label extends IRcommand
 					}
 				}
 		}
+	}
+
+	@Override
+	public void MIPSme() {
+		MIPSGenerator.getInstance().jump(label_name);
 	}
 
 	private int findLabel(String name) {

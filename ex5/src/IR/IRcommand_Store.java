@@ -11,6 +11,7 @@ package IR;
 /* PROJECT IMPORTS */
 /*******************/
 import TEMP.*;
+import MIPS.*;
 import java.util.HashSet;
 import java.util.stream.Collectors;
 
@@ -53,5 +54,10 @@ public class IRcommand_Store extends IRcommand
 				}
 		}
 	}
+
+	@Override
+	public void MIPSme() {
+		MIPSGenerator.getInstance().store(var_name, src);
+	}	
 
 }
