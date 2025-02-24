@@ -25,8 +25,8 @@ public class AST_STMT_WHILE extends AST_STMT_CONDITIONAL {
 		/*******************************/
 		/* [1] Allocate 2 fresh labels */
 		/*******************************/
-		String label_end   = IRcommand.getFreshLabel("end");
-		String label_start = IRcommand.getFreshLabel("start");
+		String label_end   = IRcommand.getFreshLabel("while_end");
+		String label_start = IRcommand.getFreshLabel("while_start");
 	
 		/*********************************/
 		/* [2] entry label for the while */

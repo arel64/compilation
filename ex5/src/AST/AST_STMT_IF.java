@@ -26,8 +26,8 @@ public class AST_STMT_IF extends AST_STMT_CONDITIONAL
 		/*******************************/
 		/* [1] Allocate 2 fresh labels */
 		/*******************************/
-		String label_end   = IRcommand.getFreshLabel("end");
-		String label_start = IRcommand.getFreshLabel("start");
+		String label_end   = IRcommand.getFreshLabel("if_end");
+		String label_start = IRcommand.getFreshLabel("if_start");
 	
 		/*********************************/
 		/* [2] entry label for the if    */

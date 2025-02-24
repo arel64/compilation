@@ -120,13 +120,13 @@ public class AST_FUNC_DEC extends AST_CLASS_FIELDS_DEC {
 
     @Override
     public TEMP IRme() {
-        String label_end   = IRcommand.getFreshLabel("end");
-		String label_start = IRcommand.getFreshLabel("start");
+		String label_start = IRcommand.getFreshLabel(this.varName + "_start");
+        String label_end   = IRcommand.getFreshLabel(this.varName + "_end");
 
-        IR.getInstance().Add_IRcommand(new IRcommand_Label(label_start));
+        IR.getInstance().Add_IRcommand(new IRcommand_Label(label_start, label_end));
         IR.getInstance().Add_IRcommand(new IRcommand_Func_Dec(this.varName, returnType, this.params));
         body.IRme();
-        IR.getInstance().Add_IRcommand(new IRcommand_Label(label_end));
+        IR.getInstance().Add_IRcommand(new IRcommand_Label(label_end, true));
         return null;
     }
 }
