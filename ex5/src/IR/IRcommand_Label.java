@@ -11,6 +11,7 @@ package IR;
 /* PROJECT IMPORTS */
 /*******************/
 import TEMP.*;
+import MIPS.*;
 
 public class IRcommand_Label extends IRcommand
 {
@@ -57,7 +58,7 @@ public class IRcommand_Label extends IRcommand
 		else { // start label of class or func
 			int afterBlockCommand = findLabel(this.closing_label) + 1;
 			if (afterBlockCommand < workList.size())
-				nextCommands.add(afterBlockCommand);
+				this.nextCommands = new int[]{this.index + 1, afterBlockCommand};
 			super.staticAnanlysis();
 		}
 	}

@@ -4,7 +4,7 @@ import SYMBOL_TABLE.SYMBOL_TABLE;
 
 
 public abstract class AST_DEC extends AST_Node {
-    private String name;
+    public String name;
     public AST_DEC(String name)
     {
         this.name = name;
