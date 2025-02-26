@@ -23,6 +23,7 @@ public class IRcommand_Array_Set extends IRcommand
 		this.array = array;
 		this.index = index;
 		this.value = value;
+		IR.getInstance().recordVarTemp("temp_" + array.getSerialNumber(), array);
 	}
 	
 	@Override

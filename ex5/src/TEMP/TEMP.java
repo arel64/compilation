@@ -30,4 +30,15 @@ public class TEMP
 	public String toString() {
         return "TEMP_" + serial;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof TEMP)) return false;
+        return ((TEMP)obj).getSerialNumber() == serial;
+    }
+
+    @Override
+    public int hashCode() {
+        return serial;
+    }
 }

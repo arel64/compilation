@@ -23,6 +23,7 @@ public class IRcommand_Array_Access extends IRcommand
 		this.dst = dst;
 		this.src = src;
 		this.index = index;
+		IR.getInstance().recordVarTemp("temp_" + dst.getSerialNumber(), dst);
 	}
 	@Override
 	public String toString() {

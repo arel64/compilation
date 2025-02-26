@@ -47,6 +47,19 @@ public abstract class IRcommand
 			if (temp != null)
 				in.addAll(temp);
 		}
+		
+		// Track any TEMPs used in this instruction
+		if (this instanceof IRcommand_Load) {
+			IRcommand_Load load = (IRcommand_Load) this;
+			// Record that this TEMP is associated with this variable
+			IR.getInstance().recordVarTemp(load.var_name, load.dst);
+		}
+		else if (this instanceof IRcommand_Store) {
+			IRcommand_Store store = (IRcommand_Store) this;
+			// Record that this TEMP is associated with this variable
+			IR.getInstance().recordVarTemp(store.var_name, store.src);
+		}
+		
 		if (!in.equals(this.out)) {
 			this.out = new HashSet<Init>(in);
 			if (nextCommands != null)

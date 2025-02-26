@@ -186,13 +186,13 @@ everything:
 	@echo "*                           *"
 	@echo "*****************************"
 	java -jar COMPILER ${INPUT} ${OUTPUT}
-	# @echo "\n"
-	# @echo "****************************************"
-	# @echo "*                                      *"
-	# @echo "*                                      *"
-	# @echo "* [7] Run spim and redirect its output *"
-	# @echo "*                                      *"
-	# @echo "*                                      *"
-	# @echo "****************************************"
-	# spim -f ${OUTPUT_DIR}/MIPS.txt > ${OUTPUT_DIR}/MIPS_OUTPUT.txt
-	# @echo "\n"
+	@echo "\n"
+	@echo "****************************************"
+	@echo "*                                      *"
+	@echo "*                                      *"
+	@echo "* [7] Run spim and redirect its output *"
+	@echo "*                                      *"
+	@echo "*                                      *"
+	@echo "****************************************"
+	spim -f ${OUTPUT_DIR}/MIPS.txt > ${OUTPUT_DIR}/MIPS_OUTPUT.txt
+	@echo "\n"

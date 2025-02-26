@@ -1,4 +1,3 @@
-
 import java.io.*;
 import java.util.*; 
 
@@ -51,11 +50,12 @@ public class Main {
 				IR.StaticAnalysis();
 				System.out.println(IR.getInstance().toString());
 				if (IRcommand.exceptionVariables.isEmpty()) {
-					file_writer.write("!OK");
+					// Perform register allocation
+					IR.getInstance().allocateRegisters();
+					
+					// Generate MIPS code using the register allocation
 					IR.getInstance().MIPSme();
-					// // liveless analysis
-					// // interference graph
-					// // allocate 10 registers
+					
 					MIPSGenerator.getInstance();
 				}
 				else {
