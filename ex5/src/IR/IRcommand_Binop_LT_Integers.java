@@ -3,6 +3,8 @@
 /***********/
 package IR;
 
+import MIPS.MIPSGenerator;
+
 /*******************/
 /* GENERAL IMPORTS */
 /*******************/
@@ -34,6 +36,28 @@ public class IRcommand_Binop_LT_Integers extends IRcommand
 		if (!t1.initialized || !t2.initialized)
 			dst.initialized = false;
 		super.staticAnanlysis();
+	}
+
+	@Override
+	public void MIPSme()
+	{
+		// Generate a unique label for the comparison
+		String trueLabel = IRcommand.getFreshLabel("lt_true");
+		String endLabel = IRcommand.getFreshLabel("lt_end");
+		
+		// Compare t1 < t2
+		MIPSGenerator.getInstance().blt(t1, t2, trueLabel);
+		
+		// If not less than, set result to 0
+		MIPSGenerator.getInstance().li(dst, 0);
+		MIPSGenerator.getInstance().jump(endLabel);
+		
+		// If less than, set result to 1
+		MIPSGenerator.getInstance().label(trueLabel);
+		MIPSGenerator.getInstance().li(dst, 1);
+		
+		// End of comparison
+		MIPSGenerator.getInstance().label(endLabel);
 	}
 
 }

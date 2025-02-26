@@ -13,6 +13,7 @@ import java.util.stream.*;
 /* PROJECT IMPORTS */
 /*******************/
 import TEMP.*;
+import MIPS.*;
 
 public class IRcommand_Func_Call extends IRcommand
 {
@@ -46,5 +47,23 @@ public class IRcommand_Func_Call extends IRcommand
 		if (args.stream().anyMatch(temp -> !temp.initialized))
 			dst.initialized = false;
 		super.staticAnanlysis();
+	}
+
+	@Override
+	public void MIPSme() {
+		// Handle predefined functions
+		if (func.equals("PrintInt") && args.size() == 1) {
+			// PrintInt is implemented using MIPS syscall
+			MIPSGenerator.getInstance().print_int(args.get(0));
+			return;
+		}
+		
+		// For other functions, we would generate code to:
+		// 1. Push arguments to stack
+		// 2. Jump to function label
+		// 3. Store return value (if any) to dst
+		
+		// This part would be implemented based on your calling convention
+		// For now, we're only handling the PrintInt predefined function
 	}
 }

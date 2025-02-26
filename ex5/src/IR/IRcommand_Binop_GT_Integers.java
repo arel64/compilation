@@ -3,6 +3,8 @@
 /***********/
 package IR;
 
+import MIPS.MIPSGenerator;
+
 /*******************/
 /* GENERAL IMPORTS */
 /*******************/
@@ -36,4 +38,26 @@ public class IRcommand_Binop_GT_Integers extends IRcommand
 		super.staticAnanlysis();
 	}
 
+	@Override
+	public void MIPSme()
+	{
+		// Generate a unique label for the comparison
+		String trueLabel = IRcommand.getFreshLabel("gt_true");
+		String endLabel = IRcommand.getFreshLabel("gt_end");
+		
+		// Compare t1 > t2 (this is the same as t2 < t1)
+		// We don't have a direct "greater than" instruction, so we use "less than" in reverse
+		MIPSGenerator.getInstance().blt(t2, t1, trueLabel);
+		
+		// If not greater than, set result to 0
+		MIPSGenerator.getInstance().li(dst, 0);
+		MIPSGenerator.getInstance().jump(endLabel);
+		
+		// If greater than, set result to 1
+		MIPSGenerator.getInstance().label(trueLabel);
+		MIPSGenerator.getInstance().li(dst, 1);
+		
+		// End of comparison
+		MIPSGenerator.getInstance().label(endLabel);
+	}
 }

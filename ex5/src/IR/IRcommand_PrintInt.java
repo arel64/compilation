@@ -11,6 +11,7 @@ package IR;
 /* PROJECT IMPORTS */
 /*******************/
 import TEMP.*;
+import MIPS.MIPSGenerator;
 
 public class IRcommand_PrintInt extends IRcommand
 {
@@ -24,5 +25,11 @@ public class IRcommand_PrintInt extends IRcommand
 	@Override
     public String toString() {
         return "IRcommand_PrintInt: t=" + t;
+    }
+    
+    @Override
+    public void MIPSme() {
+        // Call the MIPS generator to print the integer
+        MIPSGenerator.getInstance().print_int(t);
     }
 }
