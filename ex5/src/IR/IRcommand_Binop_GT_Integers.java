@@ -13,6 +13,8 @@ import MIPS.MIPSGenerator;
 /* PROJECT IMPORTS */
 /*******************/
 import TEMP.*;
+import java.util.Arrays;
+import java.util.HashSet;
 
 public class IRcommand_Binop_GT_Integers extends IRcommand
 {
@@ -42,8 +44,8 @@ public class IRcommand_Binop_GT_Integers extends IRcommand
 	public void MIPSme()
 	{
 		// Generate a unique label for the comparison
-		String trueLabel = IRcommand.getFreshLabel("gt_true");
-		String endLabel = IRcommand.getFreshLabel("gt_end");
+		String trueLabel = MIPSGenerator.getInstance().label("gt_true");
+		String endLabel = MIPSGenerator.getInstance().label("gt_end");
 		
 		// Compare t1 > t2 (this is the same as t2 < t1)
 		// We don't have a direct "greater than" instruction, so we use "less than" in reverse
@@ -59,5 +61,9 @@ public class IRcommand_Binop_GT_Integers extends IRcommand
 		
 		// End of comparison
 		MIPSGenerator.getInstance().label(endLabel);
+	}
+
+	public HashSet<TEMP> liveTEMPs() {
+		return new HashSet<TEMP>(Arrays.asList(t1, t2));
 	}
 }

@@ -14,6 +14,8 @@ import TEMP.*;
 import MIPS.*;
 import java.util.HashSet;
 import java.util.stream.Collectors;
+import java.util.Arrays;
+import java.util.HashSet;
 
 public class IRcommand_Store extends IRcommand
 {
@@ -59,6 +61,10 @@ public class IRcommand_Store extends IRcommand
 	@Override
 	public void MIPSme() {
 		MIPSGenerator.getInstance().store(var_name, src);
-	}	
+	}
+
+	public HashSet<TEMP> liveTEMPs() {
+		return new HashSet<TEMP>(Arrays.asList(src));
+	}
 
 }

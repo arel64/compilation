@@ -18,6 +18,7 @@ import TEMP.*;
 public class MIPSGenerator
 {
 	private int WORD_SIZE=4;
+	private int labelCount = 0;
 	/***********************/
 	/* The file writer ... */
 	/***********************/
@@ -45,7 +46,6 @@ public class MIPSGenerator
 			finalWriter.print("\n.text\n");
 			finalWriter.print(".globl main\n");
 			finalWriter.print("main:\n");
-			finalWriter.print("\tj Label_0_main_start\n"); // Jump to our actual code
 			
 			// Remove the "main:" line from textContent if it exists
 			String textContentStr = textContent.toString();
@@ -146,10 +146,13 @@ public class MIPSGenerator
         String instruction = String.format("\tdiv %s,%s,%s\n", dstReg, src1Reg, src2Reg);
         textContent.append(instruction);
     }
-	public void label(String inlabel)
+	public String label(String inlabel)
 	{
-		String instruction = String.format("%s:\n", inlabel);
+		String l = String.format("%d%s:\n", labelCount, inlabel);
+		String instruction = l;
 		textContent.append(instruction);
+		labelCount++;
+		return l;
 	}	
 	public void jump(String inlabel)
 	{

@@ -14,6 +14,8 @@ import java.util.ArrayList;
 /* PROJECT IMPORTS */
 /*******************/
 import TEMP.*;
+import java.util.Arrays;
+import java.util.HashSet;
 
 public class IRcommand_Func_Dec extends IRcommand
 {
@@ -54,5 +56,9 @@ public class IRcommand_Func_Dec extends IRcommand
 				workList.add(i);
 			}
 		}
+	}
+
+	public void MIPSme() {
+
 	}
 }

@@ -12,6 +12,8 @@ import AST.AST_TYPE;
 /* PROJECT IMPORTS */
 /*******************/
 import TEMP.*;
+import java.util.Arrays;
+import java.util.HashSet;
 
 public class IRcommand_Class_Dec extends IRcommand
 {

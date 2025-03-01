@@ -12,6 +12,8 @@ import java.util.stream.*;
 /* PROJECT IMPORTS */
 /*******************/
 import TEMP.*;
+import java.util.Arrays;
+import java.util.HashSet;
 
 public class IRcommand_Class_Method_Call extends IRcommand
 {
@@ -48,6 +50,11 @@ public class IRcommand_Class_Method_Call extends IRcommand
 		if (!src.initialized || args.stream().anyMatch(temp -> !temp.initialized))
 			dst.initialized = false;
 		super.staticAnanlysis();
+	}
+
+	public HashSet<TEMP> liveTEMPs() {
+		args.add(src);
+		return new HashSet<TEMP>(args);
 	}
 }
 

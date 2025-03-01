@@ -12,25 +12,27 @@ package IR;
 /*******************/
 import TEMP.*;
 import MIPS.*;
+import java.util.Arrays;
+import java.util.HashSet;
 
 public class IRcommandConstInt extends IRcommand
 {
-	TEMP t;
+	TEMP dst;
 	int value;
 	
-	public IRcommandConstInt(TEMP t,int value)
+	public IRcommandConstInt(TEMP dst,int value)
 	{
-		this.t = t;
+		this.dst = dst;
 		this.value = value;
 	}
 
 	@Override
     public String toString() {
-        return "IRcommandConstInt: t=" + t + ", value=" + value;
+        return "IRcommandConstInt: dst=" + dst + ", value=" + value;
     }
 
 	@Override
 	public void MIPSme() {
-		MIPSGenerator.getInstance().li(t, value);
+		MIPSGenerator.getInstance().li(dst, value);
 	}
 }

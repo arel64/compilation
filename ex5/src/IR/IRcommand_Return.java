@@ -11,6 +11,8 @@ package IR;
 /* PROJECT IMPORTS */
 /*******************/
 import TEMP.*;
+import java.util.Arrays;
+import java.util.HashSet;
 
 public class IRcommand_Return extends IRcommand
 {
@@ -25,4 +27,8 @@ public class IRcommand_Return extends IRcommand
     public String toString() {
         return "IRcommand_Return: register=" + register;
     }
+
+	public HashSet<TEMP> liveTEMPs() {
+		return new HashSet<TEMP>(Arrays.asList(register));
+	}
 }

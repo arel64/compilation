@@ -11,6 +11,8 @@ package IR;
 /* PROJECT IMPORTS */
 /*******************/
 import TEMP.*;
+import java.util.Arrays;
+import java.util.HashSet;
 
 public class IRcommand_Array_Access extends IRcommand
 {
@@ -39,5 +41,9 @@ public class IRcommand_Array_Access extends IRcommand
 		if (!index.initialized || !src.initialized)
 			dst.initialized = false;
 		super.staticAnanlysis();
+	}
+
+	public HashSet<TEMP> liveTEMPs() {
+		return new HashSet<TEMP>(Arrays.asList(src, index));
 	}
 }

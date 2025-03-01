@@ -12,6 +12,8 @@ package IR;
 /*******************/
 import TEMP.*;
 import MIPS.*;
+import java.util.Arrays;
+import java.util.HashSet;
 
 public class IRcommand_Binop_Div_Integers extends IRcommand
 {
@@ -40,6 +42,10 @@ public class IRcommand_Binop_Div_Integers extends IRcommand
 	public void MIPSme()
 	{
 		MIPSGenerator.getInstance().div(dst,t1,t2);
+	}
+
+	public HashSet<TEMP> liveTEMPs() {
+		return new HashSet<TEMP>(Arrays.asList(t1, t2));
 	}
 
 }

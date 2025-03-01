@@ -14,6 +14,8 @@ import java.util.stream.Collectors;
 /*******************/
 import TEMP.*;
 import MIPS.*;
+import java.util.Arrays;
+import java.util.HashSet;
 
 public class IRcommand_Load extends IRcommand
 {

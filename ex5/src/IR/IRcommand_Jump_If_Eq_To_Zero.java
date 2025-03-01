@@ -13,6 +13,7 @@ package IR;
 import TEMP.*;
 import MIPS.*;
 import java.util.HashSet;
+import java.util.Arrays;
 
 public class IRcommand_Jump_If_Eq_To_Zero extends IRcommand
 {
@@ -70,5 +71,9 @@ public class IRcommand_Jump_If_Eq_To_Zero extends IRcommand
 			}
 		}
 		return -1;
+	}
+
+	public HashSet<TEMP> liveTEMPs() {
+		return new HashSet<TEMP>(Arrays.asList(t));
 	}
 }

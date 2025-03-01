@@ -11,6 +11,8 @@ package IR;
 /* PROJECT IMPORTS */
 /*******************/
 import TEMP.*;
+import java.util.Arrays;
+import java.util.HashSet;
 
 public class IRcommand_New_Class extends IRcommand
 {

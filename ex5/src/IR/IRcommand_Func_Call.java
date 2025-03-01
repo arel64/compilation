@@ -14,6 +14,8 @@ import java.util.stream.*;
 /*******************/
 import TEMP.*;
 import MIPS.*;
+import java.util.Arrays;
+import java.util.HashSet;
 
 public class IRcommand_Func_Call extends IRcommand
 {
@@ -65,5 +67,9 @@ public class IRcommand_Func_Call extends IRcommand
 		
 		// This part would be implemented based on your calling convention
 		// For now, we're only handling the PrintInt predefined function
+	}
+
+	public HashSet<TEMP> liveTEMPs() {
+		return new HashSet<TEMP>(args);
 	}
 }

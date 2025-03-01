@@ -13,6 +13,8 @@ import MIPS.MIPSGenerator;
 /* PROJECT IMPORTS */
 /*******************/
 import TEMP.*;
+import java.util.Arrays;
+import java.util.HashSet;
 
 public class IRcommand_Binop_LT_Integers extends IRcommand
 {
@@ -42,8 +44,8 @@ public class IRcommand_Binop_LT_Integers extends IRcommand
 	public void MIPSme()
 	{
 		// Generate a unique label for the comparison
-		String trueLabel = IRcommand.getFreshLabel("lt_true");
-		String endLabel = IRcommand.getFreshLabel("lt_end");
+		String trueLabel = MIPSGenerator.getInstance().label("lt_true");
+		String endLabel = MIPSGenerator.getInstance().label("lt_end");
 		
 		// Compare t1 < t2
 		MIPSGenerator.getInstance().blt(t1, t2, trueLabel);
@@ -58,6 +60,10 @@ public class IRcommand_Binop_LT_Integers extends IRcommand
 		
 		// End of comparison
 		MIPSGenerator.getInstance().label(endLabel);
+	}
+
+	public HashSet<TEMP> liveTEMPs() {
+		return new HashSet<TEMP>(Arrays.asList(t1, t2));
 	}
 
 }

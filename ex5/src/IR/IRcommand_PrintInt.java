@@ -12,6 +12,8 @@ package IR;
 /*******************/
 import TEMP.*;
 import MIPS.MIPSGenerator;
+import java.util.HashSet;
+import java.util.Arrays;
 
 public class IRcommand_PrintInt extends IRcommand
 {
@@ -32,4 +34,8 @@ public class IRcommand_PrintInt extends IRcommand
         // Call the MIPS generator to print the integer
         MIPSGenerator.getInstance().print_int(t);
     }
+
+    public HashSet<TEMP> liveTEMPs() {
+		return new HashSet<TEMP>(Arrays.asList(t));
+	}
 }

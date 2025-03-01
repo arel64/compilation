@@ -4,6 +4,7 @@
 package IR;
 import java.util.HashSet;
 import java.util.ArrayList;
+import TEMP.*;
 /*******************/
 /* GENERAL IMPORTS */
 /*******************/
@@ -71,6 +72,10 @@ public abstract class IRcommand
 
 	public void MIPSme() {
 		
+	}
+
+	public HashSet<TEMP> liveTEMPs() {
+		return new HashSet<TEMP>();
 	}
 
 	protected class Init {

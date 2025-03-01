@@ -13,6 +13,7 @@ package IR;
 import TEMP.*;
 import MIPS.*;
 import java.util.HashSet;
+import java.util.Arrays;
 
 public class IRcommand_Jump_Label extends IRcommand
 {
