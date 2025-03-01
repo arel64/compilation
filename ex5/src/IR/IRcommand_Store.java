@@ -19,8 +19,8 @@ import java.util.HashSet;
 
 public class IRcommand_Store extends IRcommand
 {
-	String var_name;
-	TEMP src;
+	public String var_name;
+	public TEMP src;
 	
 	public IRcommand_Store(String var_name, TEMP src)
 	{

@@ -17,8 +17,8 @@ import java.util.HashSet;
 
 public class IRcommand_Class_Dec extends IRcommand
 {
-	String name;
-	String parent;
+	public String name;
+	public String parent;
 	
 	public IRcommand_Class_Dec(String name, String parent)
 	{

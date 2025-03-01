@@ -17,10 +17,9 @@ import java.util.HashSet;
 
 public class IRcommand_Class_Method_Call extends IRcommand
 {
-	TEMP dst;
-	TEMP src;
-	String method;
-	ArrayList<TEMP> args;
+	public TEMP src;
+	public String method;
+	public ArrayList<TEMP> args;
 	
 	public IRcommand_Class_Method_Call(TEMP src, String method, ArrayList<TEMP> args)
 	{

@@ -20,7 +20,6 @@ public class IRcommand_Binop_GT_Integers extends IRcommand
 {
 	public TEMP t1;
 	public TEMP t2;
-	public TEMP dst;
 
 	public IRcommand_Binop_GT_Integers(TEMP dst,TEMP t1,TEMP t2)
 	{

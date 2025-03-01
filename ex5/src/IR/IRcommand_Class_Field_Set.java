@@ -16,9 +16,9 @@ import java.util.HashSet;
 
 public class IRcommand_Class_Field_Set extends IRcommand
 {
-	TEMP src;
-	String field;
-	TEMP value;
+	public TEMP src;
+	public String field;
+	public TEMP value;
 	
 	public IRcommand_Class_Field_Set(TEMP src, String field, TEMP value)
 	{

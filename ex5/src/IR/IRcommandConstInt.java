@@ -17,8 +17,7 @@ import java.util.HashSet;
 
 public class IRcommandConstInt extends IRcommand
 {
-	TEMP dst;
-	int value;
+	public int value;
 	
 	public IRcommandConstInt(TEMP dst,int value)
 	{

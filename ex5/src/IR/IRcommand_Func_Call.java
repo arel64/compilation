@@ -19,9 +19,8 @@ import java.util.HashSet;
 
 public class IRcommand_Func_Call extends IRcommand
 {
-	TEMP dst;
-	String func;
-	ArrayList<TEMP> args;
+	public String func;
+	public ArrayList<TEMP> args;
 
 	public IRcommand_Func_Call(String func, ArrayList<TEMP> args)
 	{

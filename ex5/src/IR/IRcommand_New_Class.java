@@ -16,8 +16,7 @@ import java.util.HashSet;
 
 public class IRcommand_New_Class extends IRcommand
 {
-	TEMP dst;
-	String type;
+	public String type;
 	
 	public IRcommand_New_Class(TEMP dst, String type)
 	{

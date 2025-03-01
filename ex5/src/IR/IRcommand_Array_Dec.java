@@ -17,8 +17,8 @@ import java.util.HashSet;
 
 public class IRcommand_Array_Dec extends IRcommand
 {
-	String name;
-	AST_TYPE type;
+	public String name;
+	public AST_TYPE type;
 	
 	public IRcommand_Array_Dec(String name, AST_TYPE type)
 	{

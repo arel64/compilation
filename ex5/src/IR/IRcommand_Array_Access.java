@@ -16,9 +16,8 @@ import java.util.HashSet;
 
 public class IRcommand_Array_Access extends IRcommand
 {
-	TEMP dst;
-	TEMP src;
-	TEMP index;
+	public TEMP src;
+	public TEMP index;
 	
 	public IRcommand_Array_Access(TEMP dst, TEMP src, TEMP index)
 	{

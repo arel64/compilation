@@ -16,9 +16,9 @@ import java.util.HashSet;
 
 public class IRcommand_Array_Set extends IRcommand
 {
-	TEMP array;
-	TEMP index;
-	TEMP value;
+	public TEMP array;
+	public TEMP index;
+	public TEMP value;
 	
 	public IRcommand_Array_Set(TEMP array, TEMP index, TEMP value)
 	{

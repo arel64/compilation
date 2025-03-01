@@ -32,6 +32,8 @@ public abstract class IRcommand
 	public HashSet<Init> out = null;
 	public int index;
 
+	public TEMP dst = null;
+
 	public IRcommand() {
 		this.index = commandCounter++;
 		this.nextCommands = new int[]{this.index + 1};

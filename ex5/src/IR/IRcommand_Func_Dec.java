@@ -19,9 +19,9 @@ import java.util.HashSet;
 
 public class IRcommand_Func_Dec extends IRcommand
 {
-	String name;
-	AST_TYPE type;
-	AST_LIST<AST_VAR_DEC> params;
+	public String name;
+	public AST_TYPE type;
+	public AST_LIST<AST_VAR_DEC> params;
 	
 	public IRcommand_Func_Dec(String name, AST_TYPE type, AST_LIST<AST_VAR_DEC> params)
 	{

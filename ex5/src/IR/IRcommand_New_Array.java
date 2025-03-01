@@ -16,9 +16,8 @@ import java.util.HashSet;
 
 public class IRcommand_New_Array extends IRcommand
 {
-	TEMP dst;
-	String type;
-	TEMP size;
+	public String type;
+	public TEMP size;
 	
 	public IRcommand_New_Array(TEMP dst, String type, TEMP size)
 	{

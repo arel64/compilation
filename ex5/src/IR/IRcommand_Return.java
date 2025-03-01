@@ -16,7 +16,7 @@ import java.util.HashSet;
 
 public class IRcommand_Return extends IRcommand
 {
-	TEMP register;
+	public TEMP register;
 	
 	public IRcommand_Return(TEMP register)
 	{
