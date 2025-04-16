@@ -26,7 +26,7 @@ public class IRcommand_Store extends IRcommand
 	{
 		this.src      = src;
 		this.var_name = var_name;
-		IR.getInstance().recordVarTemp(var_name, src);
+	//	IR.getInstance().recordVarTemp(var_name, src);
 	}
 
 	@Override

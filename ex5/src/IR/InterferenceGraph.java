@@ -42,10 +42,38 @@ public class InterferenceGraph {
                 // Graph is not 10-colorable, need to spill
                 TEMP spillNode = graph.keySet().stream()
                     .filter(t -> !removed.contains(t))
-                    .findFirst()
+                    .max(Comparator.comparingInt(t -> (int) graph.get(t).stream().filter(n -> !removed.contains(n)).count()))
                     .get();
-                stack.add(spillNode);
-                removed.add(spillNode);
+
+                TEMP n1 = TEMP_FACTORY.getInstance().getFreshTEMP();
+                TEMP n2 = TEMP_FACTORY.getInstance().getFreshTEMP();
+
+                int index = 0;
+                int size = graph.size() / 2;
+                HashSet<TEMP> n1Neighbors = new HashSet<>();
+                HashSet<TEMP> n2Neighbors = new HashSet<>();
+                for (TEMP item : graph.get(spillNode)) {
+                    if (index < size) {
+                        n1Neighbors.add(item);
+                    } else {
+                        n2Neighbors.add(item);
+                    }
+                    index++;
+                }
+
+                for (TEMP t : n1Neighbors) {
+                    graph.get(t).add(n1);
+                    graph.get(t).remove(spillNode);
+                }
+                for (TEMP t : n2Neighbors) {
+                    graph.get(t).add(n2);
+                    graph.get(t).remove(spillNode);
+                }
+
+                graph.put(n1, n1Neighbors);
+                graph.put(n2, n2Neighbors);
+                graph.remove(spillNode);
+
             }
         }
         

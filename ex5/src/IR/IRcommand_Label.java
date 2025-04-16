@@ -24,6 +24,7 @@ public class IRcommand_Label extends IRcommand
 	public IRcommand_Label(String label_name)
 	{
 		this.label_name = label_name;
+		this.inClassVarDecs = false;
 	}
 
 	public IRcommand_Label(String label_name, String closing_label)
@@ -40,7 +41,7 @@ public class IRcommand_Label extends IRcommand
 
 	@Override
 	public void MIPSme() {
-		MIPSGenerator.getInstance().label(label_name);
+		MIPSGenerator.getInstance().label(label_name + ":");
 	}
 
 	@Override

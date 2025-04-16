@@ -27,12 +27,14 @@ public abstract class IRcommand
 		return String.format("Label_%d_%s",label_counter++,msg);
 	}
 
-	public HashSet<Integer> prevCommands = new HashSet<Integer>();
-	public int[] nextCommands;
-	public HashSet<Init> out = null;
-	public int index;
+	public HashSet<Integer> prevCommands = new HashSet<Integer>(); // all previous possible commands that can lead to this command
+	public int[] nextCommands; // all next possible commands
+	public HashSet<Init> out = null; // out of static analysis (inits of variables)
+	public int index; // current command index in list
 
-	public TEMP dst = null;
+	public TEMP dst = null; // only relevant in some commands but easier to have it here
+
+	public static boolean inClassVarDecs = false; // this is to track if the last label was of class dec to know if we define class vars
 
 	public IRcommand() {
 		this.index = commandCounter++;
@@ -40,6 +42,7 @@ public abstract class IRcommand
 
 		if (this.index > 0 && !(IR.getInstance().commandList.get(this.index - 1) instanceof IRcommand_Jump_Label))
 			this.prevCommands.add(this.index - 1);
+
 	}
 
 	public void staticAnanlysis() {
@@ -49,18 +52,6 @@ public abstract class IRcommand
 			HashSet<Init> temp = IR.getInstance().commandList.get(i).out;
 			if (temp != null)
 				in.addAll(temp);
-		}
-		
-		// Track any TEMPs used in this instruction
-		if (this instanceof IRcommand_Load) {
-			IRcommand_Load load = (IRcommand_Load) this;
-			// Record that this TEMP is associated with this variable
-			IR.getInstance().recordVarTemp(load.var_name, load.dst);
-		}
-		else if (this instanceof IRcommand_Store) {
-			IRcommand_Store store = (IRcommand_Store) this;
-			// Record that this TEMP is associated with this variable
-			IR.getInstance().recordVarTemp(store.var_name, store.src);
 		}
 		
 		if (!in.equals(this.out)) {

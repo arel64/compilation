@@ -59,6 +59,7 @@ public class Main {
 					MIPSGenerator.getInstance();
 				}
 				else {
+					System.out.println("You fucked up...");
         			List<String> sortedList = new ArrayList<>(IRcommand.exceptionVariables);
         			Collections.sort(sortedList);
         			for (String var : sortedList) {
@@ -66,7 +67,7 @@ public class Main {
         			}
 				}
 				AST_GRAPHVIZ.getInstance().finalizeFile();
-				MIPSGenerator.getInstance().finalizeFile();
+				//MIPSGenerator.getInstance().finalizeFile();
 			} catch (LexerError e) {
 				System.out.println(e.getMessage());
 				file_writer.write("ERROR");

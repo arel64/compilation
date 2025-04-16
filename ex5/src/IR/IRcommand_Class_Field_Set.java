@@ -32,12 +32,6 @@ public class IRcommand_Class_Field_Set extends IRcommand
         return "IRcommand_Class_Field_Set: src=" + src + ", field=" + field + ", value=" + value;
     }
 
-	public void staticAnanlysis() {
-		if (!value.initialized)
-			src.initialized = false;
-		super.staticAnanlysis();
-	}
-
 	public HashSet<TEMP> liveTEMPs() {
 		return new HashSet<TEMP>(Arrays.asList(value, src));
 	}

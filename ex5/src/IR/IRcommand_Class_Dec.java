@@ -24,6 +24,7 @@ public class IRcommand_Class_Dec extends IRcommand
 	{
 		this.name = name;
 		this.parent = parent;
+		this.inClassVarDecs = true;
 	}
 
 	@Override

@@ -37,7 +37,6 @@ public class AST_VAR_SIMPLE extends AST_VAR
 	{
 		TEMP dst = TEMP_FACTORY.getInstance().getFreshTEMP();
 		IR.getInstance().Add_IRcommand(new IRcommand_Load(dst, this.val));
-		IR.getInstance().recordVarTemp(this.val, dst);
 		return dst;
 	}
 

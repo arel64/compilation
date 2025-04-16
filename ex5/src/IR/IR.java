@@ -25,8 +25,7 @@ public class IR
 	public ArrayList<IRcommand> commandList = new ArrayList<IRcommand>();
 	public InterferenceGraph interferenceGraph;
 	public Map<TEMP, Integer> registerAllocation;
-	public Map<String, TEMP> varToTemp = new HashMap<>();
-	
+
 	/******************/
 	/* Add IR command */
 	/******************/
@@ -91,17 +90,10 @@ public class IR
 			// Add interference edges between all live temps
 			for (TEMP t1 : liveTEMPs) {
 				for (TEMP t2 : liveTEMPs) {
-					if (t1 != t2) {
-						interferenceGraph.addEdge(t1, t2);
-					}
+					interferenceGraph.addEdge(t1, t2);
 				}
 			}
 		}
-	}
-
-	public void recordVarTemp(String var, TEMP temp) {
-		//System.out.println("Recording var-temp mapping: " + var + " -> " + temp);
-		varToTemp.put(var, temp);
 	}
 
 	public int getRegister(TEMP temp) {
@@ -130,12 +122,6 @@ public class IR
 	}
 
 	public void allocateRegisters() {
-		// Debug the varToTemp map
-		System.out.println("varToTemp map size: " + varToTemp.size());
-		for (String var : varToTemp.keySet()) {
-			System.out.println("Var: " + var + " -> TEMP: " + varToTemp.get(var));
-		}
-		
 		// Build the interference graph from liveness information
 		buildInterferenceGraph();
 		
@@ -147,7 +133,8 @@ public class IR
 		registerAllocation = interferenceGraph.colorGraph();
 		
 		// Debug output
-		System.out.println("Register allocation complete: " + registerAllocation.size() + " temps assigned");
+		for (TEMP t : registerAllocation.keySet())
+			System.out.println("TEMP: " + t + " is given color: " + registerAllocation.get(t) +"\n");
 	}
 
 }

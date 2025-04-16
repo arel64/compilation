@@ -108,10 +108,11 @@ public class AST_FUNC_INVOCATION extends AST_EXP {
     @Override
     public TEMP IRme() {
         ArrayList<TEMP> paramsTemp = new ArrayList<TEMP>();
-        for (AST_EXP param : params)
-        {
-           paramsTemp.add(param.IRme());
-        }
+        if (params != null)
+            for (AST_EXP param : params)
+            {
+                paramsTemp.add(param.IRme());
+            }
         TEMP dst = TEMP_FACTORY.getInstance().getFreshTEMP();
         if (var == null)
         {

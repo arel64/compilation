@@ -25,7 +25,6 @@ public class IRcommand_Load extends IRcommand
 	{
 		this.dst = dst;
 		this.var_name = var_name;
-		IR.getInstance().recordVarTemp(var_name, dst);
 	}
 
 	public void staticAnanlysis() {
