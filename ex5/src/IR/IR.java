@@ -61,13 +61,13 @@ public class IR
 
 	public static void StaticAnalysis() {
 		IRcommand.workList.add(0);
-		instance.commandList.get(IRcommand.workList.get(0)).staticAnanlysis();
+		instance.commandList.get(IRcommand.workList.get(0)).staticAnalysis();
 		while (!IRcommand.workList.isEmpty()) {
 			int next = IRcommand.workList.get(0);
 			if (next >= instance.commandList.size())
 				IRcommand.workList.remove(IRcommand.workList.indexOf(next));
 			else 
-				instance.commandList.get(next).staticAnanlysis();
+				instance.commandList.get(next).staticAnalysis();
 		}
 
 	}

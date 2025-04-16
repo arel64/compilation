@@ -44,10 +44,10 @@ public class IRcommand_Func_Call extends IRcommand
         return result;
     }
 
-	public void staticAnanlysis() {
+	public void staticAnalysis() {
 		if (args.stream().anyMatch(temp -> !temp.initialized))
 			dst.initialized = false;
-		super.staticAnanlysis();
+		super.staticAnalysis();
 	}
 
 	@Override

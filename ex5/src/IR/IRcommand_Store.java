@@ -26,7 +26,6 @@ public class IRcommand_Store extends IRcommand
 	{
 		this.src      = src;
 		this.var_name = var_name;
-	//	IR.getInstance().recordVarTemp(var_name, src);
 	}
 
 	@Override
@@ -34,7 +33,7 @@ public class IRcommand_Store extends IRcommand
         return "IRcommand_Store: var_name=" + var_name + ", src=" + src;
     }
 
-	public void staticAnanlysis() {
+	public void staticAnalysis() {
 		workList.remove(workList.indexOf(this.index));
 		HashSet<Init> in = new HashSet<Init>();
 		for (Integer i : prevCommands) {

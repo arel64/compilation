@@ -45,7 +45,7 @@ public abstract class IRcommand
 
 	}
 
-	public void staticAnanlysis() {
+	public void staticAnalysis() {
 		workList.remove(workList.indexOf(this.index));
 		HashSet<Init> in = new HashSet<Init>();
 		for (Integer i : prevCommands) {

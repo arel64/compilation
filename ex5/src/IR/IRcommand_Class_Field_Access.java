@@ -30,10 +30,10 @@ public class IRcommand_Class_Field_Access extends IRcommand
 		return "IRcommand_Class_Field_Access: dst=" + dst + ", src=" + src + ", field=" + field;
 	}
 
-	public void staticAnanlysis() {
+	public void staticAnalysis() {
 		if (!src.initialized)
 			dst.initialized = false;
-		super.staticAnanlysis();
+		super.staticAnalysis();
 	}
 
 	public HashSet<TEMP> liveTEMPs() {

@@ -45,10 +45,10 @@ public class IRcommand_Class_Method_Call extends IRcommand
         return result;
     }
 
-	public void staticAnanlysis() {
+	public void staticAnalysis() {
 		if (!src.initialized || args.stream().anyMatch(temp -> !temp.initialized))
 			dst.initialized = false;
-		super.staticAnanlysis();
+		super.staticAnalysis();
 	}
 
 	public HashSet<TEMP> liveTEMPs() {

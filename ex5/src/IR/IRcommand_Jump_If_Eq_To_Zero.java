@@ -33,7 +33,7 @@ public class IRcommand_Jump_If_Eq_To_Zero extends IRcommand
     }
 
 	@Override
-	public void staticAnanlysis() {
+	public void staticAnalysis() {
 		workList.remove(workList.indexOf(this.index));
 		HashSet<Init> in = new HashSet<Init>();
 		for (Integer i : prevCommands) {

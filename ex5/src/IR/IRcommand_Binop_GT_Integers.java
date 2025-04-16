@@ -33,10 +33,10 @@ public class IRcommand_Binop_GT_Integers extends IRcommand
 		return "IRcommand_Binop_GT_Integers: dst=" + dst + ", t1=" + t1 + ", t2=" + t2;
 	}
 
-	public void staticAnanlysis() {
+	public void staticAnalysis() {
 		if (!t1.initialized || !t2.initialized)
 			dst.initialized = false;
-		super.staticAnanlysis();
+		super.staticAnalysis();
 	}
 
 	@Override

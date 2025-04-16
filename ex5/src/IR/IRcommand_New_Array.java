@@ -31,10 +31,10 @@ public class IRcommand_New_Array extends IRcommand
         return "IRcommand_New_Array: dst=" + dst + " type=" + type + ", size=" + size;
     }
 
-	public void staticAnanlysis() {
+	public void staticAnalysis() {
 		if (!size.initialized)
 			dst.initialized = false;
-		super.staticAnanlysis();
+		super.staticAnalysis();
 	}
 
 	public HashSet<TEMP> liveTEMPs() {

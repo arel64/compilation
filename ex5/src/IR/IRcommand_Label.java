@@ -24,7 +24,6 @@ public class IRcommand_Label extends IRcommand
 	public IRcommand_Label(String label_name)
 	{
 		this.label_name = label_name;
-		this.inClassVarDecs = false;
 	}
 
 	public IRcommand_Label(String label_name, String closing_label)
@@ -50,9 +49,10 @@ public class IRcommand_Label extends IRcommand
     }
 
 	@Override
-	public void staticAnanlysis() {
+	public void staticAnalysis() {
+		this.inClassVarDecs = false;
 		if (closing_label == null) { // regular label of if or while
-			super.staticAnanlysis();
+			super.staticAnalysis();
 		}
 		else if (this.funcOrClassEnd) { // end label of class or func
 			workList.remove(workList.indexOf(this.index));
@@ -62,7 +62,7 @@ public class IRcommand_Label extends IRcommand
 			int afterBlockCommand = findLabel(this.closing_label) + 1;
 			if (afterBlockCommand < workList.size())
 				this.nextCommands = new int[]{this.index + 1, afterBlockCommand};
-			super.staticAnanlysis();
+			super.staticAnalysis();
 		}
 	}
 

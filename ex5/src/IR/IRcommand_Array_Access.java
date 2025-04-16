@@ -35,10 +35,10 @@ public class IRcommand_Array_Access extends IRcommand
 		//MIPSGenerator.getInstance().allocate(var_name);
 	}
 
-	public void staticAnanlysis() {
+	public void staticAnalysis() {
 		if (!index.initialized || !src.initialized)
 			dst.initialized = false;
-		super.staticAnanlysis();
+		super.staticAnalysis();
 	}
 
 	public HashSet<TEMP> liveTEMPs() {

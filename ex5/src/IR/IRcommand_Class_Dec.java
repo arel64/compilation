@@ -24,11 +24,16 @@ public class IRcommand_Class_Dec extends IRcommand
 	{
 		this.name = name;
 		this.parent = parent;
-		this.inClassVarDecs = true;
 	}
 
 	@Override
     public String toString() {
         return "IRcommand_Class_Dec: name=" + this.name + " parent=" + this.parent;
     }
+
+	@Override
+	public void staticAnalysis() {
+		this.inClassVarDecs = true;
+		super.staticAnalysis();
+	}
 }

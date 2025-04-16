@@ -25,7 +25,7 @@ public class IRcommand_Allocate extends IRcommand
 		this.var_name = var_name;
 	}
 
-	public void staticAnanlysis() {
+	public void staticAnalysis() {
 		workList.remove(workList.indexOf(this.index));
 		HashSet<Init> in = new HashSet<Init>();
 		for (Integer i : prevCommands) {
