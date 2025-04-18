@@ -25,8 +25,9 @@ public class AST_LIT_STRING extends AST_LIT
     @Override
     public TEMP IRme()
 	{
-	
-		return null;
+		TEMP dst = TEMP_FACTORY.getInstance().getFreshTEMP();
+		IR.getInstance().Add_IRcommand(new IRcommandConstString(dst, val));
+		return dst;
 	}
    
 }

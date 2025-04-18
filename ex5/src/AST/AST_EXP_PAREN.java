@@ -33,7 +33,7 @@ public class AST_EXP_PAREN extends AST_EXP {
 	public TEMP IRme()
 	{
 	
-		return null;
+		return exp.IRme();
 	}
 
 }
