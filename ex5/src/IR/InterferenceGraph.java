@@ -7,8 +7,10 @@ public class InterferenceGraph {
     private Map<TEMP, Set<TEMP>> graph = new HashMap<>();
     
     public void addEdge(TEMP t1, TEMP t2) {
-        graph.computeIfAbsent(t1, k -> new HashSet<>()).add(t2);
-        graph.computeIfAbsent(t2, k -> new HashSet<>()).add(t1);
+        if (!t1.equals(t2)) {
+            graph.computeIfAbsent(t1, k -> new HashSet<>()).add(t2);
+            graph.computeIfAbsent(t2, k -> new HashSet<>()).add(t1);
+        }
     }
     
     public Map<TEMP, Integer> colorGraph() {
@@ -49,7 +51,7 @@ public class InterferenceGraph {
                 TEMP n2 = TEMP_FACTORY.getInstance().getFreshTEMP();
 
                 int index = 0;
-                int size = graph.size() / 2;
+                int size = graph.get(spillNode).size() / 2;
                 HashSet<TEMP> n1Neighbors = new HashSet<>();
                 HashSet<TEMP> n2Neighbors = new HashSet<>();
                 for (TEMP item : graph.get(spillNode)) {
