@@ -67,7 +67,7 @@ public class Main {
         			}
 				}
 				AST_GRAPHVIZ.getInstance().finalizeFile();
-				//MIPSGenerator.getInstance().finalizeFile();
+				MIPSGenerator.getInstance().finalizeFile();
 			} catch (LexerError e) {
 				System.out.println(e.getMessage());
 				file_writer.write("ERROR");

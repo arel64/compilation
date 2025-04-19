@@ -43,8 +43,8 @@ public class IRcommand_Binop_GT_Integers extends IRcommand
 	public void MIPSme()
 	{
 		// Generate a unique label for the comparison
-		String trueLabel = MIPSGenerator.getInstance().label("gt_true");
-		String endLabel = MIPSGenerator.getInstance().label("gt_end");
+		String trueLabel = "gt_true";
+		String endLabel = "gt_end";
 		
 		// Compare t1 > t2 (this is the same as t2 < t1)
 		// We don't have a direct "greater than" instruction, so we use "less than" in reverse

@@ -118,6 +118,8 @@ public class AST_EXP_BINOP extends AST_EXP
 		}
 		if(leftType.isPrimitive())
 		{
+			if (leftType instanceof TYPE_STRING)
+				return TYPE_STRING.getInstance();
 			return TYPE_INT.getInstance();
 		}
 		return ((TYPE_WRAPPER)(leftType)).t;

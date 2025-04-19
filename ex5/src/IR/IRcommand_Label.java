@@ -40,7 +40,7 @@ public class IRcommand_Label extends IRcommand
 
 	@Override
 	public void MIPSme() {
-		MIPSGenerator.getInstance().label(label_name + ":");
+		MIPSGenerator.getInstance().label(label_name);
 	}
 
 	@Override
