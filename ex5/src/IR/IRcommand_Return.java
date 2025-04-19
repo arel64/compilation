@@ -29,6 +29,7 @@ public class IRcommand_Return extends IRcommand
     }
 
 	public HashSet<TEMP> liveTEMPs() {
-		return new HashSet<TEMP>(Arrays.asList(register));
+		if (register != null) return new HashSet<TEMP>(Arrays.asList(register));
+		return new HashSet<TEMP>();
 	}
 }

@@ -11,7 +11,7 @@ public class AST_LIT_NIL extends AST_LIT
 
     @Override 
     public String getValue() {
-        return "nil";
+        return null;
     }
 
     @Override

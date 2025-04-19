@@ -25,6 +25,7 @@ public class IRcommand_Load extends IRcommand
 	{
 		this.dst = dst;
 		this.var_name = var_name;
+		if (var_name == null) this.dst.initialized = false;
 	}
 
 	public void staticAnalysis() {
@@ -36,7 +37,7 @@ public class IRcommand_Load extends IRcommand
 				in.addAll(temp);
 		}
 		try {
-        	Integer.parseInt(var_name);
+			if (var_name != null) Integer.parseInt(var_name);
     	} 
 		catch (NumberFormatException e) {
 			if (in.stream().allMatch(init -> !init.var.equals(var_name) || init.line == -1)) {
