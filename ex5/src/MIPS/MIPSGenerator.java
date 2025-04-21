@@ -46,14 +46,16 @@ public class MIPSGenerator
 			finalWriter.print("\n.text\n");
 			finalWriter.print(".globl main\n");
 			finalWriter.print("main:\n");
-			
-			// Remove the "main:" line from textContent if it exists
+
+			String mainStartLabel = IR.getInstance().getFunctionLabel("main");
+			finalWriter.format("\tj %s\n", mainStartLabel);
+
 			String textContentStr = textContent.toString();
-			if (textContentStr.startsWith("main:\n")) {
-				textContentStr = textContentStr.substring(6); // Remove "main:\n"
-			}
+
 			finalWriter.print(textContentStr);
 			
+			// Add the program exit syscall sequence at the very end
+			finalWriter.print("\nprogram_exit:\n"); // Add a label for clarity
 			finalWriter.print("\tli $v0,10\n");
 			finalWriter.print("\tsyscall\n");
 			finalWriter.close();
@@ -188,6 +190,56 @@ public class MIPSGenerator
         textContent.append(instruction);
     }
 	
+	public void jal(String label) {
+        String instruction = String.format("\tjal %s\n", label);
+        textContent.append(instruction);
+    }
+	
+	public void addi(TEMP dst, TEMP src, int immediate) {
+		String dstReg = tempToRegister(dst);
+		String srcReg = tempToRegister(src);
+		String instruction = String.format("\taddi %s,%s,%d\n", dstReg, srcReg, immediate);
+		textContent.append(instruction);
+	}
+
+	public void sw_sp(TEMP src, int offset) { // Store word relative to $sp
+		String srcReg = tempToRegister(src);
+		// MIPS convention: sw register, offset(base_register)
+		String instruction = String.format("\tsw %s,%d($sp)\n", srcReg, offset);
+		textContent.append(instruction);
+	}
+
+	public void sw_fp(TEMP src, int offset) { // Store word relative to $fp
+		String srcReg = tempToRegister(src);
+		String instruction = String.format("\tsw %s,%d($fp)\n", srcReg, offset);
+		textContent.append(instruction);
+	}
+
+	public void lw_sp(TEMP dst, int offset) { // Load word relative to $sp
+		String dstReg = tempToRegister(dst);
+		String instruction = String.format("\tlw %s,%d($sp)\n", dstReg, offset);
+		textContent.append(instruction);
+	}
+
+	public void lw_fp(TEMP dst, int offset) { // Load word relative to $fp
+		String dstReg = tempToRegister(dst);
+		String instruction = String.format("\tlw %s,%d($fp)\n", dstReg, offset);
+		textContent.append(instruction);
+	}
+
+	public void move(TEMP dst, TEMP src) {
+		String dstReg = tempToRegister(dst);
+        String srcReg = tempToRegister(src);
+        String instruction = String.format("\tmove %s,%s\n", dstReg, srcReg);
+        textContent.append(instruction);
+	}
+
+	public void jr(TEMP target) {
+		String targetReg = tempToRegister(target);
+		String instruction = String.format("\tjr %s\n", targetReg);
+		textContent.append(instruction);
+	}
+	
 	/**************************************/
 	/* USUAL SINGLETON IMPLEMENTATION ... */
 	/**************************************/
@@ -235,11 +287,65 @@ public class MIPSGenerator
 
 	// Add this helper method to convert TEMP to register name
 	private String tempToRegister(TEMP temp) {
+		// REVERTED: Removed switch statement for special registers
+		
+		// Handle regular TEMPs allocated to $t0-$t9
 		int regNum = IR.getInstance().getRegister(temp);
 		if (regNum >= 0 && regNum < 10) {
-			return "$t" + regNum;  // Use $t0 through $t9 for our registers
+			return "$t" + regNum;  // Use $t0 through $t9 for allocated registers
 		}
-		// If no register was allocated or spilled, use a default
-		return "$t" + temp.getSerialNumber() % 10;
+		
+		// Fallback for unallocated/spilled temps (or if register allocation is off)
+		// Using serial % 10 is just a simple fallback, might not be robust
+		int serial = temp.getSerialNumber(); // Get serial here for fallback
+		System.err.println("Warning: TEMP " + serial + " has no allocated register, using fallback mapping.");
+		return "$t" + Math.abs(serial % 10); 
 	}
+
+	// --- Dedicated Prologue/Epilogue --- 
+
+	public void genPrologue(int frameSize) {
+		// Allocate space on stack: addi $sp, $sp, -frameSize
+		String allocInstr = String.format("\taddi $sp,$sp,%d\n", -frameSize);
+		textContent.append(allocInstr);
+
+		// Save old frame pointer: sw $fp, offset($sp) (e.g., offset = frameSize - 4)
+		String saveFpInstr = String.format("\tsw $fp,%d($sp)\n", frameSize - 4);
+		textContent.append(saveFpInstr);
+
+		// Save return address: sw $ra, offset($sp) (e.g., offset = frameSize)
+		String saveRaInstr = String.format("\tsw $ra,%d($sp)\n", frameSize);
+		textContent.append(saveRaInstr);
+
+		// Set new frame pointer: addi $fp, $sp, frameSize 
+		String setFpInstr = String.format("\taddi $fp,$sp,%d\n", frameSize);
+		textContent.append(setFpInstr);
+	}
+
+	public void genEpilogue(int frameSize) {
+		// Restore return address: lw $ra, offset($sp)
+		String restoreRaInstr = String.format("\tlw $ra,%d($sp)\n", frameSize);
+		textContent.append(restoreRaInstr);
+
+		// Restore old frame pointer: lw $fp, offset($sp)
+		String restoreFpInstr = String.format("\tlw $fp,%d($sp)\n", frameSize - 4);
+		textContent.append(restoreFpInstr);
+
+		// Deallocate stack frame: addi $sp, $sp, frameSize
+		String deallocInstr = String.format("\taddi $sp,$sp,%d\n", frameSize);
+		textContent.append(deallocInstr);
+	}
+
+	public void genReturnJump() {
+		textContent.append("\tjr $ra\n");
+	}
+
+	public void genMoveReturnValue(TEMP src) {
+		// Move the return value (from src TEMP) into $v0
+		String srcReg = tempToRegister(src);
+		String instruction = String.format("\tmove $v0,%s\n", srcReg);
+        textContent.append(instruction);
+	}
+
+	// --- End Dedicated Prologue/Epilogue ---
 }

@@ -123,9 +123,23 @@ public class AST_FUNC_DEC extends AST_CLASS_FIELDS_DEC {
 		String label_start = IRcommand.getFreshLabel(this.varName + "_start");
         String label_end   = IRcommand.getFreshLabel(this.varName + "_end");
 
+        // Register the generated start label with the IR central mapping
+        IR.getInstance().registerFunctionLabel(this.varName, label_start);
+
         IR.getInstance().Add_IRcommand(new IRcommand_Label(label_start, label_end));
         IR.getInstance().Add_IRcommand(new IRcommand_Func_Dec(this.varName, returnType, this.params));
-        body.IRme();
+        
+        // Generate prologue via IRcommand_Func_Dec.MIPSme which is called later
+
+        if (body != null) {
+            body.IRme();
+        }
+
+        // Add implicit return command to trigger epilogue generation
+        // Pass null for void functions or functions without explicit return value
+        IR.getInstance().Add_IRcommand(new IRcommand_Return(null)); 
+
+        // Add the function end label
         IR.getInstance().Add_IRcommand(new IRcommand_Label(label_end, true));
         return null;
     }

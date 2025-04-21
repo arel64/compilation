@@ -114,18 +114,16 @@ public class AST_FUNC_INVOCATION extends AST_EXP {
                 paramsTemp.add(param.IRme());
             }
         TEMP dst = TEMP_FACTORY.getInstance().getFreshTEMP();
+
         if (var == null)
         {
             IR.getInstance().Add_IRcommand(new IRcommand_Func_Call(dst, funcName, paramsTemp));
-
         }
         else
         {
-            IR.getInstance().Add_IRcommand(new IRcommand_Class_Method_Call(dst, var.IRme(), funcName, paramsTemp));
+            System.err.println("Warning: IR generation for class method calls requires label updates in IRcommand_Class_Method_Call and correct label retrieval mechanism.");
+            IR.getInstance().Add_IRcommand(new IRcommand_Class_Method_Call(dst, var.IRme(), funcName, paramsTemp)); 
         }
-
-        // IR.getInstance().Add_IRcommand(new IRcommand_Jump_Label(func_label)); // TODO fix label
-        // IR.getInstance().Add_IRcommand(new IRcommand_Jump_Label(end_label));
 
         return dst;
     }

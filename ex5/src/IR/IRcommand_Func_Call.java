@@ -19,25 +19,25 @@ import java.util.HashSet;
 
 public class IRcommand_Func_Call extends IRcommand
 {
-	public String func;
+	public String funcName;
 	public ArrayList<TEMP> args;
 
-	public IRcommand_Func_Call(String func, ArrayList<TEMP> args)
+	public IRcommand_Func_Call(String funcName, ArrayList<TEMP> args)
 	{
-		this.func = func;
+		this.funcName = funcName;
 		this.args = args;
 	}
 
-	public IRcommand_Func_Call(TEMP dst, String func, ArrayList<TEMP> args)
+	public IRcommand_Func_Call(TEMP dst, String funcName, ArrayList<TEMP> args)
 	{
 		this.dst = dst;
-		this.func = func;
+		this.funcName = funcName;
 		this.args = args;
 	}
 
 	@Override
     public String toString() {
-        String result = "IRcommand_Func_Call: func=" + func + ", args=" + args.toString();
+        String result = "IRcommand_Func_Call: funcName=" + funcName + ", args=" + args.toString();
         if (dst != null) {
             result += ", dst=" + dst;
         }
@@ -53,7 +53,7 @@ public class IRcommand_Func_Call extends IRcommand
 	@Override
 	public void MIPSme() {
 		// Handle predefined functions
-		if (func.equals("PrintInt") && args.size() == 1) {
+		if (funcName.equals("PrintInt") && args.size() == 1) {
 			// PrintInt is implemented using MIPS syscall
 			MIPSGenerator.getInstance().print_int(args.get(0));
 			return;
@@ -64,8 +64,16 @@ public class IRcommand_Func_Call extends IRcommand
 		// 2. Jump to function label
 		// 3. Store return value (if any) to dst
 		
+		// Look up the label using the function name from the central IR map
+		String labelToJumpTo = IR.getInstance().getFunctionLabel(this.funcName);
+
+		// Generate the jump-and-link instruction using the looked-up label
+		// NOTE: Assumes label map is populated correctly during IR generation.
+		//       Also assumes a simple calling convention with no arg passing/return handling yet.
+		MIPSGenerator.getInstance().jal(labelToJumpTo);
+
 		// This part would be implemented based on your calling convention
-		// For now, we're only handling the PrintInt predefined function
+		// For now, we're only handling the PrintInt predefined function and simple jumps
 	}
 
 	public HashSet<TEMP> liveTEMPs() {

@@ -26,6 +26,9 @@ public class IR
 	public InterferenceGraph interferenceGraph;
 	public Map<TEMP, Integer> registerAllocation;
 
+	// Map to store function name -> start label mapping
+	private Map<String, String> functionLabels = new HashMap<>();
+
 	/******************/
 	/* Add IR command */
 	/******************/
@@ -135,6 +138,23 @@ public class IR
 		// Debug output
 		for (TEMP t : registerAllocation.keySet())
 			System.out.println("TEMP: " + t + " is given color: " + registerAllocation.get(t) +"\n");
+	}
+
+	// Method to register a function's start label
+	public void registerFunctionLabel(String funcName, String label) {
+		functionLabels.put(funcName, label);
+	}
+
+	// Method to retrieve a function's start label
+	public String getFunctionLabel(String funcName) {
+		// Handle cases where label might not be found (e.g., error, predefined function)
+		String label = functionLabels.get(funcName);
+		if (label == null) {
+			// Consider how to handle missing labels. Return null? Throw exception? Return funcName?
+			System.err.println("Warning: Could not find registered start label for function: " + funcName + ". Using function name as fallback.");
+			return funcName; // Fallback to function name might work for simple cases or predefined functions
+		}
+		return label;
 	}
 
 }
