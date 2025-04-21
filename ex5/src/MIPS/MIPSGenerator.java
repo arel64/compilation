@@ -148,10 +148,9 @@ public class MIPSGenerator
     }
 	public String label(String inlabel)
 	{
-		String l = String.format("Lable%d%s:\n", labelCount, inlabel);
+		String l = String.format("%s:\n", inlabel);
 		String instruction = l;
 		textContent.append(instruction);
-		labelCount++;
 		return l;
 	}	
 	public void jump(String inlabel)

@@ -42,23 +42,22 @@ public class IRcommand_Binop_LT_Integers extends IRcommand
 	@Override
 	public void MIPSme()
 	{
-		// Generate a unique label for the comparison
-		String trueLabel = "gt_true";
-		String endLabel = "gt_end";
+		// Generate unique labels for the comparison
+		String trueLabel = getFreshLabel("lt_true");
+		String endLabel = getFreshLabel("lt_end");
 		
-		// Compare t1 > t2 (this is the same as t2 < t1)
-		// We don't have a direct "greater than" instruction, so we use "less than" in reverse
+		// Compare t1 < t2
 		MIPSGenerator.getInstance().blt(t1, t2, trueLabel);
 		
-		// If not greater than, set result to 0
+		// If not less than, result is 0
 		MIPSGenerator.getInstance().li(dst, 0);
 		MIPSGenerator.getInstance().jump(endLabel);
 		
-		// If greater than, set result to 1
+		// If less than, result is 1
 		MIPSGenerator.getInstance().label(trueLabel);
 		MIPSGenerator.getInstance().li(dst, 1);
 		
-		// End of comparison
+		// End label
 		MIPSGenerator.getInstance().label(endLabel);
 	}
 
