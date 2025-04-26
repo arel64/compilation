@@ -1,5 +1,6 @@
 package AST;
 import SYMBOL_TABLE.SYMBOL_TABLE;
+import SYMBOL_TABLE.SYMBOL_TABLE_ENTRY;
 import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
 import TEMP.*;
@@ -36,9 +37,15 @@ public class AST_VAR_SIMPLE extends AST_VAR
 	@Override
 	public TEMP IRme()
 	{
-		TEMP dst = TEMP_FACTORY.getInstance().getFreshTEMP();
-		// IR.getInstance().Add_IRcommand(new IRcommand_Load(dst, this.val,));
-		return dst;
+		SYMBOL_TABLE_ENTRY entry = SYMBOL_TABLE.getInstance().findEntry(this.val);
+		if (entry == null) {
+            throw new RuntimeException("Compiler Error: Symbol table entry not found for variable " + this.val + " during IR generation.");
+        }
+		if (entry.temp == null) {
+            throw new RuntimeException("Compiler Error: TEMP not associated with variable " + this.val + " during IR generation.");
+        }
+		
+		return entry.temp;
 	}
 
 }

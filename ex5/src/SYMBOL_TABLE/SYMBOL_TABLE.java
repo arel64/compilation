@@ -14,6 +14,8 @@ import java.util.List;
 /* PROJECT IMPORTS */
 /*******************/
 import TYPES.*;
+import TEMP.*;
+import AST.AST_VAR_DEC;
 
 /****************/
 /* SYMBOL TABLE */
@@ -50,6 +52,11 @@ public class SYMBOL_TABLE
 	/****************************************************************************/
 	public void enter(String name,TYPE t)
 	{
+		enter(name, t, null);
+	}
+
+	public void enter(String name, TYPE t, AST_VAR_DEC declarationNode)
+	{
 		/*************************************************/
 		/* [1] Compute the hash value for this new entry */
 		/*************************************************/
@@ -62,9 +69,9 @@ public class SYMBOL_TABLE
 		SYMBOL_TABLE_ENTRY next = table[hashValue];
 	
 		/**************************************************************************/
-		/* [3] Prepare a new symbol table entry with name, type, next and prevtop */
+		/* [3] Prepare a new symbol table entry with name, type, node, next, prevtop */
 		/**************************************************************************/
-		SYMBOL_TABLE_ENTRY e = new SYMBOL_TABLE_ENTRY(name,t,hashValue,next,top,top_index++);
+		SYMBOL_TABLE_ENTRY e = new SYMBOL_TABLE_ENTRY(name, t, hashValue, next, top, top_index++, declarationNode);
 
 		/**********************************************/
 		/* [4] Update the top of the symbol table ... */
@@ -87,20 +94,11 @@ public class SYMBOL_TABLE
 	/***********************************************/
 	public TYPE find(String name)
 	{
-		if(name == null)
-		{
-			return null;
+
+		SYMBOL_TABLE_ENTRY e = findEntry(name);
+		if (e != null) {
+			return e.type;
 		}
-		SYMBOL_TABLE_ENTRY e;
-				
-		for (e = table[hash(name)]; e != null; e = e.next)
-		{
-			if (name.equals(e.name))
-			{
-				return e.type;
-			}
-		}
-		
 		return null;
 	}
 
@@ -139,18 +137,21 @@ public class SYMBOL_TABLE
 		/**************************************************************************/
 		/* Pop elements from the symbol table stack until a SCOPE-BOUNDARY is hit */		
 		/**************************************************************************/
-		while (top.name != "SCOPE-BOUNDARY")
+		while (top != null && !top.name.equals("SCOPE-BOUNDARY")) // Added null check for safety
 		{
-			table[top.index] = top.next;
-			top_index = top_index-1;
-			top = top.prevtop;
+			// DO NOT MODIFY HASH TABLE LINKS (table[top.index] = top.next;)
+			// Only move the top pointer back to logically close the scope
+			top_index = top.prevtop_index; // Restore previous top_index if needed (though maybe not necessary if top_index isn't used for lookups)
+			top = top.prevtop; 
 		}
 		/**************************************/
 		/* Pop the SCOPE-BOUNDARY sign itself */		
 		/**************************************/
-		table[top.index] = top.next;
-		top_index = top_index-1;
-		top = top.prevtop;
+		if (top != null) { // Ensure top is not null before accessing prevtop
+			// DO NOT MODIFY HASH TABLE LINKS (table[top.index] = top.next;)
+			top_index = top.prevtop_index; // Restore previous top_index
+			top = top.prevtop; 
+		}
 
 		/*********************************************/
 		/* Print the symbol table after every change */		
@@ -338,4 +339,33 @@ public class SYMBOL_TABLE
         }
         return null;
     }
+
+	// Add a method to find the SYMBOL_TABLE_ENTRY itself, not just the TYPE
+	public SYMBOL_TABLE_ENTRY findEntry(String name)
+	{
+		if(name == null)
+		{
+			return null;
+		}
+		SYMBOL_TABLE_ENTRY e;
+
+		for (e = table[hash(name)]; e != null; e = e.next) {
+			if (name.equals(e.name)) {
+				return e;
+			}
+		}
+		return null;
+	}
+
+	public void associateTemp(String name, TEMP temp)
+	{
+		SYMBOL_TABLE_ENTRY entry = findEntry(name);
+		if (entry != null) {
+			entry.temp = temp;
+		} else {
+			// This would be a compiler error - trying to associate TEMP with non-existent var
+			System.err.println("ERROR: Could not find symbol table entry for " + name + " to associate TEMP.");
+			// Consider throwing an exception
+		}
+	}
 }

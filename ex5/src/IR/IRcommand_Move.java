@@ -14,15 +14,13 @@ import java.util.stream.Collectors;
 /*******************/
 import TEMP.*;
 import MIPS.*;
-public class IRcommand_Load extends IRcommand
+public class IRcommand_Move extends IRcommand
 {
-	public String var_name;
 	TEMP src;
-	public IRcommand_Load(TEMP dst, TEMP src, String var_name)
+	public IRcommand_Move(TEMP dst, TEMP src)
 	{
 		this.dst = dst;
 		this.src = src;
-		this.var_name = var_name;
 	}
 
 	public void staticAnalysis() {
@@ -32,15 +30,6 @@ public class IRcommand_Load extends IRcommand
 			HashSet<Init> temp = IR.getInstance().commandList.get(i).out;
 			if (temp != null)
 				in.addAll(temp);
-		}
-		try {
-			if (var_name != null) Integer.parseInt(var_name);
-    	} 
-		catch (NumberFormatException e) {
-			if (in.stream().allMatch(init -> !init.var.equals(var_name) || init.line == -1)) {
-				exceptionVariables.add(var_name);
-				dst.initialized = false;
-			}
 		}
 		if (!in.equals(this.out)) {
 			this.out = in;
@@ -54,11 +43,10 @@ public class IRcommand_Load extends IRcommand
 	@Override
 	public void MIPSme() {
 		MIPSGenerator.getInstance().move(dst, src);
-		
 	}
 
 	@Override
     public String toString() {
-        return "IRcommand_Load: dst=" + dst + ", var_name=" + var_name;
+        return String.format("IRcommand_Move: dst=%s, src=%s", dst, src);
     }
 }
