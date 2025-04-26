@@ -20,13 +20,21 @@ import java.util.HashSet;
 public class IRcommand_Store extends IRcommand
 {
 	String var_name;
-	TEMP src;
-	
+	TEMP src = null;
+	public int offset;
+	boolean is_offset = false;
 	public IRcommand_Store(TEMP dst, TEMP src, String var_name)
 	{
 		this.dst = dst;
 		this.src = src;
 		this.var_name = var_name;
+	}
+	public IRcommand_Store(TEMP dst, int offset, String var_name)
+	{
+		this.dst = dst;
+		this.offset = offset;
+		this.var_name = var_name;
+		is_offset = true;
 	}
 	@Override
     public String toString() {
@@ -43,7 +51,7 @@ public class IRcommand_Store extends IRcommand
 				in.addAll(temp);
 		}
 
-		if (src != null && src.initialized)
+		if (src != null && src.initialized || is_offset)
 		{
 			in = in.stream().filter(init -> !init.var.equals(var_name)).collect(Collectors.toCollection(HashSet::new));
 			in.add(new Init(var_name, this.index));
@@ -60,7 +68,11 @@ public class IRcommand_Store extends IRcommand
 
 	@Override
 	public void MIPSme() {
-		MIPSGenerator.getInstance().move(dst, src);
+		if (src != null) {
+			MIPSGenerator.getInstance().move(dst, src);
+		} else {
+			MIPSGenerator.getInstance().sw_fp(dst, offset);
+		}
 	}
 
 	public HashSet<TEMP> liveTEMPs() {

@@ -9,7 +9,7 @@ public class TYPE_VAR_DEC extends TYPE_WRAPPER
 	}
 	@Override
 	public String toString() {
-		return String.format("VAR DEC %s %s",t,getName());
+		return String.format("TYPE_VAR_DEC %s %s",t,getName());
 	}
 	@Override
 	public boolean equals(Object obj) {

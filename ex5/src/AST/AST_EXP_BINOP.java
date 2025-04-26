@@ -98,10 +98,9 @@ public class AST_EXP_BINOP extends AST_EXP
 		{
 			throw new SemanticException(lineNumber,String.format("Cannot %s between %s and %s",binopOperation,leftType,rightType));
 		}
-
 		if(!(leftType.isAssignable(rightType) || rightType.isAssignable(leftType) || leftType.equals(rightType)))
 		{
-			throw new SemanticException(lineNumber,String.format("Cannot '%s' for different primitive types %s %s",binopOperation,leftType,rightType));
+			throw new SemanticException(lineNumber,String.format("Cannot '%s' for different primitive types %s and %s",binopOperation,leftType,rightType));
 		}
 		if(leftType.isAssignable(TYPE_STRING.getInstance()))
 		{

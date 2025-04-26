@@ -52,28 +52,55 @@ public class IRcommand_Func_Call extends IRcommand
 
 	@Override
 	public void MIPSme() {
+		MIPSGenerator gen = MIPSGenerator.getInstance();
+
 		// Handle predefined functions
 		if (funcName.equals("PrintInt") && args.size() == 1) {
-			// PrintInt is implemented using MIPS syscall
-			MIPSGenerator.getInstance().print_int(args.get(0));
+			gen.print_int(args.get(0));
+			// PrintInt doesn't return a value, so no need to handle dst
 			return;
 		}
-		
-		// For other functions, we would generate code to:
-		// 1. Push arguments to stack
-		// 2. Jump to function label
-		// 3. Store return value (if any) to dst
-		
-		// Look up the label using the function name from the central IR map
+		// Add other predefined functions here (e.g., PrintString, Allocate, etc.)
+
+		// --- Standard Function Call --- 
+
+		// 1. Push arguments onto stack (in reverse order)
+		int argSpace = args.size() * 4;
+		if (argSpace > 0) {
+			// Allocate space on stack for arguments
+			gen.addi_imm("$sp", "$sp", -argSpace);
+			
+			// Store arguments
+			for (int i = 0; i < args.size(); i++) {
+				TEMP argTemp = args.get(i);
+				// Calculate offset relative to the *new* $sp
+				// Args pushed ..., arg1, arg0. arg0 is at $sp+0, arg1 at $sp+4, ...
+				// If pushed in reverse: argN-1 at $sp+0, ... arg0 at $sp+(N-1)*4
+				// Let's push 0 to N-1: arg0 at $sp+0, arg1 at $sp+4, ...
+				// Switched to standard order push for simplicity with offset calc below.
+				int offset = i * 4; 
+				gen.sw_sp(argTemp, offset); // sw arg_temp, offset($sp)
+			}
+		}
+
+		// 2. Call the function
 		String labelToJumpTo = IR.getInstance().getFunctionLabel(this.funcName);
+		if (labelToJumpTo == null) {
+			System.err.printf("ERROR: Could not find label for function '%s' during MIPS generation.\n", this.funcName);
+			// Potentially generate an error or halt? For now, skip the call.
+			return; 
+		}
+		gen.jal(labelToJumpTo);
 
-		// Generate the jump-and-link instruction using the looked-up label
-		// NOTE: Assumes label map is populated correctly during IR generation.
-		//       Also assumes a simple calling convention with no arg passing/return handling yet.
-		MIPSGenerator.getInstance().jal(labelToJumpTo);
+		// 3. Clean up stack (remove arguments)
+		if (argSpace > 0) {
+			gen.addi_imm("$sp", "$sp", argSpace);
+		}
 
-		// This part would be implemented based on your calling convention
-		// For now, we're only handling the PrintInt predefined function and simple jumps
+		// 4. Handle return value (if function returns one)
+		if (dst != null) {
+			gen.move_from_v0(dst); // dst = $v0
+		}
 	}
 
 	public HashSet<TEMP> liveTEMPs() {

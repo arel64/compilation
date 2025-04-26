@@ -3,10 +3,6 @@ import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
 import TEMP.*;
 import IR.*;
-import AST.AST_STMT;
-import AST.AST_STMT_VAR_DECL;
-import java.util.Arrays;
-
 import SYMBOL_TABLE.SYMBOL_TABLE;
 
 public class AST_FUNC_DEC extends AST_CLASS_FIELDS_DEC {
@@ -136,7 +132,7 @@ public class AST_FUNC_DEC extends AST_CLASS_FIELDS_DEC {
                 }
             }
         }
-        int frameSize = (2 + numLocals) * 4;
+        int frameSize = 8 + numLocals * 4;
 
         IR.getInstance().registerFunctionLabel(funcName, label_start);
 
@@ -144,20 +140,24 @@ public class AST_FUNC_DEC extends AST_CLASS_FIELDS_DEC {
         
         IR.getInstance().Add_IRcommand(new IRcommand_Prologue(frameSize));
         
+        if (params != null) {
+            int paramIndex = 0;
+            for (AST_VAR_DEC param : params) {
+                int offset = 0 + paramIndex * 4;
+                TEMP paramTemp = TEMP_FACTORY.getInstance().getFreshTEMP();
+                IR.getInstance().Add_IRcommand(new IRcommand_Load(paramTemp, offset, param.getName()));
+
+                SYMBOL_TABLE.getInstance().associateTemp(param.getName(), paramTemp);
+
+                paramIndex++;
+            }
+        }
+
         if (body != null) {
             body.IRme();
         }
-        
         IR.getInstance().Add_IRcommand(new IRcommand_Epilogue(frameSize));
-
-        // If this is the main function, add an explicit jump to the program exit
-        // instead of letting the epilogue do a jr $ra.
-        // NOTE: This assumes the epilogue *doesn't* jump if it's main.
-        // A better approach might be to modify IRcommand_Epilogue or MIPSGenerator.genEpilogue
-        // to take a flag or check the function name.
-        // For now, we add an explicit jump *after* the epilogue restores the stack.
         if (funcName.equals("main")) {
-             // We need a command to generate a jump. Assuming IRcommand_Jump_Label exists.
              IR.getInstance().Add_IRcommand(new IRcommand_Jump_Label("program_exit"));
         }
 

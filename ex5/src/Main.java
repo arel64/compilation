@@ -45,9 +45,13 @@ public class Main {
 			try {
 				AST = (AST_PROGRAM) p.parse().value;
 				AST.PrintMe();
+				System.out.println("AST printed");
 				AST.SemantMeLog();
+				System.out.println("AST semantic analysis done");
 				AST.IRme();
+				System.out.println("AST IR generation done");
 				IR.StaticAnalysis();
+				System.out.println("IR static analysis done");
 				System.out.println(IR.getInstance().toString());
 				if (IRcommand.exceptionVariables.isEmpty()) {
 					// Perform register allocation

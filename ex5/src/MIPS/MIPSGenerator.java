@@ -57,7 +57,6 @@ public class MIPSGenerator
 			finalWriter.print("\tli $v0,10\n");
 			finalWriter.print("\tsyscall\n");
 			finalWriter.close();
-			
 			// No need to close fileWriter as we won't be using it anymore
 			if (fileWriter != null) {
 				fileWriter.close();
@@ -93,14 +92,9 @@ public class MIPSGenerator
 		String instruction = String.format("\tglobal_%s: .word 721\n", var_name);
 		dataContent.append(instruction);
 	}
-	public void load(TEMP dst, String var_name) {
-		String reg = tempToRegister(dst);
-		String instruction = String.format("\tlw %s,global_%s\n", reg, var_name);
-		textContent.append(instruction);
-	}
-	public void store(String var_name, TEMP src) {
+	public void store(TEMP src, int offset) {
 		String reg = tempToRegister(src);
-		String instruction = String.format("\tsw %s,global_%s\n", reg, var_name);
+		String instruction = String.format("\tsw %s,%d($sp)\n", reg, offset);
 		textContent.append(instruction);
 	}
 	public void li(TEMP t,int value)
@@ -290,37 +284,32 @@ public class MIPSGenerator
 	public void genPrologue(int frameSize) {
 		textContent.append("#### Prologue ####\n");
 		// Allocate space on stack: addi $sp, $sp, -frameSize
-		String allocInstr = String.format("\taddi $sp,$sp,%d\n", -frameSize);
-		textContent.append(allocInstr);
+		// frameSize includes space for locals, saved $fp, saved $ra
+		textContent.append(String.format("\taddi $sp,$sp,%d\n", -frameSize));
 
-		// Save old frame pointer: sw $fp, offset($sp) (e.g., offset = frameSize - 4)
-		String saveFpInstr = String.format("\tsw $fp,%d($sp)\n", frameSize - 4);
-		textContent.append(saveFpInstr);
+		// Save return address: sw $ra, offset($sp) (e.g., offset = frameSize - 4)
+		textContent.append(String.format("\tsw $ra,%d($sp)\n", frameSize - 4));
 
-		// Save return address: sw $ra, offset($sp) (e.g., offset = frameSize)
-		String saveRaInstr = String.format("\tsw $ra,%d($sp)\n", frameSize);
-		textContent.append(saveRaInstr);
+		// Save old frame pointer: sw $fp, offset($sp) (e.g., offset = frameSize - 8)
+		textContent.append(String.format("\tsw $fp,%d($sp)\n", frameSize - 8));
 
 		// Set new frame pointer: addi $fp, $sp, frameSize 
-		String setFpInstr = String.format("\taddi $fp,$sp,%d\n", frameSize);
-		textContent.append(setFpInstr);
+		textContent.append(String.format("\taddi $fp,$sp,%d\n", frameSize));
 		textContent.append("#### Prologue End ####\n");
 	}
 
 	public void genEpilogue(int frameSize) {
 		textContent.append("#### Epilogue ####\n");
 		// Restore return address: lw $ra, offset($sp)
-		String restoreRaInstr = String.format("\tlw $ra,%d($sp)\n", frameSize);
-		textContent.append(restoreRaInstr);
+		textContent.append(String.format("\tlw $ra,%d($sp)\n", frameSize - 4));
 
 		// Restore old frame pointer: lw $fp, offset($sp)
-		String restoreFpInstr = String.format("\tlw $fp,%d($sp)\n", frameSize - 4);
-		textContent.append(restoreFpInstr);
+		textContent.append(String.format("\tlw $fp,%d($sp)\n", frameSize - 8));
 
 		// Deallocate stack frame: addi $sp, $sp, frameSize
-		String deallocInstr = String.format("\taddi $sp,$sp,%d\n", frameSize);
-		textContent.append(deallocInstr);
-		genReturnJump();
+		textContent.append(String.format("\taddi $sp,$sp,%d\n", frameSize));
+
+		genReturnJump(); // Adds jr $ra
 		textContent.append("#### Epilogue End ####\n");
 
 	}
@@ -336,5 +325,28 @@ public class MIPSGenerator
         textContent.append(instruction);
 	}
 
-	
+    // Add immediate instruction (allows using register names like $sp)
+    public void addi_imm(String dstReg, String srcReg, int immediate) {
+        String instruction = String.format("\taddi %s,%s,%d\n", dstReg, srcReg, immediate);
+        textContent.append(instruction);
+    }
+
+    // Load immediate value into a specific register (e.g., $a0)
+    public void li_imm(String dstReg, int immediate) {
+        String instruction = String.format("\tli %s,%d\n", dstReg, immediate);
+        textContent.append(instruction);
+    }
+
+    // Syscall to print a character stored in $a0
+    public void syscall_print_char() {
+        textContent.append("\tli $v0,11\n"); 
+        textContent.append("\tsyscall\n");
+    }
+
+    // Move from $v0 (return value register)
+    public void move_from_v0(TEMP dst) {
+        String dstReg = tempToRegister(dst);
+        String instruction = String.format("\tmove %s,$v0\n", dstReg);
+        textContent.append(instruction);
+    }
 }
