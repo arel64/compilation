@@ -7,14 +7,13 @@ package IR;
 /* GENERAL IMPORTS */
 /*******************/
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+
 import java.util.Map;
 import java.util.Set;
-import java.util.HashMap;
-import java.util.Collections;
-
-import IR.IRcommand.Init;
-import java.lang.reflect.*;
+import java.util.Stack;
 import TEMP.*;
 /*******************/
 /* PROJECT IMPORTS */
@@ -24,10 +23,9 @@ public class IR
 {
 	public ArrayList<IRcommand> commandList = new ArrayList<IRcommand>();
 	public InterferenceGraph interferenceGraph;
-	public Map<TEMP, Integer> registerAllocation;
-
-	// Map to store function name -> start label mapping
-	private Map<String, String> functionLabels = new HashMap<>();
+  	public Map<TEMP, Integer> registerAllocation;
+	private Map<String, String> functionLabels = new HashMap<>(); 
+	private Stack<String> functionEndLabels = new Stack<>(); 
 
 	/******************/
 	/* Add IR command */
@@ -152,6 +150,21 @@ public class IR
 			throw new RuntimeException("Function label not found for: " + funcName);
 		}
 		return label;
+	}
+
+	// --- Function End Label Stack Management ---
+	public void pushFunctionEndLabel(String label) {
+		functionEndLabels.push(label);
+	}
+
+	public void popFunctionEndLabel() {
+		if (!functionEndLabels.isEmpty()) {
+			functionEndLabels.pop();
+		}
+	}
+
+	public String getCurrentFunctionEndLabel() {
+		return functionEndLabels.isEmpty() ? null : functionEndLabels.peek();
 	}
 
 }

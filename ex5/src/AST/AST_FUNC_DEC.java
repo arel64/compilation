@@ -134,34 +134,41 @@ public class AST_FUNC_DEC extends AST_CLASS_FIELDS_DEC {
         }
         int frameSize = 8 + numLocals * 4;
 
-        IR.getInstance().registerFunctionLabel(funcName, label_start);
+        IR ir = IR.getInstance(); // Get instance once
 
-        IR.getInstance().Add_IRcommand(new IRcommand_Label(label_start));
+        ir.registerFunctionLabel(funcName, label_start);
+        ir.Add_IRcommand(new IRcommand_Label(label_start));
+        ir.Add_IRcommand(new IRcommand_Prologue(frameSize));
         
-        IR.getInstance().Add_IRcommand(new IRcommand_Prologue(frameSize));
-        
+        // --- Parameter Loading ---
         if (params != null) {
             int paramIndex = 0;
             for (AST_VAR_DEC param : params) {
-                int offset = 0 + paramIndex * 4;
+                int offset = 0 + paramIndex * 4; 
                 TEMP paramTemp = TEMP_FACTORY.getInstance().getFreshTEMP();
-                IR.getInstance().Add_IRcommand(new IRcommand_Load(paramTemp, offset, param.getName()));
-
+                ir.Add_IRcommand(new IRcommand_Load(paramTemp, offset, param.getName()));
                 SYMBOL_TABLE.getInstance().associateTemp(param.getName(), paramTemp);
-
                 paramIndex++;
             }
         }
 
+        // --- Process Body with End Label Tracking ---
+        ir.pushFunctionEndLabel(label_end); // Push label before processing body
         if (body != null) {
             body.IRme();
         }
-        IR.getInstance().Add_IRcommand(new IRcommand_Epilogue(frameSize));
+        ir.popFunctionEndLabel(); // Pop label after processing body
+
+        // --- End Label and Epilogue ---
+        ir.Add_IRcommand(new IRcommand_Label(label_end)); // End label position
+        ir.Add_IRcommand(new IRcommand_Epilogue(frameSize)); // Epilogue comes AFTER end label
+
+        // --- Main Function Exit Jump ---
         if (funcName.equals("main")) {
-             IR.getInstance().Add_IRcommand(new IRcommand_Jump_Label("program_exit"));
+             ir.Add_IRcommand(new IRcommand_Jump_Label("program_exit"));
         }
 
-        IR.getInstance().Add_IRcommand(new IRcommand_Label(label_end));
+        // Note: Original code had label_end after epilogue/main exit jump, moved it before.
         
         return null;
     }
