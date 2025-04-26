@@ -13,45 +13,33 @@ package IR;
 import TEMP.*;
 import java.util.Arrays;
 import java.util.HashSet;
-import MIPS.*;
+import MIPS.MIPSGenerator;
 
 public class IRcommand_Return extends IRcommand
 {
-	TEMP src;
+	public TEMP register;
 	
-	public IRcommand_Return(TEMP src)
+	public IRcommand_Return(TEMP register)
 	{
-		this.src = src;
+		this.register = register;
 	}
 
 	@Override
     public String toString() {
-        return "IRcommand_Return: src=" + src;
+        return "IRcommand_Return: register=" + register;
     }
 
 	public HashSet<TEMP> liveTEMPs() {
-		if (src != null) return new HashSet<TEMP>(Arrays.asList(src));
+		if (register != null) return new HashSet<TEMP>(Arrays.asList(register));
 		return new HashSet<TEMP>();
 	}
 
-	/***************/
-	/* MIPS me !!! */
-	/***************/
-	public void MIPSme()
-	{
-		MIPSGenerator gen = MIPSGenerator.getInstance();
-
-		// Handle return value (if any)
-		if (src != null) {
-			gen.genMoveReturnValue(src);
-		}
-
-		// Epilogue generation (restore registers, deallocate stack)
-		// TODO: Use actual frame size calculated during prologue/analysis
-		int frameSize = 8; // Placeholder matches prologue
-		gen.genEpilogue(frameSize);
-
-		// Jump back to caller
-		gen.genReturnJump();
-	}
+    @Override
+    public void MIPSme() {
+        MIPSGenerator generator = MIPSGenerator.getInstance();
+        if (this.register != null) {
+            generator.genMoveReturnValue(this.register);
+        }
+    }
+    
 }

@@ -19,7 +19,7 @@ import java.util.HashSet;
 
 public class IRcommand_Store extends IRcommand
 {
-	public String var_name;
+	String var_name;
 	public TEMP src;
 	
 	public IRcommand_Store(String var_name, TEMP src)
@@ -27,10 +27,16 @@ public class IRcommand_Store extends IRcommand
 		this.src      = src;
 		this.var_name = var_name;
 	}
-
+	public IRcommand_Store(TEMP dst, TEMP src, String var_name)
+	{
+		this.dst = dst;
+		this.src = src;
+		this.var_name = var_name;
+	}
 	@Override
     public String toString() {
-        return "IRcommand_Store: var_name=" + var_name + ", src=" + src;
+		String base = String.format("IRcommand_Store: var_name=%s, src=%s, dst=%s", var_name, src, dst);
+        return base;
     }
 
 	public void staticAnalysis() {
@@ -59,7 +65,11 @@ public class IRcommand_Store extends IRcommand
 
 	@Override
 	public void MIPSme() {
-		MIPSGenerator.getInstance().store(var_name, src);
+		if (dst != null) {
+			MIPSGenerator.getInstance().move(dst, src);
+		} else {
+			MIPSGenerator.getInstance().store(var_name, src);
+		}
 	}
 
 	public HashSet<TEMP> liveTEMPs() {

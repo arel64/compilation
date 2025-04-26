@@ -3,6 +3,9 @@ import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
 import TEMP.*;
 import IR.*;
+import AST.AST_STMT;
+import AST.AST_STMT_VAR_DECL;
+import java.util.Arrays;
 
 import SYMBOL_TABLE.SYMBOL_TABLE;
 
@@ -120,27 +123,46 @@ public class AST_FUNC_DEC extends AST_CLASS_FIELDS_DEC {
 
     @Override
     public TEMP IRme() {
-		String label_start = IRcommand.getFreshLabel(this.varName + "_start");
-        String label_end   = IRcommand.getFreshLabel(this.varName + "_end");
+		String funcName = this.varName;
 
-        // Register the generated start label with the IR central mapping
-        IR.getInstance().registerFunctionLabel(this.varName, label_start);
+		String label_start = IRcommand.getFreshLabel(funcName + "_start");
+        String label_end   = IRcommand.getFreshLabel(funcName + "_end");
 
-        IR.getInstance().Add_IRcommand(new IRcommand_Label(label_start, label_end));
-        IR.getInstance().Add_IRcommand(new IRcommand_Func_Dec(this.varName, returnType, this.params));
+        int numLocals = 0;
+        if (body != null) {
+            for (AST_STMT stmt : body) {
+                if (stmt instanceof AST_STMT_VAR_DECL) {
+                    numLocals++;
+                }
+            }
+        }
+        int frameSize = (2 + numLocals) * 4;
+
+        IR.getInstance().registerFunctionLabel(funcName, label_start);
+
+        IR.getInstance().Add_IRcommand(new IRcommand_Label(label_start));
         
-        // Generate prologue via IRcommand_Func_Dec.MIPSme which is called later
-
+        IR.getInstance().Add_IRcommand(new IRcommand_Prologue(frameSize));
+        
         if (body != null) {
             body.IRme();
         }
+        
+        IR.getInstance().Add_IRcommand(new IRcommand_Epilogue(frameSize));
 
-        // Add implicit return command to trigger epilogue generation
-        // Pass null for void functions or functions without explicit return value
-        IR.getInstance().Add_IRcommand(new IRcommand_Return(null)); 
+        // If this is the main function, add an explicit jump to the program exit
+        // instead of letting the epilogue do a jr $ra.
+        // NOTE: This assumes the epilogue *doesn't* jump if it's main.
+        // A better approach might be to modify IRcommand_Epilogue or MIPSGenerator.genEpilogue
+        // to take a flag or check the function name.
+        // For now, we add an explicit jump *after* the epilogue restores the stack.
+        if (funcName.equals("main")) {
+             // We need a command to generate a jump. Assuming IRcommand_Jump_Label exists.
+             IR.getInstance().Add_IRcommand(new IRcommand_Jump_Label("program_exit"));
+        }
 
-        // Add the function end label
-        IR.getInstance().Add_IRcommand(new IRcommand_Label(label_end, true));
+        IR.getInstance().Add_IRcommand(new IRcommand_Label(label_end));
+        
         return null;
     }
 }

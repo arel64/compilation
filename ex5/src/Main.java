@@ -59,7 +59,7 @@ public class Main {
 					MIPSGenerator.getInstance();
 				}
 				else {
-					System.out.println("You fucked up...");
+					System.out.println("You fucked up..." + IRcommand.exceptionVariables.toString());
         			List<String> sortedList = new ArrayList<>(IRcommand.exceptionVariables);
         			Collections.sort(sortedList);
         			for (String var : sortedList) {

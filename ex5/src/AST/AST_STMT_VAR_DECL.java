@@ -1,8 +1,11 @@
 package AST;
 import SYMBOL_TABLE.SemanticException;
+import SYMBOL_TABLE.SYMBOL_TABLE;
 import TYPES.*;
 import TEMP.*;
 import IR.*;
+import MIPS.MIPSGenerator;
+
 public class AST_STMT_VAR_DECL extends AST_STMT {
     public AST_VAR_DEC varDec;
 
@@ -24,7 +27,6 @@ public class AST_STMT_VAR_DECL extends AST_STMT {
     @Override
     public TEMP IRme()
 	{
-		this.varDec.IRme();
-        return null;
+        return varDec.IRme();
 	}
 }

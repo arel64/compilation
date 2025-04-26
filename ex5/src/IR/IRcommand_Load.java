@@ -20,12 +20,19 @@ import java.util.HashSet;
 public class IRcommand_Load extends IRcommand
 {
 	public String var_name;
-	
+	TEMP src;
 	public IRcommand_Load(TEMP dst, String var_name)
 	{
 		this.dst = dst;
 		this.var_name = var_name;
 		if (var_name == null) this.dst.initialized = false;
+		this.src = null;
+	}
+	public IRcommand_Load(TEMP dst, TEMP src, String var_name)
+	{
+		this.dst = dst;
+		this.src = src;
+		this.var_name = var_name;
 	}
 
 	public void staticAnalysis() {
@@ -56,7 +63,11 @@ public class IRcommand_Load extends IRcommand
 
 	@Override
 	public void MIPSme() {
-		MIPSGenerator.getInstance().load(dst, var_name);
+		if (src != null) {
+			MIPSGenerator.getInstance().move(dst, src);
+		} else {
+			MIPSGenerator.getInstance().load(dst, var_name);
+		}
 	}
 
 	@Override

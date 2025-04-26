@@ -60,11 +60,5 @@ public class IRcommand_Func_Dec extends IRcommand
 	}
 
 	public void MIPSme() {
-		// Prologue generation is now handled by MIPSGenerator
-		// TODO: Calculate actual frame size based on locals and max args passed
-		int frameSize = 8; // Placeholder for $fp (4 bytes) + $ra (4 bytes)
-		MIPSGenerator.getInstance().genPrologue(frameSize);
-
-		// NOTE: Argument handling (moving from $a0..$a3 or stack) would go here.
 	}
 }

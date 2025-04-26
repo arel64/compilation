@@ -4,6 +4,7 @@ import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
 import TEMP.*;
 import IR.*;
+import MIPS.MIPSGenerator;
 
 public class AST_VAR_DEC extends AST_DEC {
     
@@ -58,12 +59,11 @@ public class AST_VAR_DEC extends AST_DEC {
     @Override
     public TEMP IRme()
 	{
-		IR.getInstance().Add_IRcommand(new IRcommand_Allocate(this.varName));
-		
-		if (this.varValue != null)
-		{
-			IR.getInstance().Add_IRcommand(new IRcommand_Store(this.varName,this.varValue.IRme()));
-		}
-		return null;
+        TEMP varTemp = TEMP_FACTORY.getInstance().getFreshTEMP();
+        if (this.varValue != null) {
+            TEMP initValTemp = this.varValue.IRme();
+            IR.getInstance().Add_IRcommand(new IRcommand_Store(varTemp, initValTemp, varName));
+        }
+        return varTemp;
 	}
 }
