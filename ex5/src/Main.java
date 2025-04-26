@@ -50,6 +50,8 @@ public class Main {
 				System.out.println("AST semantic analysis done");
 				AST.IRme();
 				System.out.println("AST IR generation done");
+
+
 				IR.StaticAnalysis();
 				System.out.println("IR static analysis done");
 				System.out.println(IR.getInstance().toString());
@@ -59,8 +61,6 @@ public class Main {
 					
 					// Generate MIPS code using the register allocation
 					IR.getInstance().MIPSme();
-					
-					MIPSGenerator.getInstance();
 				}
 				else {
 					System.out.println("You fucked up..." + IRcommand.exceptionVariables.toString());
@@ -102,4 +102,5 @@ public class Main {
 			e.printStackTrace();
 		}
 	}
+
 }

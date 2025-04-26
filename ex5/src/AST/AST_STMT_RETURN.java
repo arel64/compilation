@@ -53,13 +53,10 @@ public class AST_STMT_RETURN extends AST_STMT {
         // 1. Handle return value (if expression exists)
         if (exp != null) { 
             TEMP returnValue = exp.IRme();
+            System.err.println("RETURN VALUE: " + returnValue);
             // Use IRcommand_Return to generate the 'move $v0, returnValue' instruction
             IR.getInstance().Add_IRcommand(new IRcommand_Return(returnValue));
-        } else {
-            // For void return, no need to set $v0 explicitly.
-            // IRcommand_Return(null) doesn't generate code anyway.
         }
-
 		// 2. Generate unconditional jump to the function's end label
         IR.getInstance().Add_IRcommand(new IRcommand_Jump_Label(endLabel));
 

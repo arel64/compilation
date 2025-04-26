@@ -54,40 +54,45 @@ public class IRcommand_Func_Call extends IRcommand
 	public void MIPSme() {
 		MIPSGenerator gen = MIPSGenerator.getInstance();
 
-		// Handle predefined functions
-		if (funcName.equals("PrintInt") && args.size() == 1) {
+		if (this.funcName.equals("PrintInt")) {
+			System.out.println("DEBUG: IRcommand_Func_Call calling PrintInt");
 			gen.print_int(args.get(0));
-			// PrintInt doesn't return a value, so no need to handle dst
 			return;
 		}
-		// Add other predefined functions here (e.g., PrintString, Allocate, etc.)
+		// 0. Save $v0 (register 2) - Do this for ALL calls for simplicity
+		final String V0_REG_NAME = "$v0"; // Use register name
+		final int V0_SAVE_AREA_SIZE = 4;
+		gen.addi_imm("$sp", "$sp", -V0_SAVE_AREA_SIZE); // Allocate space for $v0
+		gen.sw_reg_sp(V0_REG_NAME, 0); // sw $v0, 0($sp)
 
-		// --- Standard Function Call --- 
-
-		// 1. Push arguments onto stack (in reverse order)
+		// 1. Push arguments onto stack
 		int argSpace = args.size() * 4;
 		if (argSpace > 0) {
-			// Allocate space on stack for arguments
 			gen.addi_imm("$sp", "$sp", -argSpace);
-			
-			// Store arguments
 			for (int i = 0; i < args.size(); i++) {
 				TEMP argTemp = args.get(i);
-				// Calculate offset relative to the *new* $sp
-				// Args pushed ..., arg1, arg0. arg0 is at $sp+0, arg1 at $sp+4, ...
-				// If pushed in reverse: argN-1 at $sp+0, ... arg0 at $sp+(N-1)*4
-				// Let's push 0 to N-1: arg0 at $sp+0, arg1 at $sp+4, ...
-				// Switched to standard order push for simplicity with offset calc below.
 				int offset = i * 4; 
-				gen.sw_sp(argTemp, offset); // sw arg_temp, offset($sp)
+				// Store argument ONLY if its TEMP has a register allocated
+				if (IR.getInstance().getRegister(argTemp) >= 0) {
+ 					gen.sw_sp(argTemp, offset); // sw arg_temp, offset($sp)
+				} else {
+					// If argument TEMP not allocated, do nothing. The space is allocated
+					// on the stack, but left uninitialized. This is safe if the 
+					// liveness analysis correctly determined the arg wasn't needed.
+				}
 			}
 		}
 
 		// 2. Call the function
 		String labelToJumpTo = IR.getInstance().getFunctionLabel(this.funcName);
+
 		if (labelToJumpTo == null) {
 			System.err.printf("ERROR: Could not find label for function '%s' during MIPS generation.\n", this.funcName);
-			// Potentially generate an error or halt? For now, skip the call.
+			// Clean up stack (args and saved v0) before returning
+			if (argSpace > 0) gen.addi_imm("$sp", "$sp", argSpace);
+			// Restore v0 first before deallocating its space
+			gen.lw_reg_sp(V0_REG_NAME, 0); // lw $v0, 0($sp)
+			gen.addi_imm("$sp", "$sp", V0_SAVE_AREA_SIZE); 
 			return; 
 		}
 		gen.jal(labelToJumpTo);
@@ -97,8 +102,13 @@ public class IRcommand_Func_Call extends IRcommand
 			gen.addi_imm("$sp", "$sp", argSpace);
 		}
 
-		// 4. Handle return value (if function returns one)
-		if (dst != null) {
+		// 4. Restore $v0 
+		gen.lw_reg_sp(V0_REG_NAME, 0); // lw $v0, 0($sp)
+		gen.addi_imm("$sp", "$sp", V0_SAVE_AREA_SIZE); // Deallocate space for $v0
+
+		// 5. Handle return value (move from the now restored $v0)
+		// Check dst exists and is allocated BEFORE trying to move $v0
+		if (dst != null && IR.getInstance().getRegister(dst) >= 0) {
 			gen.move_from_v0(dst); // dst = $v0
 		}
 	}

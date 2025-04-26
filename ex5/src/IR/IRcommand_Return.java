@@ -37,9 +37,10 @@ public class IRcommand_Return extends IRcommand
     @Override
     public void MIPSme() {
         MIPSGenerator generator = MIPSGenerator.getInstance();
-        if (this.register != null) {
-            generator.genMoveReturnValue(this.register);
+        if (IR.getInstance().getRegister(this.register) < 0) {
+            return;
         }
+        generator.genMoveReturnValue(this.register);
     }
     
 }

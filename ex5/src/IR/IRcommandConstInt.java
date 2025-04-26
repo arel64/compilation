@@ -12,8 +12,6 @@ package IR;
 /*******************/
 import TEMP.*;
 import MIPS.*;
-import java.util.Arrays;
-import java.util.HashSet;
 
 public class IRcommandConstInt extends IRcommand
 {
@@ -32,6 +30,9 @@ public class IRcommandConstInt extends IRcommand
 
 	@Override
 	public void MIPSme() {
+		if (IR.getInstance().getRegister(dst) < 0) {
+			return; 
+		}
 		MIPSGenerator.getInstance().li(dst, value);
 	}
 }

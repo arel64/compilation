@@ -65,27 +65,6 @@ public class MIPSGenerator
 			e.printStackTrace();
 		}
 	}
-	public void print_int(TEMP t)
-	{
-		String reg = tempToRegister(t);
-		String instruction = String.format("\tmove $a0,%s\n", reg);
-		textContent.append(instruction);
-		
-		instruction = "\tli $v0,1\n";
-		textContent.append(instruction);
-		
-		instruction = "\tsyscall\n";
-		textContent.append(instruction);
-		
-		instruction = "\tli $a0,32\n";
-		textContent.append(instruction);
-		
-		instruction = "\tli $v0,11\n";
-		textContent.append(instruction);
-		
-		instruction = "\tsyscall\n";
-		textContent.append(instruction);
-	}
 
 	public void allocate(String var_name)
 	{
@@ -276,7 +255,7 @@ public class MIPSGenerator
 		if (regNum >= 0 && regNum < 10) {
 			return "$t" + regNum; 
 		}
-		return "$t" + temp.getSerialNumber() % 10;
+		return null;
 	}
 
 	// --- Dedicated Prologue/Epilogue --- 
@@ -319,7 +298,6 @@ public class MIPSGenerator
 	}
 
 	public void genMoveReturnValue(TEMP src) {
-		// Move the return value (from src TEMP) into $v0
 		String srcReg = tempToRegister(src);
 		String instruction = String.format("\tmove $v0,%s\n", srcReg);
         textContent.append(instruction);
@@ -334,19 +312,84 @@ public class MIPSGenerator
     // Load immediate value into a specific register (e.g., $a0)
     public void li_imm(String dstReg, int immediate) {
         String instruction = String.format("\tli %s,%d\n", dstReg, immediate);
+        // Diagnostic print: Show the exact instruction string being appended
+        System.out.printf("DEBUG: MIPSGenerator.li_imm attempting to append: [%s]\n", instruction.replace("\n", "<NL>").replace("\t", "<TAB>"));
+        int lenBefore = textContent.length();
         textContent.append(instruction);
+        int lenAfter = textContent.length();
+        System.out.printf("DEBUG: MIPSGenerator.li_imm textContent length before=%d, after=%d (appended %d chars)\n", lenBefore, lenAfter, lenAfter - lenBefore);
+        if (lenAfter - lenBefore != instruction.length()) {
+            System.out.println("ERROR: textContent length did not increase by instruction length!");
+        }
     }
 
-    // Syscall to print a character stored in $a0
-    public void syscall_print_char() {
-        textContent.append("\tli $v0,11\n"); 
-        textContent.append("\tsyscall\n");
-    }
-
-    // Move from $v0 (return value register)
     public void move_from_v0(TEMP dst) {
         String dstReg = tempToRegister(dst);
         String instruction = String.format("\tmove %s,$v0\n", dstReg);
         textContent.append(instruction);
     }
+
+    // Load Address
+    public void la(String dstReg, String label) {
+        String instruction = String.format("\tla %s,%s\n", dstReg, label);
+        textContent.append(instruction);
+    }
+
+    // Syscall
+    public void syscall() {
+        textContent.append("\tsyscall\n");
+    }
+
+    // Store register relative to $sp
+    public void sw_reg_sp(String regName, int offset) {
+        String instruction = String.format("\tsw %s,%d($sp)\n", regName, offset);
+        textContent.append(instruction);
+    }
+
+    // Load register relative to $sp
+    public void lw_reg_sp(String regName, int offset) {
+        String instruction = String.format("\tlw %s,%d($sp)\n", regName, offset);
+        textContent.append(instruction);
+    }
+
+    // Append a raw, pre-formatted MIPS instruction
+    public void appendRawInstruction(String instruction) {
+        // Ensure proper formatting (e.g., leading tab, trailing newline)
+        String formatted = instruction.trim();
+        if (!formatted.isEmpty()) {
+            textContent.append("\t" + formatted + "\n");
+        }
+    }
+
+    // Move TEMP value into $a0
+    public void move_temp_to_a0(TEMP src) {
+        String srcReg = tempToRegister(src);
+        if (srcReg == null) {
+            System.err.printf("ERROR: Cannot move unallocated TEMP %s to $a0. Using $zero.\n", src);
+            srcReg = "$zero";
+        }
+        String instruction = String.format("\tmove $a0,%s\n", srcReg);
+        textContent.append(instruction);
+    }
+
+	public void print_int(TEMP t) {
+		String reg = tempToRegister(t);
+		String instruction = String.format("\tmove $a0,%s\n", reg);
+		textContent.append(instruction);
+		
+		instruction = "\tli $v0,1\n";
+		textContent.append(instruction);
+		
+		instruction = "\tsyscall\n";
+		textContent.append(instruction);
+		
+		instruction = "\tli $a0,32\n";
+		textContent.append(instruction);
+		
+		instruction = "\tli $v0,11\n";
+		textContent.append(instruction);
+		
+		instruction = "\tsyscall\n";
+		textContent.append(instruction);
+	}
 }

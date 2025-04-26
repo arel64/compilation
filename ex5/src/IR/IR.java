@@ -14,6 +14,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
+
+import SYMBOL_TABLE.SYMBOL_TABLE;
 import TEMP.*;
 /*******************/
 /* PROJECT IMPORTS */
@@ -126,12 +128,21 @@ public class IR
 		// Build the interference graph from liveness information
 		buildInterferenceGraph();
 		
+		// Collect *all* defined/used TEMPs to ensure allocation even for non-interfering ones
+		Set<TEMP> allTemps = new HashSet<>();
+		for (IRcommand cmd : commandList) {
+			if (cmd.dst != null) {
+				allTemps.add(cmd.dst);
+			}
+			allTemps.addAll(cmd.liveTEMPs());
+		}
+
 		// Debug the interference graph
 		System.out.println("Interference graph nodes: " + interferenceGraph.getNodeCount());
 		System.out.println("Interference graph: " + interferenceGraph.toString());
 		
-		// Color the graph to get register assignments
-		registerAllocation = interferenceGraph.colorGraph();
+		// Color the graph to get register assignments, passing all TEMPs
+		registerAllocation = interferenceGraph.colorGraph(allTemps);
 		
 		// Debug output
 		for (TEMP t : registerAllocation.keySet())
@@ -139,7 +150,6 @@ public class IR
 	}
 
 	public void registerFunctionLabel(String funcName, String label) {
-		System.out.println("Registering function label: " + funcName + " with label: " + label);
 		functionLabels.put(funcName, label);
 	}
 
@@ -166,5 +176,31 @@ public class IR
 	public String getCurrentFunctionEndLabel() {
 		return functionEndLabels.isEmpty() ? null : functionEndLabels.peek();
 	}
+	
+	// public static void addPrintIntIR() {
+	// 	IR ir = IR.getInstance();
+	// 	String funcLabel = "PrintInt"; // Use the actual function name as the label
 
+	// 	// 1. Register the label so IRcommand_Func_Call can find it
+	// 	ir.registerFunctionLabel(funcLabel, funcLabel+"Start");
+
+	// 	// 2. Create the IR command sequence
+	// 	ir.Add_IRcommand(new IRcommand_Label(funcLabel+"Start"));
+	// 	ir.Add_IRcommand(new IRcommand_Prologue(8)); // Minimal frame size (save $fp, $ra)
+
+	// 	TEMP argTemp = TEMP_FACTORY.getInstance().getFreshTEMP();
+	// 	// Load the first argument (at offset 0 relative to the $fp established by the prologue)
+	// 	ir.Add_IRcommand(new IRcommand_Load(argTemp, 8, "printIntArg"));
+	// 	SYMBOL_TABLE.getInstance().associateTemp("printIntArg", argTemp);
+	// 	ir.pushFunctionEndLabel(funcLabel+"End"); // Push label before processing body
+
+	// 	// Call the syscalls using the generic command
+	// 	ir.Add_IRcommand(new IRcommand_Syscall(1, argTemp)); // code 1 = print_int, arg = argTemp
+	// 	ir.Add_IRcommand(new IRcommand_Syscall(11, 32)); // code 11 = print_char, arg_imm = 32 (space)
+	// 	ir.popFunctionEndLabel(); // Pop label after processing body
+
+	// 	// Epilogue
+	// 	ir.Add_IRcommand(new IRcommand_Epilogue(8));
+	// 	System.out.println("Added IR sequence for PrintInt function using IRcommand_Syscall.");
+	// }	
 }

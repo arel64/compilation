@@ -144,7 +144,7 @@ public class AST_FUNC_DEC extends AST_CLASS_FIELDS_DEC {
         if (params != null) {
             int paramIndex = 0;
             for (AST_VAR_DEC param : params) {
-                int offset = 0 + paramIndex * 4; 
+                int offset = 8 + paramIndex * 4; 
                 TEMP paramTemp = TEMP_FACTORY.getInstance().getFreshTEMP();
                 ir.Add_IRcommand(new IRcommand_Load(paramTemp, offset, param.getName()));
                 SYMBOL_TABLE.getInstance().associateTemp(param.getName(), paramTemp);
@@ -166,10 +166,7 @@ public class AST_FUNC_DEC extends AST_CLASS_FIELDS_DEC {
         // --- Main Function Exit Jump ---
         if (funcName.equals("main")) {
              ir.Add_IRcommand(new IRcommand_Jump_Label("program_exit"));
-        }
-
-        // Note: Original code had label_end after epilogue/main exit jump, moved it before.
-        
+        }        
         return null;
     }
 }

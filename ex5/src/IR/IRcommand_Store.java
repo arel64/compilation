@@ -68,6 +68,14 @@ public class IRcommand_Store extends IRcommand
 
 	@Override
 	public void MIPSme() {
+		if (IR.getInstance().getRegister(dst) < 0) {
+			System.err.println("ERROR: Destination register is not initialized" + var_name);
+			return;
+		}
+		if (src != null && IR.getInstance().getRegister(src) < 0) {
+			throw new RuntimeException("ERROR: Source register is not initialized despite being used in dest, static analysis failed" + var_name);
+		}
+
 		if (src != null) {
 			MIPSGenerator.getInstance().move(dst, src);
 		} else {

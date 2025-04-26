@@ -13,17 +13,11 @@ public class InterferenceGraph {
         }
     }
     
-    public Map<TEMP, Integer> colorGraph() {
-        System.out.println("Starting graph coloring with " + graph.size() + " nodes");
+    public Map<TEMP, Integer> colorGraph(Set<TEMP> allTemps) {
+        System.out.println("Starting graph coloring with " + graph.size() + " nodes involved in interference.");
         List<TEMP> stack = new ArrayList<>();
         Set<TEMP> removed = new HashSet<>();
         Map<TEMP, Integer> colors = new HashMap<>();
-        
-        // If graph is empty, return empty mapping
-        if (graph.isEmpty()) {
-            System.out.println("Empty graph, no coloring needed");
-            return colors;
-        }
         
         // Remove nodes with degree < K (K = 10 registers)
         while (removed.size() < graph.size()) {
@@ -93,6 +87,17 @@ public class InterferenceGraph {
             int color = 0;
             while (usedColors.contains(color)) color++;
             colors.put(temp, color);
+        }
+        
+        // Assign a default color (0) to any TEMPs that exist but had no interferences
+        int defaultColor = 0; // Corresponds to $t0 in current MIPSGenerator
+        for (TEMP temp : allTemps) {
+            if (!colors.containsKey(temp)) {
+                // This TEMP exists but wasn't involved in interference or spilling
+                // Assign it the default color.
+                colors.put(temp, defaultColor);
+                System.out.println("Assigning default color " + defaultColor + " to non-interfering TEMP: " + temp);
+            }
         }
         
         System.out.println("Final coloring: " + colors.size() + " temps assigned colors");

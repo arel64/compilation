@@ -141,27 +141,27 @@ public class AST_EXP_BINOP extends AST_EXP
 		}
 		if (binopOperation == Operation.GT)
 		{
-			IR.getInstance().Add_IRcommand(new IRcommand_Binop_GT_Integers(dst,t1,t2));
+			IR.getInstance().Add_IRcommand(new IRcommand_Binop_Comparison(dst,t1,t2,IRcommand_Binop_Comparison.ComparisonOperation.GT));
 		}
 		if (binopOperation == Operation.LT)
 		{
-			IR.getInstance().Add_IRcommand(new IRcommand_Binop_LT_Integers(dst,t1,t2));
+			IR.getInstance().Add_IRcommand(new IRcommand_Binop_Comparison(dst,t1,t2,IRcommand_Binop_Comparison.ComparisonOperation.LT));
 		}
 		if (binopOperation == Operation.PLUS)
 		{
-			IR.getInstance().Add_IRcommand(new IRcommand_Binop_Add_Integers(dst,t1,t2));
+			IR.getInstance().Add_IRcommand(new IRcommand_Binop_Arithmetic(dst,t1,t2,IRcommand_Binop_Arithmetic.ArithmeticOperation.ADD));
 		}
 		if (binopOperation == Operation.MINUS)
 		{
-			IR.getInstance().Add_IRcommand(new IRcommand_Binop_Sub_Integers(dst,t1,t2));
+			IR.getInstance().Add_IRcommand(new IRcommand_Binop_Arithmetic(dst,t1,t2,IRcommand_Binop_Arithmetic.ArithmeticOperation.SUB));
 		}
 		if (binopOperation == Operation.MULTIPLY)
 		{
-			IR.getInstance().Add_IRcommand(new IRcommand_Binop_Mul_Integers(dst,t1,t2));
+			IR.getInstance().Add_IRcommand(new IRcommand_Binop_Arithmetic(dst,t1,t2,IRcommand_Binop_Arithmetic.ArithmeticOperation.MUL));
 		}
 		if (binopOperation == Operation.DIVIDE)
 		{
-			IR.getInstance().Add_IRcommand(new IRcommand_Binop_Div_Integers(dst,t1,t2));
+			IR.getInstance().Add_IRcommand(new IRcommand_Binop_Arithmetic(dst,t1,t2,IRcommand_Binop_Arithmetic.ArithmeticOperation.DIV));
 		}
 
 		return dst;

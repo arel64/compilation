@@ -62,15 +62,24 @@ public class IRcommand_Load extends IRcommand
 
 	@Override
 	public void MIPSme() {
+
+		if (IR.getInstance().getRegister(dst) < 0) {
+			return; 
+		}
+		if (src != null && IR.getInstance().getRegister(src) < 0) {
+			return;
+		}
+
 		MIPSGenerator gen = MIPSGenerator.getInstance();
 		if (is_offset) {
 			// Generate lw instruction relative to frame pointer
-			gen.lw_fp(dst, offset); 
+			System.out.printf("DEBUG: IRcommand_Load (%s): Calling lw_fp for dst=%s with offset=%d\n", this.var_name, this.dst, this.offset); // DEBUG PRINT
+			gen.lw_fp(dst, offset);
 
 		} else {
 			// Generate move instruction
 			if (src != null) { // Ensure src is not null for move
-				MIPSGenerator.getInstance().move(dst, src);
+				gen.move(dst, src);
 			} else {
 				System.err.printf("ERROR: IRcommand_Load (move) has null src for dst=%s, var=%s\n", dst, var_name);
 			}
