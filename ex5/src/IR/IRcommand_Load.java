@@ -72,8 +72,6 @@ public class IRcommand_Load extends IRcommand
 
 		MIPSGenerator gen = MIPSGenerator.getInstance();
 		if (is_offset) {
-			// Generate lw instruction relative to frame pointer
-			System.out.printf("DEBUG: IRcommand_Load (%s): Calling lw_fp for dst=%s with offset=%d\n", this.var_name, this.dst, this.offset); // DEBUG PRINT
 			gen.lw_fp(dst, offset);
 
 		} else {

@@ -4,20 +4,6 @@
 package IR;
 import AST.*;
 import java.util.HashSet;
-import java.util.ArrayList;
-import MIPS.MIPSGenerator;
-
-/*******************/
-/* GENERAL IMPORTS */
-/*******************/
-
-/*******************/
-/* PROJECT IMPORTS */
-/*******************/
-import TEMP.*;
-import java.util.Arrays;
-import java.util.HashSet;
-
 public class IRcommand_Func_Dec extends IRcommand
 {
 	public String name;

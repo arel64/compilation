@@ -35,7 +35,7 @@ public class AST_PROGRAM extends AST_Node {
     @Override
     public TEMP IRme()
 	{
-        // IR.addPrintIntIR();
+        IR.addPrintIntIR();
         return declerationList.IRme();
 	}
 }

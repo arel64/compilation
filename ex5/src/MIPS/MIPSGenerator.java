@@ -312,15 +312,7 @@ public class MIPSGenerator
     // Load immediate value into a specific register (e.g., $a0)
     public void li_imm(String dstReg, int immediate) {
         String instruction = String.format("\tli %s,%d\n", dstReg, immediate);
-        // Diagnostic print: Show the exact instruction string being appended
-        System.out.printf("DEBUG: MIPSGenerator.li_imm attempting to append: [%s]\n", instruction.replace("\n", "<NL>").replace("\t", "<TAB>"));
-        int lenBefore = textContent.length();
         textContent.append(instruction);
-        int lenAfter = textContent.length();
-        System.out.printf("DEBUG: MIPSGenerator.li_imm textContent length before=%d, after=%d (appended %d chars)\n", lenBefore, lenAfter, lenAfter - lenBefore);
-        if (lenAfter - lenBefore != instruction.length()) {
-            System.out.println("ERROR: textContent length did not increase by instruction length!");
-        }
     }
 
     public void move_from_v0(TEMP dst) {

@@ -177,30 +177,30 @@ public class IR
 		return functionEndLabels.isEmpty() ? null : functionEndLabels.peek();
 	}
 	
-	// public static void addPrintIntIR() {
-	// 	IR ir = IR.getInstance();
-	// 	String funcLabel = "PrintInt"; // Use the actual function name as the label
+	public static void addPrintIntIR() {
+		IR ir = IR.getInstance();
+		String funcLabel = "PrintInt"; // Use the actual function name as the label
 
-	// 	// 1. Register the label so IRcommand_Func_Call can find it
-	// 	ir.registerFunctionLabel(funcLabel, funcLabel+"Start");
+		// 1. Register the label so IRcommand_Func_Call can find it
+		ir.registerFunctionLabel(funcLabel, funcLabel+"Start");
 
-	// 	// 2. Create the IR command sequence
-	// 	ir.Add_IRcommand(new IRcommand_Label(funcLabel+"Start"));
-	// 	ir.Add_IRcommand(new IRcommand_Prologue(8)); // Minimal frame size (save $fp, $ra)
+		// 2. Create the IR command sequence
+		ir.Add_IRcommand(new IRcommand_Label(funcLabel+"Start"));
+		ir.Add_IRcommand(new IRcommand_Prologue(8)); // Minimal frame size (save $fp, $ra)
 
-	// 	TEMP argTemp = TEMP_FACTORY.getInstance().getFreshTEMP();
-	// 	// Load the first argument (at offset 0 relative to the $fp established by the prologue)
-	// 	ir.Add_IRcommand(new IRcommand_Load(argTemp, 8, "printIntArg"));
-	// 	SYMBOL_TABLE.getInstance().associateTemp("printIntArg", argTemp);
-	// 	ir.pushFunctionEndLabel(funcLabel+"End"); // Push label before processing body
+		TEMP argTemp = TEMP_FACTORY.getInstance().getFreshTEMP();
+		// Load the first argument (at offset 0 relative to the $fp established by the prologue)
+		ir.Add_IRcommand(new IRcommand_Load(argTemp, 0, "printIntArg"));
+		SYMBOL_TABLE.getInstance().associateTemp("printIntArg", argTemp);
+		ir.pushFunctionEndLabel(funcLabel+"End"); // Push label before processing body
 
-	// 	// Call the syscalls using the generic command
-	// 	ir.Add_IRcommand(new IRcommand_Syscall(1, argTemp)); // code 1 = print_int, arg = argTemp
-	// 	ir.Add_IRcommand(new IRcommand_Syscall(11, 32)); // code 11 = print_char, arg_imm = 32 (space)
-	// 	ir.popFunctionEndLabel(); // Pop label after processing body
+		// Call the syscalls using the generic command
+		ir.Add_IRcommand(new IRcommand_Syscall(1, argTemp)); // code 1 = print_int, arg = argTemp
+		ir.Add_IRcommand(new IRcommand_Syscall(11, 32)); // code 11 = print_char, arg_imm = 32 (space)
+		ir.popFunctionEndLabel(); // Pop label after processing body
 
-	// 	// Epilogue
-	// 	ir.Add_IRcommand(new IRcommand_Epilogue(8));
-	// 	System.out.println("Added IR sequence for PrintInt function using IRcommand_Syscall.");
-	// }	
+		// Epilogue
+		ir.Add_IRcommand(new IRcommand_Epilogue(8));
+		System.out.println("Added IR sequence for PrintInt function using IRcommand_Syscall.");
+	}	
 }

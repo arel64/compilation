@@ -54,12 +54,7 @@ public class IRcommand_Func_Call extends IRcommand
 	public void MIPSme() {
 		MIPSGenerator gen = MIPSGenerator.getInstance();
 
-		if (this.funcName.equals("PrintInt")) {
-			System.out.println("DEBUG: IRcommand_Func_Call calling PrintInt");
-			gen.print_int(args.get(0));
-			return;
-		}
-		// 0. Save $v0 (register 2) - Do this for ALL calls for simplicity
+		
 		final String V0_REG_NAME = "$v0"; // Use register name
 		final int V0_SAVE_AREA_SIZE = 4;
 		gen.addi_imm("$sp", "$sp", -V0_SAVE_AREA_SIZE); // Allocate space for $v0
@@ -87,13 +82,7 @@ public class IRcommand_Func_Call extends IRcommand
 		String labelToJumpTo = IR.getInstance().getFunctionLabel(this.funcName);
 
 		if (labelToJumpTo == null) {
-			System.err.printf("ERROR: Could not find label for function '%s' during MIPS generation.\n", this.funcName);
-			// Clean up stack (args and saved v0) before returning
-			if (argSpace > 0) gen.addi_imm("$sp", "$sp", argSpace);
-			// Restore v0 first before deallocating its space
-			gen.lw_reg_sp(V0_REG_NAME, 0); // lw $v0, 0($sp)
-			gen.addi_imm("$sp", "$sp", V0_SAVE_AREA_SIZE); 
-			return; 
+			throw new RuntimeException("ERROR: Could not find label for function '" + this.funcName + "' during MIPS generation.");
 		}
 		gen.jal(labelToJumpTo);
 
