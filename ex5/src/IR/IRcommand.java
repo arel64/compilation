@@ -67,7 +67,13 @@ public abstract class IRcommand
 		
 	}
 
-	public HashSet<TEMP> liveTEMPs() {
+	/**
+	 * Returns the set of TEMPs that are used (read) by this IR command.
+	 * This is crucial for liveness analysis.
+	 */
+	public abstract HashSet<TEMP> liveTEMPs();
+
+	public HashSet<TEMP> s() {
 		return new HashSet<TEMP>();
 	}
 

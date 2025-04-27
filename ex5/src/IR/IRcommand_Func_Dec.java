@@ -3,6 +3,7 @@
 /***********/
 package IR;
 import AST.*;
+import TEMP.*;
 import java.util.HashSet;
 public class IRcommand_Func_Dec extends IRcommand
 {
@@ -46,5 +47,10 @@ public class IRcommand_Func_Dec extends IRcommand
 	}
 
 	public void MIPSme() {
+	}
+
+	@Override
+	public HashSet<TEMP> liveTEMPs() {
+		return new HashSet<TEMP>();
 	}
 }

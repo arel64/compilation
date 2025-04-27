@@ -69,4 +69,9 @@ public class IRcommand_Jump_Label extends IRcommand
 		}
 		return -1;
 	}
+
+	@Override
+	public HashSet<TEMP> liveTEMPs() {
+		return new HashSet<TEMP>();
+	}
 }

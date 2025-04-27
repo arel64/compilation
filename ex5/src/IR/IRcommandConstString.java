@@ -35,4 +35,9 @@ public class IRcommandConstString extends IRcommand
 		// implement 
 		//MIPSGenerator.getInstance().li(dst, value);
 	}
+
+	@Override
+	public HashSet<TEMP> liveTEMPs() {
+		return new HashSet<TEMP>();
+	}
 }

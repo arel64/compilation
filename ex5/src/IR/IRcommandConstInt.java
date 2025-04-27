@@ -12,6 +12,7 @@ package IR;
 /*******************/
 import TEMP.*;
 import MIPS.*;
+import java.util.HashSet;
 
 public class IRcommandConstInt extends IRcommand
 {
@@ -34,5 +35,10 @@ public class IRcommandConstInt extends IRcommand
 			return; 
 		}
 		MIPSGenerator.getInstance().li(dst, value);
+	}
+
+	@Override
+	public HashSet<TEMP> liveTEMPs() {
+		return new HashSet<TEMP>();
 	}
 }

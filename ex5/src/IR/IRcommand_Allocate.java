@@ -57,4 +57,8 @@ public class IRcommand_Allocate extends IRcommand
 		return "IRcommand_Allocate: Allocate " + var_name;
 	}
 
+	@Override
+	public HashSet<TEMP> liveTEMPs() {
+		return new HashSet<TEMP>();
+	}
 }

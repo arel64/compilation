@@ -42,4 +42,9 @@ public class IRcommand_Epilogue extends IRcommand {
     
     // Needs to declare usage of $ra potentially, if liveness tracks specific registers
     // For now, assuming liveness focuses on TEMPs.
+
+    @Override
+    public HashSet<TEMP> liveTEMPs() {
+        return new HashSet<TEMP>();
+    }
 } 

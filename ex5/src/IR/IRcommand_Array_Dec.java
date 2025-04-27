@@ -30,4 +30,9 @@ public class IRcommand_Array_Dec extends IRcommand
     public String toString() {
         return "IRcommand_Array_Dec: name=" + this.name + " type=" + this.type;
     }
+
+	@Override
+	public HashSet<TEMP> liveTEMPs() {
+		return new HashSet<TEMP>();
+	}
 }

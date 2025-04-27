@@ -88,4 +88,13 @@ public class IRcommand_Load extends IRcommand
     public String toString() {
         return String.format("IRcommand_Load: dst=%s, offset=%d($fp), var=%s", dst, offset, var_name);
     }
+
+	@Override
+	public HashSet<TEMP> liveTEMPs() {
+		HashSet<TEMP> used = new HashSet<TEMP>();
+		if (!is_offset && src != null) { // Only the move form uses a TEMP
+			used.add(src);
+		}
+		return used;
+	}
 }

@@ -36,4 +36,9 @@ public class IRcommand_Class_Dec extends IRcommand
 		this.inClassVarDecs = true;
 		super.staticAnalysis();
 	}
+
+	@Override
+	public HashSet<TEMP> liveTEMPs() {
+		return new HashSet<TEMP>();
+	}
 }

@@ -28,4 +28,9 @@ public class IRcommand_New_Class extends IRcommand
     public String toString() {
         return "IRcommand_New_Class: dst= " + dst + ", type=" + type;
     }
+
+	@Override
+	public HashSet<TEMP> liveTEMPs() {
+		return new HashSet<TEMP>();
+	}
 }

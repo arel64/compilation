@@ -2,6 +2,7 @@ package IR;
 
 import MIPS.MIPSGenerator;
 import TEMP.*;
+import java.util.HashSet;
 
 public class IRcommand_Prologue extends IRcommand {
     int frameSize;
@@ -20,5 +21,10 @@ public class IRcommand_Prologue extends IRcommand {
     @Override
     public String toString() {
         return String.format("PROLOGUE (frameSize=%d)", frameSize);
+    }
+
+    @Override
+    public HashSet<TEMP> liveTEMPs() {
+        return new HashSet<TEMP>();
     }
 } 
