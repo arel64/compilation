@@ -54,12 +54,6 @@ public class IRcommand_Func_Call extends IRcommand
 	public void MIPSme() {
 		MIPSGenerator gen = MIPSGenerator.getInstance();
 
-		
-		final String V0_REG_NAME = "$v0"; // Use register name
-		final int V0_SAVE_AREA_SIZE = 4;
-		gen.addi_imm("$sp", "$sp", -V0_SAVE_AREA_SIZE); // Allocate space for $v0
-		gen.sw_reg_sp(V0_REG_NAME, 0); // sw $v0, 0($sp)
-
 		// 1. Push arguments onto stack
 		int argSpace = args.size() * 4;
 		if (argSpace > 0) {
@@ -90,11 +84,6 @@ public class IRcommand_Func_Call extends IRcommand
 		if (argSpace > 0) {
 			gen.addi_imm("$sp", "$sp", argSpace);
 		}
-
-		// 4. Restore $v0 
-		gen.lw_reg_sp(V0_REG_NAME, 0); // lw $v0, 0($sp)
-		gen.addi_imm("$sp", "$sp", V0_SAVE_AREA_SIZE); // Deallocate space for $v0
-
 		// 5. Handle return value (move from the now restored $v0)
 		// Check dst exists and is allocated BEFORE trying to move $v0
 		if (dst != null && IR.getInstance().getRegister(dst) >= 0) {

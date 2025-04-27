@@ -74,7 +74,6 @@ non terminal AST_VAR var;
 non terminal AST_STMT stmt;
 non terminal AST_NEW_EXP newExp;
 non terminal AST_CLASS_FIELDS_DEC cField;
-non terminal AST_BINOP binop;
 non terminal AST_LIST<AST_DEC> dec_list;
 non terminal AST_LIST<AST_VAR_DEC> opt_param_list;
 non terminal AST_LIST<AST_VAR_DEC> param_list;
@@ -85,14 +84,14 @@ non terminal AST_LIST<AST_EXP> opt_exp_list;
 non terminal AST_LIST<AST_EXP> exp_list;
 non terminal AST_EXP num_exp;
 
+precedence right ASSIGN;       // Assignment: lowest precedence, right-associative
+precedence left EQ, LT, GT;    // Comparisons
+precedence left PLUS, MINUS;  // Additive
+precedence left TIMES, DIVIDE; // Multiplicative
+// Keep highest precedence operators as they were
 precedence left DOT;
-precedence left LPAREN;
 precedence left LBRACK;
-precedence left TIMES, DIVIDE;
-precedence left PLUS, MINUS;
-precedence left LT, GT;
-precedence left EQ;
-precedence left ASSIGN;
+precedence left LPAREN;
 
 start with program;
 
@@ -113,49 +112,6 @@ dec_list ::= dec:d
 {:
   AST_LIST<AST_DEC> node = new AST_LIST<AST_DEC>(dl,d,AST_DEC.class);
   node.setLineNumber(dleft);
-  RESULT = node;
-:};
-
-binop ::= PLUS:p
-{:
-  AST_BINOP node = new AST_BINOP("+");
-  node.setLineNumber(pleft);
-  RESULT = node;
-:}
-| MINUS:m
-{:
-  AST_BINOP node = new AST_BINOP("-");
-  node.setLineNumber(mleft);
-  RESULT = node;
-:}
-| TIMES:t
-{:
-  AST_BINOP node = new AST_BINOP("*");
-  node.setLineNumber(tleft);
-  RESULT = node;
-:}
-| DIVIDE:di
-{:
-  AST_BINOP node = new AST_BINOP("/");
-  node.setLineNumber(dileft);
-  RESULT = node;
-:}
-| LT:lt
-{:
-  AST_BINOP node = new AST_BINOP("<");
-  node.setLineNumber(ltleft);
-  RESULT = node;
-:}
-| GT:gt
-{:
-  AST_BINOP node = new AST_BINOP(">");
-  node.setLineNumber(gtleft);
-  RESULT = node;
-:}
-| EQ:eq
-{:
-  AST_BINOP node = new AST_BINOP("=");
-  node.setLineNumber(eqleft);
   RESULT = node;
 :};
 
@@ -348,12 +304,62 @@ exp ::= var:v
   node.setLineNumber(lpleft);
   RESULT = node;
 :}
-| exp:e1 binop:b exp:e2
-{:
-  AST_EXP_BINOP node = new AST_EXP_BINOP(e1, e2, b);
-  node.setLineNumber(bleft);
+| exp:e1 PLUS:op exp:e2
+{: 
+  AST_BINOP opNode = new AST_BINOP("+"); 
+  opNode.setLineNumber(opleft);
+  AST_EXP_BINOP node = new AST_EXP_BINOP(e1, e2, opNode);
+  node.setLineNumber(opleft);
   RESULT = node;
-:}
+:} %prec PLUS
+| exp:e1 MINUS:op exp:e2
+{: 
+  AST_BINOP opNode = new AST_BINOP("-"); 
+  opNode.setLineNumber(opleft);
+  AST_EXP_BINOP node = new AST_EXP_BINOP(e1, e2, opNode);
+  node.setLineNumber(opleft);
+  RESULT = node;
+:} %prec MINUS
+| exp:e1 TIMES:op exp:e2
+{: 
+  AST_BINOP opNode = new AST_BINOP("*"); 
+  opNode.setLineNumber(opleft);
+  AST_EXP_BINOP node = new AST_EXP_BINOP(e1, e2, opNode);
+  node.setLineNumber(opleft);
+  RESULT = node;
+:} %prec TIMES
+| exp:e1 DIVIDE:op exp:e2
+{: 
+  AST_BINOP opNode = new AST_BINOP("/"); 
+  opNode.setLineNumber(opleft);
+  AST_EXP_BINOP node = new AST_EXP_BINOP(e1, e2, opNode);
+  node.setLineNumber(opleft);
+  RESULT = node;
+:} %prec DIVIDE
+| exp:e1 LT:op exp:e2
+{: 
+  AST_BINOP opNode = new AST_BINOP("<"); 
+  opNode.setLineNumber(opleft);
+  AST_EXP_BINOP node = new AST_EXP_BINOP(e1, e2, opNode);
+  node.setLineNumber(opleft);
+  RESULT = node;
+:} %prec LT
+| exp:e1 GT:op exp:e2
+{: 
+  AST_BINOP opNode = new AST_BINOP(">"); 
+  opNode.setLineNumber(opleft);
+  AST_EXP_BINOP node = new AST_EXP_BINOP(e1, e2, opNode);
+  node.setLineNumber(opleft);
+  RESULT = node;
+:} %prec GT
+| exp:e1 EQ:op exp:e2
+{: 
+  AST_BINOP opNode = new AST_BINOP("="); 
+  opNode.setLineNumber(opleft);
+  AST_EXP_BINOP node = new AST_EXP_BINOP(e1, e2, opNode);
+  node.setLineNumber(opleft);
+  RESULT = node;
+:} %prec EQ
 | var:v DOT:d ID:i LPAREN:lp opt_exp_list:oel RPAREN:rp
 {:
   AST_FUNC_INVOCATION node = new AST_FUNC_INVOCATION(v, i, oel);
