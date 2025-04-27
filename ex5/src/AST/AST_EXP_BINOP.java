@@ -55,8 +55,10 @@ public class AST_EXP_BINOP extends AST_EXP
 		{
 			throw new SemanticException(lineNumber,String.format("Cannot compare between %s and %s function",leftType,rightType)); 
 		}
+
 		if(binopOperation == Operation.EQUALS)
 		{
+			System.out.println("EQUALS " + leftType + " asdasda" + rightType);
 			if((rightType instanceof TYPE_NIL && (leftType.isArray() || leftType.isClass())) || ((leftType instanceof TYPE_NIL) && (rightType.isArray() || rightType.isClass())))
 			{
 				return TYPE_INT.getInstance();

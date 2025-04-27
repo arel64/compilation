@@ -8,14 +8,8 @@ public abstract class TYPE_WRAPPER extends TYPE
 	public TYPE_WRAPPER(String name,TYPE t)
 	{
 		super(name);
-		if(t instanceof TYPE_WRAPPER)
-		{
-			this.t = ((TYPE_WRAPPER)t).t;
-		}
-		else
-		{
-			this.t = t;
-		}
+		this.t = t;
+		
 	}
 
 	public boolean isAssignable(TYPE other) throws SemanticException

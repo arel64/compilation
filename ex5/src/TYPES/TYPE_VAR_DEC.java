@@ -15,9 +15,6 @@ public class TYPE_VAR_DEC extends TYPE_WRAPPER
 	public boolean equals(Object obj) {
 		return obj instanceof TYPE_VAR_DEC && t .equals(((TYPE_VAR_DEC)obj).t);
 	}
-	@Override
-	public boolean isPrimitive() {
-		return t.isPrimitive();
-	}
+	
 	
 }
