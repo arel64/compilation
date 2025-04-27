@@ -191,7 +191,7 @@ public class IR
 		TEMP argTemp = TEMP_FACTORY.getInstance().getFreshTEMP();
 		// Load the first argument (at offset 0 relative to the $fp established by the prologue)
 		ir.Add_IRcommand(new IRcommand_Load(argTemp, 0, "printIntArg"));
-		SYMBOL_TABLE.getInstance().associateTemp("printIntArg", argTemp);
+		// SYMBOL_TABLE.getInstance().associateTemp("printIntArg", argTemp);
 		ir.pushFunctionEndLabel(funcLabel+"End"); // Push label before processing body
 
 		// Call the syscalls using the generic command
