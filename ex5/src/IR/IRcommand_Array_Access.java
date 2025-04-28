@@ -18,38 +18,51 @@ import MIPS.MIPSGenerator;
 
 public class IRcommand_Array_Access extends IRcommand
 {
-	public TEMP src;
+	public TEMP arr;
 	public TEMP index;
-	
-	public IRcommand_Array_Access(TEMP dst, TEMP src, TEMP index)
+	// public TEMP temp; // No longer needed for MIPS generation
+
+	public IRcommand_Array_Access(TEMP dst, TEMP arr, TEMP index/*, TEMP temp removed */)
 	{
 		this.dst = dst;
-		this.src = src;
+		this.arr = arr;
 		this.index = index;
+		// this.temp = temp; // Removed
 	}
+
 	@Override
 	public String toString() {
-		return "IRcommand_Array_Access: dst=" + dst + ", src=" + src + ", index=" + index;
+		// Update toString if needed, as 'temp' is removed
+		return "IRcommand_Array_Access: dst=" + dst + ", arr=" + arr + ", index=" + index;
 	}
 
 	@Override
 	public void MIPSme() {
 		MIPSGenerator generator = MIPSGenerator.getInstance();
-		// Calculate offset = index * 4 (assuming 4-byte elements) into dst
-		generator.sll(dst, index, 2); // dst = index << 2
-		// Calculate address = src (base) + offset (in dst) into dst
-		generator.add(dst, src, dst);   // dst = src + dst (offset)
-		// Load the value from memory: dst = *(address in dst)
-		generator.lw_temp_offset(dst, 0, dst); // dst = *(dst)
+
+		// Get the globally allocated physical registers for the input/output TEMPs
+		String arrReg = generator.tempToRegister(this.arr);
+		String indexReg = generator.tempToRegister(this.index);
+		String dstReg = generator.tempToRegister(this.dst); // Get the destination register
+
+		// Use $t8 (TEMP_REG_1) for the intermediate address calculation
+		generator.sll_registers(MIPSGenerator.TEMP_REG_1, indexReg, 2);       // $t8 = indexReg * 4
+		generator.add_registers(MIPSGenerator.TEMP_REG_1, arrReg, MIPSGenerator.TEMP_REG_1); // $t8 = arrReg + $t8 (offset)
+
+		// Load the value using the final address in $t8 into the destination register
+		// lw dstReg, 0($t8)
+		generator.lw_offset(dstReg, 0, MIPSGenerator.TEMP_REG_1);
 	}
 
 	public void staticAnalysis() {
-		if (!index.initialized || !src.initialized)
+		if (!index.initialized || !arr.initialized)
 			dst.initialized = false;
 		super.staticAnalysis();
 	}
 
+	@Override
 	public HashSet<TEMP> liveTEMPs() {
-		return new HashSet<TEMP>(Arrays.asList(src, index,dst));
+		// Correct: Only includes TEMPs read by the command
+		return new HashSet<TEMP>(Arrays.asList(arr, index));
 	}
 }

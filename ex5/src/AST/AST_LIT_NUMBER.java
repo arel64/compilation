@@ -9,7 +9,6 @@ public class AST_LIT_NUMBER extends AST_LIT
     
     public AST_LIT_NUMBER(boolean isNeg, int val){
         SerialNumber = AST_Node_Serial_Number.getFresh();
-        System.out.println("isNeg: " + isNeg);
         this.val = val;
         if (isNeg){
             this.val = -1 * val;

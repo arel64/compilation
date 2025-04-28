@@ -249,6 +249,7 @@ public class IR
 		
 		for (TEMP t : registerAllocation.keySet())
 			System.out.println("TEMP: " + t + " is given color: " + registerAllocation.get(t) +"\n");
+		TEMP_FACTORY.getInstance().isRegistersAllocated = true;
 	}
 
 	public void registerFunctionLabel(String funcName, String label) {

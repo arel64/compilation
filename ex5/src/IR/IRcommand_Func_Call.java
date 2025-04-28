@@ -66,8 +66,8 @@ public class IRcommand_Func_Call extends IRcommand
 		for (TEMP liveTemp : liveOut) {
 			if (registerAllocation != null && registerAllocation.containsKey(liveTemp)) { 
 				int color = registerAllocation.get(liveTemp);
-				// Assuming colors 0-9 map to $t0-$t9
-				if (color >= 0 && color <= 9) {
+				// Use the constant: check if color is within the range [0, K-1]
+				if (color >= 0 && color < MIPSGenerator.NUM_ALLOCATABLE_REGISTERS) { 
 					callerSavedRegistersToSave.add(liveTemp);
 				}
 			} else if (registerAllocation == null) {

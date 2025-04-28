@@ -14,9 +14,13 @@ package TEMP;
 public class TEMP_FACTORY
 {
 	private int counter=0;
-	
+	public boolean isRegistersAllocated = false;
 	public TEMP getFreshTEMP()
 	{
+		if (isRegistersAllocated)
+		{
+			throw new RuntimeException("Registers are  allocated cannot call fresh");
+		}
 		return new TEMP(counter++);
 	}
 	

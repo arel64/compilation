@@ -21,31 +21,41 @@ public class IRcommand_Array_Set extends IRcommand
 	public TEMP array;
 	public TEMP index;
 	public TEMP value;
-	
-	public IRcommand_Array_Set(TEMP array, TEMP index, TEMP value)
+	// public TEMP temp; // No longer needed for MIPS generation
+
+	public IRcommand_Array_Set(TEMP array, TEMP index, TEMP value/*, TEMP temp removed */)
 	{
 		this.array = array;
 		this.index = index;
 		this.value = value;
+		// this.temp = temp; // Removed
 	}
 	
 	@Override
 	public String toString() {
+		// Update toString if needed, as 'temp' is removed
 		return "IRcommand_Array_Set: array=" + array + ", index=" + index + ", value=" + value;
 	}
 
 	@Override
 	public void MIPSme() {
 		MIPSGenerator generator = MIPSGenerator.getInstance();
-		// Calculate offset = index * 4 into the index register itself
-		generator.sll(index, index, 2); // index = index << 2
-		// Calculate address = arrayBase + offset (now in index) into the index register
-		generator.add(index, array, index); // index = array + index (offset)
-		// Store the value: *(address in index) = value
-		generator.sw_temp_offset(value, 0, index); // *(index) = value
+
+		// Get the globally allocated physical registers for the input TEMPs
+		String arrayReg = generator.tempToRegister(this.array);
+		String indexReg = generator.tempToRegister(this.index);
+		String valueReg = generator.tempToRegister(this.value);
+
+		// Use $t8 (TEMP_REG_1) for the intermediate address calculation
+		generator.sll_registers(MIPSGenerator.TEMP_REG_1, indexReg, 2);       // $t8 = indexReg * 4
+		generator.add_registers(MIPSGenerator.TEMP_REG_1, arrayReg, MIPSGenerator.TEMP_REG_1); // $t8 = arrayReg + $t8 (offset)
+
+		// Store the value: sw valueReg, 0($t8)
+		generator.sw_offset(valueReg, 0, MIPSGenerator.TEMP_REG_1);
 	}
 
-		public HashSet<TEMP> liveTEMPs() {
+	@Override
+	public HashSet<TEMP> liveTEMPs() {
 		return new HashSet<TEMP>(Arrays.asList(array, index, value));
 	}
 

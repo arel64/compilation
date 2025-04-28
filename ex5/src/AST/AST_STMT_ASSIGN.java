@@ -1,10 +1,7 @@
 package AST;
-import SYMBOL_TABLE.SYMBOL_TABLE;
-import SYMBOL_TABLE.SYMBOL_TABLE_ENTRY;
 import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
 import TEMP.*;
-import IR.*;
 
 public class AST_STMT_ASSIGN extends AST_STMT
 {

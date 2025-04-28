@@ -2,6 +2,7 @@ package IR;
 
 import java.util.*;
 import TEMP.*;
+import MIPS.MIPSGenerator;
 
 public class InterferenceGraph {
     private Map<TEMP, Set<TEMP>> graph = new HashMap<>();
@@ -27,14 +28,14 @@ public class InterferenceGraph {
         Set<TEMP> removed = new HashSet<>();
         Map<TEMP, Integer> colors = new HashMap<>();
         
-        // Remove nodes with degree < K (K = 10 registers)
+        // Remove nodes with degree < K (K = 8 registers now)
         while (removed.size() < graph.size()) {
             boolean found = false;
             for (TEMP temp : graph.keySet()) {
                 if (!removed.contains(temp)) {
                     Set<TEMP> neighbors = graph.get(temp);
                     neighbors.removeAll(removed);
-                    if (neighbors.size() < 10) {
+                    if (neighbors.size() < MIPSGenerator.NUM_ALLOCATABLE_REGISTERS) {
                         stack.add(temp);
                         removed.add(temp);
                         found = true;
@@ -43,7 +44,7 @@ public class InterferenceGraph {
                 }
             }
             if (!found) {
-                // Graph is not 10-colorable, need to spill
+                // Graph is not 8-colorable, need to spill
                 TEMP spillNode = graph.keySet().stream()
                     .filter(t -> !removed.contains(t))
                     .max(Comparator.comparingInt(t -> (int) graph.get(t).stream().filter(n -> !removed.contains(n)).count()))
@@ -91,9 +92,18 @@ public class InterferenceGraph {
                 }
             }
             
-            // Find smallest available color
+            // Find smallest available color (0 to K-1)
             int color = 0;
-            while (usedColors.contains(color)) color++;
+            while (usedColors.contains(color) || color >= MIPSGenerator.NUM_ALLOCATABLE_REGISTERS) { // Ensure color is < K
+                 color++;
+            }
+            // Check if a valid color was found
+            if (color >= MIPSGenerator.NUM_ALLOCATABLE_REGISTERS) {
+                 System.err.println("ERROR: Failed to assign a color < " + MIPSGenerator.NUM_ALLOCATABLE_REGISTERS + " to TEMP " + temp + ". Max color should be " + (MIPSGenerator.NUM_ALLOCATABLE_REGISTERS - 1) + ".");
+                 // Handle error appropriately - maybe throw exception or assign a default/spill?
+                 // For now, let's throw an exception, as this indicates a logic error in simplification/spilling
+                 throw new RuntimeException("Register allocation failed: Could not find color < " + MIPSGenerator.NUM_ALLOCATABLE_REGISTERS + " for TEMP " + temp);
+             }
             colors.put(temp, color);
         }
         
