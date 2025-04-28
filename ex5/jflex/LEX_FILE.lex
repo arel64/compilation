@@ -74,8 +74,8 @@ import java_cup.runtime.*;
 			//Prevent very big numbers from overflowing int
 			throw new RuntimeException("Out of bounds integer");
 		}
-        int value = Math.abs(Integer.parseInt(representation));
-		if (value <= 32767) {
+        int value = Integer.parseInt(representation);
+		if (value <= 32767 && value >= 0) {
             return value;
         } 
 		throw new RuntimeException("Out of bounds integer");
@@ -87,10 +87,10 @@ import java_cup.runtime.*;
 /***********************/
 LineTerminator   = \r|\n|\r\n
 WhiteSpace       = {LineTerminator} | [ \t]
-INTEGER          = -?0|-?[1-9][0-9]*
+INTEGER          = 0|[1-9][0-9]*
 STRING           = \"[a-zA-Z]*\"
 ID               = [a-zA-Z_][a-zA-Z0-9_]*
-TYPE_1_COMMENT 	 = \/\/[(|)|\[|\]|{|} | \?|\!|\.|\; | \+|\-|\*|\/ | [0-9] | [a-zA-Z_]]*{WhiteSpace}*
+TYPE_1_COMMENT 	 = \/\/[(|)|\[|\]|{|} | \?|\!|\.|\[ | \+|\-|\*|\/ | [0-9] | [a-zA-Z_]]*{WhiteSpace}*
 VALID_COMMENT_CHAR = [a-zA-Z0-9 \t\n\r\(\)\[\]\{\}\?\!\+\-\*/\.;]
 
 /******************************/
