@@ -39,6 +39,7 @@ public class MIPSGenerator
 			finalWriter.print("    string_access_violation: .asciiz \"Access Violation\"\n");
 			finalWriter.print("    string_illegal_div_by_0: .asciiz \"Illegal Division By Zero\"\n");
 			finalWriter.print("    string_invalid_ptr_dref: .asciiz \"Invalid Pointer Dereference\"\n");
+			finalWriter.print("    string_invalid_array_size: .asciiz \"Invalid Array Size\"\n");
 			finalWriter.print(dataContent.toString());
 			
 			finalWriter.print("\n.text\n");
@@ -104,6 +105,12 @@ public class MIPSGenerator
         String instruction = String.format("\tmul %s,%s,%s\n", dstReg, src1Reg, src2Reg);
         textContent.append(instruction);
     }
+	public void mul_imm(TEMP dst, TEMP oprnd1, int immediate) {
+		String dstReg = tempToRegister(dst);
+		String src1Reg = tempToRegister(oprnd1);
+		String instruction = String.format("\tmul %s,%s,%d\n", dstReg, src1Reg, immediate);
+		textContent.append(instruction);
+	}
     public void div(TEMP dst, TEMP oprnd1, TEMP oprnd2) {
         String dstReg = tempToRegister(dst);
         String src1Reg = tempToRegister(oprnd1);
@@ -358,7 +365,6 @@ public class MIPSGenerator
         String srcReg = tempToRegister(src);
         if (srcReg == null) {
             System.err.printf("ERROR: Cannot move unallocated TEMP %s to $a0. Using $zero.\n", src);
-            srcReg = "$zero";
         }
         String instruction = String.format("\tmove $a0,%s\n", srcReg);
         textContent.append(instruction);
@@ -384,4 +390,86 @@ public class MIPSGenerator
 		instruction = "\tsyscall\n";
 		textContent.append(instruction);
 	}
+
+    // Branch if less than or equal to zero
+    public void blez(TEMP cond, String label) {
+        String condReg = tempToRegister(cond);
+        if (condReg == null) {
+             System.err.printf("ERROR: Cannot branch on unallocated TEMP %s. Skipping blez.\n", cond);
+             return;
+        }
+        String instruction = String.format("\tblez %s,%s\n", condReg, label);
+        textContent.append(instruction);
+    }
+
+    // Store TEMP value at offset relative to another TEMP's address
+    public void sw_temp_offset(TEMP src, int offset, TEMP base) {
+        String srcReg = tempToRegister(src);
+        String baseReg = tempToRegister(base);
+        if (srcReg == null || baseReg == null) {
+             System.err.printf("ERROR: Cannot sw_temp_offset with unallocated TEMP(s) (%s, %s). Skipping sw.\n", src, base);
+             return;
+        }
+        // MIPS format: sw register_to_store, offset(base_address_register)
+        String instruction = String.format("\tsw %s,%d(%s)\n", srcReg, offset, baseReg);
+        textContent.append(instruction);
+    }
+
+    // Load TEMP value from offset relative to another TEMP's address
+    public void lw_temp_offset(TEMP dst, int offset, TEMP base) {
+        String dstReg = tempToRegister(dst);
+        String baseReg = tempToRegister(base);
+        if (dstReg == null || baseReg == null) {
+             System.err.printf("ERROR: Cannot lw_temp_offset with unallocated TEMP(s) (%s, %s). Skipping lw.\n", dst, base);
+             return;
+        }
+        // MIPS format: lw register_to_load_into, offset(base_address_register)
+        String instruction = String.format("\tlw %s,%d(%s)\n", dstReg, offset, baseReg);
+        textContent.append(instruction);
+    }
+
+    // Print string given a data label
+    public void print_string_from_label(String label) {
+        la("$a0", label);
+        li_imm("$v0", 4);
+        syscall();
+        // Optionally print newline after string?
+        // li_imm("$a0", '\n'); 
+        // li_imm("$v0", 11);
+        // syscall();
+    }
+
+    // Exit program syscall
+    public void exit() {
+        li_imm("$v0", 10);
+        syscall();
+    }
+
+    // Branch if less than zero
+    public void bltz(TEMP cond, String label) {
+        String condReg = tempToRegister(cond);
+        if (condReg == null) {
+             System.err.printf("ERROR: Cannot branch on unallocated TEMP %s. Skipping bltz.\n", cond);
+             return;
+        }
+        String instruction = String.format("\tbltz %s,%s\n", condReg, label);
+        textContent.append(instruction);
+    }
+	public void malloc(TEMP dst, TEMP size) {
+		move_temp_to_a0(size);
+		textContent.append("\tli $v0, 9\t# Syscall code for sbrk\n");
+		textContent.append("\tsyscall\t\t# Allocate memory, address is in $v0\n");
+		move_from_v0(dst);
+	}
+    // Shift Left Logical
+    public void sll(TEMP dst, TEMP src, int shiftAmount) {
+        String dstReg = tempToRegister(dst);
+        String srcReg = tempToRegister(src);
+        if (dstReg == null || srcReg == null) {
+             System.err.printf("ERROR: Cannot sll with unallocated TEMP(s) (%s, %s). Skipping sll.\n", dst, src);
+             return;
+        }
+        String instruction = String.format("\tsll %s,%s,%d\n", dstReg, srcReg, shiftAmount);
+        textContent.append(instruction);
+    }
 }

@@ -30,4 +30,10 @@ public class TYPE_NIL extends TYPE{
 	public boolean isPrimitive() {
 		return true;
 	}
+
+    @Override
+    public int getSize() {
+        final int POINTER_SIZE = 4;
+        return POINTER_SIZE; // nil is effectively a null pointer
+    }
 }

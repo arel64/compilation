@@ -38,4 +38,9 @@ public class TYPE_INT extends TYPE
 	public boolean isPrimitive() {
 		return true;
 	}
+
+	@Override
+	public int getSize() {
+		return 4; // Integers are 4 bytes
+	}
 }

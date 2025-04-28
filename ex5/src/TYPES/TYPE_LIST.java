@@ -81,5 +81,12 @@ public class TYPE_LIST extends TYPE
 	public boolean isAssignable(TYPE other) throws SemanticException {
 		return false;
 	}
-	
+	@Override
+	public int getSize() {
+		int totalSize = 0;
+		for (TYPE t : list) {
+			totalSize += t.getSize();
+		}
+		return totalSize;
+	}
 }

@@ -69,22 +69,28 @@ public class SYMBOL_TABLE
 		SYMBOL_TABLE_ENTRY next = table[hashValue];
 	
 		/**************************************************************************/
-		/* [3] Prepare a new symbol table entry with name, type, node, next, prevtop */
+		/* [3] Calculate Size using TYPE.getSize()                                */
+		/**************************************************************************/
+		int calculatedSize = t.getSize();
+		
+		/**************************************************************************/
+		/* [4] Prepare a new symbol table entry with name, type, node, next, prevtop */
 		/**************************************************************************/
 		SYMBOL_TABLE_ENTRY e = new SYMBOL_TABLE_ENTRY(name, t, hashValue, next, top, top_index++, declarationNode);
+		e.size = calculatedSize;
 
 		/**********************************************/
-		/* [4] Update the top of the symbol table ... */
+		/* [5] Update the top of the symbol table ... */
 		/**********************************************/
 		top = e;
 		
 		/****************************************/
-		/* [5] Enter the new entry to the table */
+		/* [6] Enter the new entry to the table */
 		/****************************************/
 		table[hashValue] = e;
 		
 		/**************************/
-		/* [6] Print Symbol Table */
+		/* [7] Print Symbol Table */
 		/**************************/
 		PrintMe();
 	}
@@ -212,9 +218,10 @@ public class SYMBOL_TABLE
 					/* [4b] Print entry(i,it) node */
 					/*******************************/
 					fileWriter.format("node_%d_%d ",i,j);
-					fileWriter.format("[label=\"<f0>%s|<f1>%s|<f2>prevtop=%d|<f3>next\"];\n",
+					fileWriter.format("[label=\"<f0>%s|<f1>%s|size=%d|<f2>prevtop=%d|<f3>next\"];\n",
 						it.name,
 						it.type.getName(),
+						it.size,
 						it.prevtop_index);
 
 					if (it.next != null)
@@ -362,10 +369,8 @@ public class SYMBOL_TABLE
 		SYMBOL_TABLE_ENTRY entry = findEntry(name);
 		if (entry != null) {
 			entry.temp = temp;
-		} else {
-			// This would be a compiler error - trying to associate TEMP with non-existent var
-			System.err.println("ERROR: Could not find symbol table entry for " + name + " to associate TEMP.");
-			// Consider throwing an exception
-		}
+			return;
+		} 
+		throw new RuntimeException("No entry found for name: " + name);
 	}
 }

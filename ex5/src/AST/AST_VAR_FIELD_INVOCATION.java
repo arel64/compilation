@@ -43,4 +43,8 @@ public class AST_VAR_FIELD_INVOCATION extends AST_VAR
 	
 		return null;
 	}
+	@Override
+	public TEMP storeValueIR(TEMP sourceValue) {
+		return null;
+	}
 }

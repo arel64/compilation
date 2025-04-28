@@ -8,6 +8,7 @@ import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
 import TEMP.*;
 import IR.*;
+
 public class AST_CLASS_DEC extends AST_DEC {
       
     public String parentClassName;
@@ -68,6 +69,7 @@ public class AST_CLASS_DEC extends AST_DEC {
         TYPE_CLASS father = (TYPE_CLASS)symbol_table.getTypeInGlobalScope(parentClassName);
 		TYPE_CLASS currentClass = new TYPE_CLASS(parentClassName, getName(),lineNumber);
         SYMBOL_TABLE.getInstance().enter(getName(),currentClass);
+        
         symbol_table.beginScope();
         TYPE_CLASS_VAR_DEC_LIST parentAttributes = null;
         List<String> potenitianlyOverridenFunctions = new ArrayList<>();

@@ -22,4 +22,11 @@ public abstract class TYPE
 	public boolean isInterchangeableWith(TYPE other) throws SemanticException{ 
 		return isAssignable(other);
 	}
+
+    /**
+     * Returns the size of this type in bytes for memory allocation/layout.
+     * Primitives have fixed sizes, pointers are typically 4 bytes,
+     * classes sum non-method field sizes, functions/void are 0.
+     */
+    public abstract int getSize();
 }

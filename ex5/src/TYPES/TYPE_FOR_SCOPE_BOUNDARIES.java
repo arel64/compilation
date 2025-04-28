@@ -14,4 +14,9 @@ public class TYPE_FOR_SCOPE_BOUNDARIES extends TYPE
 	public boolean isAssignable(TYPE other) {
 		throw new UnsupportedOperationException("Unimplemented method 'isAssignable'");
 	}
+
+	@Override
+	public int getSize() {
+		return 0;
+	}
 }

@@ -37,6 +37,11 @@ public class SYMBOL_TABLE_ENTRY
 	public TEMP temp = null;
 
 	/******************************************/
+	/* Size of the type in memory (bytes)   */
+	/******************************************/
+	public int size = 0; // Will be set during semantic analysis
+
+	/******************************************/
 	/* AST Node for the declaration (VAR_DEC) */
 	/******************************************/
 	public AST_VAR_DEC declarationNode = null;

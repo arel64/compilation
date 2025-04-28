@@ -48,4 +48,17 @@ public class AST_VAR_SIMPLE extends AST_VAR
 		return entry.temp;
 	}
 
+	@Override
+	public TEMP storeValueIR(TEMP sourceValue) {
+		SYMBOL_TABLE_ENTRY entry = SYMBOL_TABLE.getInstance().findEntry(this.val);
+		if (entry == null) {
+			throw new RuntimeException("Compiler Error: Symbol table entry not found for variable " + this.val + " during storeValueIR.");
+		}
+		if (entry.temp == null) {
+			throw new RuntimeException("Compiler Error: TEMP not associated with variable " + this.val + " during storeValueIR.");
+		}
+		IR.getInstance().Add_IRcommand(new IRcommand_Store(entry.temp, sourceValue, this.val));
+		return null; // Store operation doesn't produce a result TEMP
+	}
+
 }

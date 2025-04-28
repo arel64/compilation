@@ -1,5 +1,7 @@
 package AST;
 
+import TEMP.*;
+
 public abstract class AST_VAR extends AST_Node
 {
     public String val;
@@ -11,4 +13,7 @@ public abstract class AST_VAR extends AST_Node
     public String toString() {
         return val;
     }
+
+    // Method to generate IR for storing a value into this variable
+    public abstract TEMP storeValueIR(TEMP sourceValue);
 }

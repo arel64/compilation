@@ -35,4 +35,10 @@ public class TYPE_ARRAY extends TYPE_VAR_DEC
 		return String.format("%s %s[]", t.getName(),getName());
 	}
 
+	@Override
+	public int getSize() {
+		final int POINTER_SIZE = 4;
+		// Array types/variables store pointers to the actual array data.
+		return POINTER_SIZE; 
+	}
 }

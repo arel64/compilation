@@ -43,4 +43,9 @@ public class TYPE_VOID extends TYPE
 	public boolean isPrimitive() {
 		return true;
 	}
+
+    @Override
+    public int getSize() {
+        return 0; // void takes no space
+    }
 }

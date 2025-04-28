@@ -59,7 +59,22 @@ public class AST_VAR_SUBSCRIPT extends AST_VAR
 
 	public TEMP IRme()
 	{
-	
-		return null;
+		TEMP arrBaseAddr = this.var.IRme();
+		TEMP index = this.subscript.IRme();
+		TEMP dst = TEMP_FACTORY.getInstance().getFreshTEMP();
+
+		IR.getInstance().Add_IRcommand(new IRcommand_Array_Access(dst, arrBaseAddr, index));
+
+		return dst;
+	}
+
+	@Override
+	public TEMP storeValueIR(TEMP sourceValue) {
+		TEMP arrBaseAddr = this.var.IRme();
+		TEMP index = this.subscript.IRme();
+
+		IR.getInstance().Add_IRcommand(new IRcommand_Array_Set(arrBaseAddr, index, sourceValue));
+
+		return null; // Store operation doesn't produce a result TEMP
 	}
 }

@@ -61,4 +61,11 @@ public class TYPE_FUNCTION extends TYPE_VAR_DEC
 	{
 		return t;
 	}
+
+    @Override
+    public int getSize() {
+        // Functions themselves don't occupy data space in the way variables/objects do.
+        // Their size might be considered the code size, but for layout/allocation, it's 0.
+        return 0; 
+    }
 }

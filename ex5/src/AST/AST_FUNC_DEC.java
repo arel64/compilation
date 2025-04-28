@@ -49,6 +49,7 @@ public class AST_FUNC_DEC extends AST_CLASS_FIELDS_DEC {
         SYMBOL_TABLE instance = SYMBOL_TABLE.getInstance();
         TYPE_FUNCTION t = new TYPE_FUNCTION(returnT, getName(),lineNumber);
         instance.enter(t.getName(),(TYPE)t);
+
         instance.beginScope();
 
         TYPE_LIST list =new TYPE_LIST();
@@ -67,6 +68,7 @@ public class AST_FUNC_DEC extends AST_CLASS_FIELDS_DEC {
         t.setParams(list);
         if(body == null)
         {
+            instance.endScope();
             return t;
         }
         for(AST_STMT statement : body)

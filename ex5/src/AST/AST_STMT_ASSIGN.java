@@ -51,15 +51,8 @@ public class AST_STMT_ASSIGN extends AST_STMT
 	@Override
 	public TEMP IRme()
 	{
-		TEMP src = exp.IRme();
-		SYMBOL_TABLE_ENTRY entry = SYMBOL_TABLE.getInstance().findEntry(var.val);
-		if (entry == null) {
-			throw new RuntimeException("Compiler Error: Symbol table entry not found for variable " + var.val + " during IR generation.");
-		}
-		if (entry.temp == null) {
-			throw new RuntimeException("Compiler Error: TEMP not associated with variable " + var.val + " during IR generation.");
-		}
-		IR.getInstance().Add_IRcommand(new IRcommand_Store(entry.temp, src, var.val));
+		TEMP srcValue = exp.IRme();
+		var.storeValueIR(srcValue);
 		return null;
 	}
 }

@@ -26,4 +26,14 @@ public abstract class TYPE_WRAPPER extends TYPE
 	public boolean isDoubleWrapped() {
 		return t instanceof TYPE_WRAPPER;
 	}
+
+    @Override
+    public int getSize() {
+        // Delegate getSize to the wrapped type.
+        // Add null check for safety.
+        if (t != null) {
+            return t.getSize();
+        } 
+		return 0;
+    }
 }

@@ -44,4 +44,10 @@ public class TYPE_STRING extends TYPE
 	public boolean isPrimitive() {
 		return true;
 	}
+
+    @Override
+    public int getSize() {
+        final int POINTER_SIZE = 4;
+        return POINTER_SIZE; // Strings are represented as pointers
+    }
 }

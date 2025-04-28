@@ -3,8 +3,6 @@ package TYPES;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.print.attribute.standard.MediaSize.Other;
-
 import SYMBOL_TABLE.SYMBOL_TABLE;
 import SYMBOL_TABLE.SemanticException;
 
@@ -138,4 +136,45 @@ public class TYPE_CLASS extends TYPE
 		return other instanceof TYPE_NIL || (other instanceof TYPE_CLASS && ((TYPE_CLASS)other).isDerivedFrom(this));
 	}
 
+    @Override
+    public int getSize()  {
+        // Use a helper to handle potential recursion depth
+        return getSizeRecursive(new HashSet<>());
+    }
+
+    private int getSizeRecursive(Set<TYPE_CLASS> visited)  {
+        return 0;
+		// visited.add(this); // Mark this class as visited for this path
+        
+        // int size = 0;
+        // // Size is the sum of sizes of all *own* non-method data members.
+        // // Inheritance is handled by how dataMembers list is populated during SemantMe.
+        // // We assume memberList contains all fields (own + inherited) by the time getSize is called.
+        // if (memberList != null) {
+        //     for (TYPE_CLASS_FIELD field : memberList) {
+        //         // Only count non-method fields
+        //         if (!(field.t instanceof TYPE_FUNCTION)) {
+        //             // Ensure field type is resolved before getting size
+        //             if (field.t == null) {
+        //                  throw new SemanticException(line, String.format("Field '%s' in class '%s' has unresolved type during getSize calculation.", field.getName(), getName()));
+        //             }
+        //             // Delegate to the field's type getSize, passing the visited set
+        //             if (field.t instanceof TYPE_CLASS) {
+        //                 size += ((TYPE_CLASS)field.t).getSizeRecursive(new HashSet<>(visited)); // Pass copy of set
+        //             } else {
+        //                 size += field.t.getSize();
+        //             }
+        //         }
+        //     }
+        // }
+
+        // // No need to explicitly add father's size if memberList correctly includes inherited fields.
+        // // If memberList ONLY contains fields declared in *this* class, then you'd need:
+        // // if (father != null) {
+        // //     size += father.getSizeRecursive(new HashSet<>(visited));
+        // // }
+        
+        // // visited.remove(this); // Not strictly necessary if passing copies
+        // return size;
+    }
 }

@@ -7,6 +7,14 @@ public class InterferenceGraph {
     private Map<TEMP, Set<TEMP>> graph = new HashMap<>();
     
     public void addEdge(TEMP t1, TEMP t2) {
+        // DEBUG: Check for null arguments
+        if (t1 == null || t2 == null) {
+            
+            System.err.printf("addEdge called with null TEMP! t1=%s, t2=%s\n", t1, t2);
+            throw new RuntimeException("addEdge called with null TEMP! t1=" + t1 + ", t2=" + t2);
+
+        }
+        
         if (!t1.equals(t2)) {
             graph.computeIfAbsent(t1, k -> new HashSet<>()).add(t2);
             graph.computeIfAbsent(t2, k -> new HashSet<>()).add(t1);
@@ -112,6 +120,10 @@ public class InterferenceGraph {
     public String toString() {
         StringBuilder sb = new StringBuilder("Interference Graph:\n");
         for (Map.Entry<TEMP, Set<TEMP>> entry : graph.entrySet()) {
+            if (entry == null || entry.getKey() == null || entry.getValue() == null || graph == null)
+            {
+                System.out.println("entry is" + entry  );
+            }
             sb.append(String.format("TEMP_%d interferes with: ", entry.getKey().getSerialNumber()));
             for (TEMP temp : entry.getValue()) {
                 sb.append(String.format("TEMP_%d ", temp.getSerialNumber()));
