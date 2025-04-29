@@ -33,8 +33,6 @@ public class AST_STMT_ASSIGN_NEW extends AST_STMT {
     }
     public TEMP IRme()
 	{
-        //TODO: fix this
-        // IR.getInstance().Add_IRcommand(new IRcommand_Store(this.var.val, newExp.IRme()));
 		return null;
 	}
 }

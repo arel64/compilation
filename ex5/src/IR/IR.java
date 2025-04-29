@@ -284,7 +284,6 @@ public class IR
 		String funcLabel = "PrintInt";
 
 		ir.registerFunctionLabel(funcLabel, funcLabel+"Start");
-
 		ir.Add_IRcommand(new IRcommand_Label(funcLabel+"Start"));
 		ir.Add_IRcommand(new IRcommand_Prologue(8));
 
@@ -297,7 +296,31 @@ public class IR
 		ir.popFunctionEndLabel();
 
 		ir.Add_IRcommand(new IRcommand_Epilogue(8));
+		ir.Add_IRcommand(new IRcommand_Label(funcLabel + "End"));
 		System.out.println("Added IR sequence for PrintInt function using IRcommand_Syscall.");
 	}	
+	
+	public static void addPrintStringIR() {
+		IR ir = IR.getInstance();
+		String funcLabel = "PrintString";
+
+		ir.registerFunctionLabel(funcLabel, funcLabel+"Start");
+		ir.Add_IRcommand(new IRcommand_Label(funcLabel+"Start"));
+		ir.Add_IRcommand(new IRcommand_Prologue(8)); 
+
+		TEMP argTemp = TEMP_FACTORY.getInstance().getFreshTEMP();
+		// Assuming the string address is passed similarly to PrintInt's argument
+		ir.Add_IRcommand(new IRcommand_Load(argTemp, 0, "printStringArg")); 
+		ir.pushFunctionEndLabel(funcLabel+"End");
+
+		// Syscall 4 prints a null-terminated string whose address is in $a0
+		ir.Add_IRcommand(new IRcommand_Syscall(4, argTemp)); 
+
+		ir.popFunctionEndLabel();
+
+		ir.Add_IRcommand(new IRcommand_Epilogue(8));
+		ir.Add_IRcommand(new IRcommand_Label(funcLabel+"End"));
+		System.out.println("Added IR sequence for PrintString function using IRcommand_Syscall.");
+	}
 	
 }

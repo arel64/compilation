@@ -11,7 +11,9 @@ public class AST_EXP_BINOP extends AST_EXP
 	public AST_BINOP binop;
 	public AST_EXP left;
 	public AST_EXP right;
-	
+	private TYPE leftType;
+	private TYPE rightType;
+
 	public AST_EXP_BINOP(AST_EXP left,AST_EXP right, AST_BINOP OP)
 	{
 		SerialNumber = AST_Node_Serial_Number.getFresh();
@@ -51,6 +53,8 @@ public class AST_EXP_BINOP extends AST_EXP
 		final Operation binopOperation = binop.operation;
 		TYPE leftType = left.SemantMe();
 		TYPE rightType = right.SemantMe();
+		this.leftType = leftType;
+		this.rightType = rightType;
 		if(leftType.isFunction() || rightType.isFunction())
 		{
 			throw new SemanticException(lineNumber,String.format("Cannot compare between %s and %s function",leftType,rightType)); 
@@ -58,7 +62,6 @@ public class AST_EXP_BINOP extends AST_EXP
 
 		if(binopOperation == Operation.EQUALS)
 		{
-			System.out.println("EQUALS " + leftType + " asdasda" + rightType);
 			if((rightType instanceof TYPE_NIL && (leftType.isArray() || leftType.isClass())) || ((leftType instanceof TYPE_NIL) && (rightType.isArray() || rightType.isClass())))
 			{
 				return TYPE_INT.getInstance();
@@ -104,7 +107,7 @@ public class AST_EXP_BINOP extends AST_EXP
 		{
 			throw new SemanticException(lineNumber,String.format("Cannot '%s' for different primitive types %s and %s",binopOperation,leftType,rightType));
 		}
-		if(leftType.isAssignable(TYPE_STRING.getInstance()))
+		if(leftType.isAssignable(TYPE_STRING.getInstance()) || rightType.isAssignable(TYPE_STRING.getInstance()))
 		{
 			if( binopOperation != Operation.PLUS)
 			{
@@ -139,7 +142,18 @@ public class AST_EXP_BINOP extends AST_EXP
 		
 		if (binopOperation == Operation.EQUALS)
 		{
-			IR.getInstance().Add_IRcommand(new IRcommand_Binop_EQ_Integers(dst,t1,t2));
+			try {
+				if(leftType.isAssignable(TYPE_STRING.getInstance()) || rightType.isAssignable(TYPE_STRING.getInstance()))
+				{
+					IR.getInstance().Add_IRcommand(new IRcommand_String_EQ(dst,t1,t2));
+				}
+				else
+				{
+					IR.getInstance().Add_IRcommand(new IRcommand_Binop_EQ_Integers(dst,t1,t2));
+				}
+			} catch (SemanticException e) {
+				throw new RuntimeException(String.format("Cannot '%s' for different primitive types %s and %s",binopOperation,leftType,rightType));
+			}
 		}
 		if (binopOperation == Operation.GT)
 		{
@@ -151,7 +165,18 @@ public class AST_EXP_BINOP extends AST_EXP
 		}
 		if (binopOperation == Operation.PLUS)
 		{
-			IR.getInstance().Add_IRcommand(new IRcommand_Binop_Arithmetic(dst,t1,t2,IRcommand_Binop_Arithmetic.ArithmeticOperation.ADD));
+			try {
+				if(leftType.isAssignable(TYPE_STRING.getInstance()) || rightType.isAssignable(TYPE_STRING.getInstance()))
+				{
+					IR.getInstance().Add_IRcommand(new IRcommand_String_Concat(dst,t1,t2));
+				}
+				else
+				{
+					IR.getInstance().Add_IRcommand(new IRcommand_Binop_Arithmetic(dst,t1,t2,IRcommand_Binop_Arithmetic.ArithmeticOperation.ADD));
+				}
+			} catch (SemanticException e) {
+				throw new RuntimeException(String.format("Cannot '%s' for different primitive types %s and %s",binopOperation,leftType,rightType));
+			}
 		}
 		if (binopOperation == Operation.MINUS)
 		{

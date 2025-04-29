@@ -12,7 +12,7 @@ public class IRcommand_Syscall extends IRcommand {
     
     // Constructor for syscalls with TEMP argument (e.g., print_int)
     public IRcommand_Syscall(int code, TEMP arg0) {
-        if (code != 1 && code != 5) { // Add other codes needing TEMP arg here
+        if (code != 1 && code != 5 && code != 4) { // Add other codes needing TEMP arg here
              System.err.printf("Warning: Using TEMP argument constructor for syscall %d that might not expect one.\n", code);
         }
         this.syscallCode = code;

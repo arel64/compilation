@@ -60,6 +60,8 @@ public class SYMBOL_TABLE
 		/*************************************************/
 		/* [1] Compute the hash value for this new entry */
 		/*************************************************/
+		name = name.toLowerCase();
+
 		int hashValue = hash(name);
 
 		/******************************************************************************/
@@ -100,7 +102,7 @@ public class SYMBOL_TABLE
 	/***********************************************/
 	public TYPE find(String name)
 	{
-
+		name = name.toLowerCase();
 		SYMBOL_TABLE_ENTRY e = findEntry(name);
 		if (e != null) {
 			return e.type;
@@ -350,6 +352,7 @@ public class SYMBOL_TABLE
 	// Add a method to find the SYMBOL_TABLE_ENTRY itself, not just the TYPE
 	public SYMBOL_TABLE_ENTRY findEntry(String name)
 	{
+		name = name.toLowerCase();
 		if(name == null)
 		{
 			return null;
@@ -357,7 +360,7 @@ public class SYMBOL_TABLE
 		SYMBOL_TABLE_ENTRY e;
 
 		for (e = table[hash(name)]; e != null; e = e.next) {
-			if (name.equals(e.name)) {
+			if (name.equals(e.name.toLowerCase())) {
 				return e;
 			}
 		}

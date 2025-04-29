@@ -137,7 +137,12 @@ public class AST_FUNC_DEC extends AST_CLASS_FIELDS_DEC {
         int frameSize = 8 + numLocals * 4;
 
         IR ir = IR.getInstance(); // Get instance once
-
+        
+        if (funcName.equals("main")) {
+            System.out.println("Generating main function IR");
+            _mainIr(body);
+            return null;
+        }
         ir.registerFunctionLabel(funcName, label_start);
         ir.Add_IRcommand(new IRcommand_Label(label_start));
         ir.Add_IRcommand(new IRcommand_Prologue(frameSize));
@@ -165,11 +170,21 @@ public class AST_FUNC_DEC extends AST_CLASS_FIELDS_DEC {
         ir.Add_IRcommand(new IRcommand_Label(label_end)); // End label position
         ir.Add_IRcommand(new IRcommand_Epilogue(frameSize)); // Epilogue comes AFTER end label
 
-        // --- Main Function Exit Jump ---
-        if (funcName.equals("main")) {
-             ir.Add_IRcommand(new IRcommand_Jump_Label("program_exit"));
-        }        
+
         return null;
+    }
+    public void _mainIr(AST_LIST<AST_STMT> body) {
+        IR ir = IR.getInstance();
+
+        ir.Add_IRcommand(new IRcommand_Label("mainStart"));
+        ir.Add_IRcommand(new IRcommand_Prologue(12));
+        ir.pushFunctionEndLabel("main");
+        if (body != null) {
+            body.IRme();
+        }
+        ir.popFunctionEndLabel();
+        ir.Add_IRcommand(new IRcommand_Epilogue(12));
+
     }
 }
 

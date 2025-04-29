@@ -18,19 +18,20 @@ import TEMP.*;
 public class MIPSGenerator
 {
 	// Define the number of registers available to the allocator ($t0-$t7)
-	public static final int NUM_ALLOCATABLE_REGISTERS = 8;
+	public static final int NUM_ALLOCATABLE_REGISTERS = 10;
 
 	// Add the $at register constant
 	public static final String AT = "$at";
 	public static final String V0 = "$v0"; // Useful for syscalls/return values
 	public static final String A0 = "$a0"; // Useful for syscalls/arguments
+	public static final String A1 = "$a1"; // Useful for syscalls/arguments
 	public static final String SP = "$sp";
 	public static final String FP = "$fp";
 	public static final String RA = "$ra";
 	public static final String ZERO = "$zero";
 	// Add dedicated temp registers, excluded from allocator
-	public static final String TEMP_REG_1 = "$t8";
-	public static final String TEMP_REG_2 = "$t9";
+	public static final String TEMP_REG_1 = "$s0";
+	public static final String TEMP_REG_2 = "$s1";
 
 	/***********************/
 	/* The file writer ... */
@@ -39,10 +40,24 @@ public class MIPSGenerator
 
 	private StringBuilder dataContent = new StringBuilder();
 	private StringBuilder textContent = new StringBuilder();
+	private StringBuilder globalInitContent = new StringBuilder(); // New buffer for global init
 
 	// Helper to append instructions consistently
 	private void commandWrite(String instruction) {
 		textContent.append("\t").append(instruction).append("\n");
+	}
+
+	// Helper to append global init instructions
+	private void globalInitWrite(String instruction) {
+		globalInitContent.append("\t").append(instruction).append("\n");
+	}
+
+	/**
+	 * Appends a directive to the .data segment content.
+	 * @param directive The complete data directive line (e.g., "my_string: .asciiz \"Hello\"").
+	 */
+	public void addDataDirective(String directive) {
+		dataContent.append("    ").append(directive).append("\n"); // Indent for readability
 	}
 
 	/***********************/
@@ -65,14 +80,19 @@ public class MIPSGenerator
 			finalWriter.print("\n.text\n");
 			finalWriter.print(".globl main\n");
 			finalWriter.print("main:\n");
-
-			String mainStartLabel = IR.getInstance().getFunctionLabel("main");
-			finalWriter.format("\tj %s\n", mainStartLabel);
+			// Print global initialization code first
+			finalWriter.print(globalInitContent.toString()); 
+			// Then jump to the actual start of the user's main function
+			finalWriter.print("\tjal mainStart\n");
+			finalWriter.print("j program_exit\n");
 
 			String textContentStr = textContent.toString();
 
 			finalWriter.print(textContentStr);
 			
+			// Add Standard Library Helper Functions
+			appendHelperFunctions(finalWriter); 
+
 			// Add the program exit syscall sequence at the very end
 			finalWriter.print("\nprogram_exit:\n"); // Add a label for clarity
 			finalWriter.print("\tli $v0,10\n");
@@ -89,7 +109,8 @@ public class MIPSGenerator
 
 	public void allocate(String var_name)
 	{
-		String instruction = String.format("\tglobal_%s: .word 721\n", var_name);
+		// Use .space to reserve space, initialization happens in .text
+		String instruction = String.format("\tglobal_%s: .space 4\n", var_name); 
 		dataContent.append(instruction);
 	}
 	public void store(TEMP src, int offset) {
@@ -246,7 +267,6 @@ public class MIPSGenerator
 				e.printStackTrace();
 			}
 
-			// Don't add main: label here - it will be added in finalizeFile
 		}
 		return instance;
 	}
@@ -333,6 +353,15 @@ public class MIPSGenerator
 		commandWrite(String.format("la %s,%s", dstReg, label));
     }
 
+	/**
+	 * Load Address using TEMP object for destination.
+	 * Gets the register name for the TEMP and calls la(String, String).
+	 */
+	public void la_temp(TEMP dst, String label) {
+		String dstReg = tempToRegister(dst);
+		la(dstReg, label);
+	}
+
     // Syscall
     public void syscall() {
 		commandWrite("syscall");
@@ -413,6 +442,23 @@ public class MIPSGenerator
 
 	public void malloc(TEMP dst, TEMP size) {
 		move_temp_to_a0(size);
+		_malloc(dst);
+	}
+
+	/**
+	 * Allocates memory on the heap using the sbrk syscall.
+	 * @param dst The TEMP to store the address of the allocated memory.
+	 * @param sizeReg The REGISTER NAME holding the number of bytes to allocate.
+	 */
+	public void malloc(TEMP dst, String sizeReg) {
+		// Ensure size is in $a0 for the syscall
+		if (!sizeReg.equals(A0)) {
+			move_registers(A0, sizeReg);
+		}
+		_malloc(dst);
+	}
+
+	private void _malloc(TEMP dst) {
 		li_imm(V0, 9); // Syscall code for sbrk
 		syscall();     // Allocate memory, address is in $v0
 		move_from_v0(dst); // Move address from $v0 to dst TEMP's register
@@ -437,7 +483,15 @@ public class MIPSGenerator
 
 	// NEW: Store word using register names for src and base
 	public void sw_offset(String srcReg, int offset, String baseReg) {
+		// This command now writes to the regular text content
 		commandWrite(String.format("sw %s,%d(%s)", srcReg, offset, baseReg));
+	}
+
+	public void sw_global(String srcReg, String globalVarLabel) {
+		// 1. Load address of global variable into $at
+		globalInitWrite(String.format("la %s, %s", AT, globalVarLabel));
+		// 2. Store the value from srcReg into the global variable address
+		globalInitWrite(String.format("sw %s, 0(%s)", srcReg, AT));
 	}
 
 	// NEW: Load word using register names for dst and base
@@ -453,5 +507,86 @@ public class MIPSGenerator
 	// NEW: Jump register using name
 	public void jr_register(String targetReg) {
 		commandWrite(String.format("jr %s", targetReg));
+	}
+
+	// NEW: Adds standard library helper functions (strlen, strcpy, strcmp) to the output
+	private void appendHelperFunctions(PrintWriter finalWriter) {
+		finalWriter.println("\n");
+		finalWriter.println("#-----------------------------------------------\n");
+		finalWriter.println("# Standard Library Helper Functions             \n");
+		finalWriter.println("#-----------------------------------------------\n");
+		finalWriter.println("\n");
+
+		// strlen: Calculates length of a null-terminated string.
+		// $a0: Address of the string
+		// $v0: Length of the string (excluding null terminator)
+		// Preserves: $s0, $s1 (Saves/restores them internally)
+		finalWriter.println("strlen:");
+		finalWriter.println("\taddi    $sp, $sp, -4 # Allocate stack space for $s0");
+		finalWriter.println(String.format("\tsw      %s, 0($sp)  # Save $s0", TEMP_REG_1));
+		finalWriter.println("\tli      $v0, 0      # Initialize length counter");
+		finalWriter.println("strlen_loop:");
+		finalWriter.println(String.format("\tlb      %s, 0($a0) # Load byte from string into $s0", TEMP_REG_1));
+		finalWriter.println(String.format("\tbeqz    %s, strlen_end # If byte is null, end", TEMP_REG_1));
+		finalWriter.println("\taddi    $v0, $v0, 1 # Increment length");
+		finalWriter.println("\taddi    $a0, $a0, 1 # Move to next character");
+		finalWriter.println("\tj       strlen_loop # Loop");
+		finalWriter.println("strlen_end:");
+		finalWriter.println(String.format("\tlw      %s, 0($sp)  # Restore $s0", TEMP_REG_1));
+		finalWriter.println("\taddi    $sp, $sp, 4  # Deallocate stack space");
+		finalWriter.println("\tjr      $ra         # Return");
+		finalWriter.println("");
+
+		// strcpy: Copies a null-terminated string from src to dst.
+		// $a0: Address of destination buffer
+		// $a1: Address of source string
+		// $v0: Address of destination buffer ($a0)
+		// Preserves: $s0 (Saves/restores it internally)
+		finalWriter.println("strcpy:");
+		finalWriter.println("\taddi    $sp, $sp, -4 # Allocate stack space for $s0");
+		finalWriter.println(String.format("\tsw      %s, 0($sp)  # Save $s0", TEMP_REG_1));
+		finalWriter.println("\tmove    $v0, $a0    # Store destination address for return value");
+		finalWriter.println("strcpy_loop:");
+		finalWriter.println(String.format("\tlb      %s, 0($a1) # Load byte from source into $s0", TEMP_REG_1));
+		finalWriter.println(String.format("\tsb      %s, 0($a0) # Store byte to destination using $s0", TEMP_REG_1));
+		finalWriter.println(String.format("\tbeqz    %s, strcpy_end # If byte is null, end", TEMP_REG_1));
+		finalWriter.println("\taddi    $a0, $a0, 1 # Move to next destination byte");
+		finalWriter.println("\taddi    $a1, $a1, 1 # Move to next source byte");
+		finalWriter.println("\tj       strcpy_loop # Loop");
+		finalWriter.println("strcpy_end:");
+		finalWriter.println(String.format("\tlw      %s, 0($sp)  # Restore $s0", TEMP_REG_1));
+		finalWriter.println("\taddi    $sp, $sp, 4  # Deallocate stack space");
+		finalWriter.println("\tjr      $ra         # Return");
+		finalWriter.println("");
+
+		// strcmp: Compares two null-terminated strings for content equality.
+		// $a0: Address of string 1
+		// $a1: Address of string 2
+		// $v0: 1 if strings are equal, 0 otherwise
+		// Preserves: $s0, $s1 (Saves/restores them internally)
+		finalWriter.println("strcmp:");
+		finalWriter.println("\taddi    $sp, $sp, -8 # Allocate stack space for $s0, $s1");
+		finalWriter.println(String.format("\tsw      %s, 4($sp)  # Save $s0", TEMP_REG_1));
+		finalWriter.println(String.format("\tsw      %s, 0($sp)  # Save $s1", TEMP_REG_2));
+		finalWriter.println("\tli      $v0, 1      # Assume equal initially");
+		finalWriter.println("strcmp_loop:");
+		finalWriter.println(String.format("\tlb      %s, 0($a0) # Load byte from str1 into $s0", TEMP_REG_1));
+		finalWriter.println(String.format("\tlb      %s, 0($a1) # Load byte from str2 into $s1", TEMP_REG_2));
+		finalWriter.println(String.format("\tbne     %s, %s, strcmp_neq # If bytes differ, strings not equal", TEMP_REG_1, TEMP_REG_2));
+		finalWriter.println(String.format("\tbeqz    %s, strcmp_end # If byte is null (and they matched), strings are equal, end", TEMP_REG_1));
+		finalWriter.println("\taddi    $a0, $a0, 1 # Move to next char str1");
+		finalWriter.println("\taddi    $a1, $a1, 1 # Move to next char str2");
+		finalWriter.println("\tj       strcmp_loop # Loop");
+		finalWriter.println("strcmp_neq:");
+		finalWriter.println("\tli      $v0, 0      # Set result to 0 (not equal)");
+		finalWriter.println("\tj       strcmp_restore # Go to restore sequence"); // Jump to common restore point
+		finalWriter.println("strcmp_end:");
+		// $v0 is already 1 (equal) from initialization or previous loop state
+		finalWriter.println("strcmp_restore:");
+		finalWriter.println(String.format("\tlw      %s, 4($sp)  # Restore $s0", TEMP_REG_1));
+		finalWriter.println(String.format("\tlw      %s, 0($sp)  # Restore $s1", TEMP_REG_2));
+		finalWriter.println("\taddi    $sp, $sp, 8  # Deallocate stack space");
+		finalWriter.println("\tjr      $ra         # Return");
+		finalWriter.println("");
 	}
 }

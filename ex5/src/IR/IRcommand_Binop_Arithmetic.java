@@ -30,7 +30,7 @@ public class IRcommand_Binop_Arithmetic extends IRcommand {
             case MUL: opStr = "Mul"; break;
             case DIV: opStr = "Div"; break;
         }
-        return String.format("IRcommand_Binop_%s_Integers: dst=%s, t1=%s, t2=%s", opStr, dst, t1, t2);
+        return String.format("IRcommand_Binop_%s: dst=%s, t1=%s, t2=%s", opStr, dst, t1, t2);
     }
 
     @Override
