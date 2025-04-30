@@ -135,7 +135,7 @@ public class AST_CLASS_DEC extends AST_DEC {
         IR.getInstance().Add_IRcommand(new IRcommand_Label(label_start, label_end));
         IR.getInstance().Add_IRcommand(new IRcommand_Class_Dec(this.getName(), this.parentClassName));
         fields.IRme();
-        IR.getInstance().Add_IRcommand(new IRcommand_Label(label_end, true));
+        IR.getInstance().Add_IRcommand(new IRcommand_Label(label_end, false, true));
         return null;
 	}
 }
