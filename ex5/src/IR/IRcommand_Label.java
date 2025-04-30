@@ -19,7 +19,7 @@ public class IRcommand_Label extends IRcommand
 {
 	public String label_name;
 	public String closing_label;
-	public boolean funEnd = false;
+	public boolean funcEnd = false;
 	public boolean ClassEnd = false;
 	
 	public IRcommand_Label(String label_name)
@@ -33,11 +33,11 @@ public class IRcommand_Label extends IRcommand
 		this.closing_label = closing_label;
 	}
 
-	public IRcommand_Label(String label_name, boolean flag, boolean flag)
+	public IRcommand_Label(String label_name, boolean funcFlag, boolean classFlag)
 	{
 		this.label_name = label_name;
-		this.funcEnd = flag;
-		this.ClassEnd = flag;
+		this.funcEnd = funcFlag;
+		this.ClassEnd = classFlag;
 	}
 
 	@Override

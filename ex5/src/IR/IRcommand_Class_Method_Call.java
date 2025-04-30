@@ -12,8 +12,11 @@ import java.util.stream.*;
 /* PROJECT IMPORTS */
 /*******************/
 import TEMP.*;
+import MIPS.MIPSGenerator;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.List;
 
 public class IRcommand_Class_Method_Call extends IRcommand
 {
@@ -105,10 +108,10 @@ public class IRcommand_Class_Method_Call extends IRcommand
 			}
 		}
 
-		String labelToJumpTo = irInstance.getFunctionLabel(this.src + "." + this.method);
+		String labelToJumpTo = irInstance.getFunctionLabel(this.src.toString() + "." + this.method);
 
 		if (labelToJumpTo == null) {
-			throw new RuntimeException("ERROR: Could not find label for function '" + this.funcName + "' during MIPS generation.");
+			throw new RuntimeException("ERROR: Could not find label for function '" + this.src.toString() + "." + this.method + "' during MIPS generation.");
 		}
 		gen.jal(labelToJumpTo);
 
