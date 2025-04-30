@@ -30,7 +30,7 @@ MANIFEST_FILE             = ${MANIFEST_DIR}/MANIFEST.MF
 ########################
 # DEFINITIONS :: JFlex #
 ########################
-JFlex_PROGRAM  = jflex
+JFlex_PROGRAM  = java -Djava.awt.headless=true -jar ~/java-tools/jflex-1.8.2/lib/jflex-full-1.8.2.jar
 JFlex_FLAGS    = -q
 JFlex_DEST_DIR = ${SRC_DIR}
 JFlex_FILE     = ${JFlex_DIR}/LEX_FILE.lex

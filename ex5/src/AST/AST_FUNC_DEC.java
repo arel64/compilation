@@ -143,7 +143,7 @@ public class AST_FUNC_DEC extends AST_CLASS_FIELDS_DEC {
             _mainIr(body);
             return null;
         }
-        ir.registerFunctionLabel(funcName, label_start);
+
         ir.Add_IRcommand(new IRcommand_Label(label_start));
         ir.Add_IRcommand(new IRcommand_Prologue(frameSize));
         
