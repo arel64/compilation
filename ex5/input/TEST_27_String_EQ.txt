@@ -1,0 +1,13 @@
+string s1:="Banana";
+void main() {
+    string s2 := "Banana";
+    string s3 := "Cool";
+    if (s1 = s2)
+    {
+        PrintInt(1);
+    }    
+    if (s1=s3)
+    {
+        PrintInt(2);
+    }
+}

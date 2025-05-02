@@ -1,0 +1,33 @@
+array IntArray = int[];
+IntArray a1 := new int[3];
+IntArray a2 := new int[3];
+IntArray a3 := new int[4];
+void main() {
+    a1[0] := 0;
+    a1[1] := 1;
+    a1[2] := 2;
+    a2[0] := 0;
+    a2[1] := 1;
+    a2[2] := 2;
+    if(a1 = a2)
+    {
+        PrintInt(1);
+    }
+    a2[2] := 3;
+    if(a1 = a2)
+    {
+        PrintInt(2);
+    }
+    a3[0] := 0;
+    a3[1] := 1;
+    a3[2] := 2;
+    a3[3] := 3;
+    if(a1 = a3)
+    {
+        PrintInt(3);
+    }
+	if(a3 = a3)
+    {
+        PrintInt(4);
+    }
+}

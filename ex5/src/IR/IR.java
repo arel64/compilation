@@ -246,14 +246,72 @@ public class IR
 						System.out.println("[Pass 2] Processing (Const for Global Init Store): " + prevCommand);
 						prevCommand.MIPSme(); 
 						processedIndicesPass2.add(i - 1); // Mark Const as processed
-					}
-				}
 
-				// Now process the Global_Init_Store command itself
-				System.out.println("[Pass 2] Processing (Global Init Store): " + command);
-				command.MIPSme(); 
-				processedIndicesPass2.add(i); // Mark Global_Init_Store as processed
+						// Process the Global_Init_Store command itself
+						System.out.println("[Pass 2] Processing (Global Init Store for Const): " + initStoreCmd);
+						initStoreCmd.MIPSme();
+						processedIndicesPass2.add(i); // Mark Init Store as processed
+					}
+					// Case 2: Preceded by a New_Array command (Handles global array initializers)
+					else if (prevCommand instanceof IRcommand_New_Array &&
+							 prevCommand.dst != null && prevCommand.dst.equals(initStoreCmd.srcTemp))
+					{
+						IRcommand_New_Array newArrayCmd = (IRcommand_New_Array) prevCommand;
+						System.out.printf("[Pass 2] Found New Array at index %d: %s%n", i - 1, newArrayCmd);
+
+						// Now, find the command that defines the size TEMP for New_Array
+						TEMP sizeTemp = newArrayCmd.size;
+						IRcommand sizeDefCommand = null;
+						int sizeDefIndex = -1;
+						for (int j = i - 2; j >= 0; j--) { // Search backwards from before New_Array
+							IRcommand potentialDef = instance.commandList.get(j);
+							if (potentialDef.dst != null && potentialDef.dst.equals(sizeTemp)) {
+								// Found the command defining the size TEMP (likely IRcommandConstInt)
+								if (potentialDef instanceof IRcommandConstInt) { // Be specific if possible
+									sizeDefCommand = potentialDef;
+									sizeDefIndex = j;
+									System.out.printf("[Pass 2] Found Size Def (ConstInt) at index %d: %s%n", j, sizeDefCommand);
+									break;
+								} // Add checks for other ways size might be defined if necessary
+							}
+						}
+
+						if (sizeDefCommand != null) {
+							// Process the Size Definition command first
+							System.out.println("[Pass 2] Processing (Size Def for New Array): " + sizeDefCommand);
+							sizeDefCommand.MIPSme();
+							processedIndicesPass2.add(sizeDefIndex); // Mark Size Def as processed
+
+							// Process the New_Array command 
+							System.out.println("[Pass 2] Processing (New Array for Global Init Store): " + newArrayCmd);
+							newArrayCmd.MIPSme();
+							processedIndicesPass2.add(i - 1); // Mark New Array as processed
+
+							// Process the Global_Init_Store command itself
+							System.out.println("[Pass 2] Processing (Global Init Store for New Array): " + initStoreCmd);
+							initStoreCmd.MIPSme();
+							processedIndicesPass2.add(i); // Mark Init Store as processed
+						} else {
+							System.err.printf("Error [Pass 2]: Could not find defining command for size TEMP %s needed by New_Array at index %d.%n", sizeTemp, i - 1);
+							// Decide how to handle this error - skip processing? throw exception?
+						}
+					}
+					// Add other potential preceding command types here if needed (e.g., Load Global?)
+					else {
+						System.err.printf("Warning [Pass 2]: Global_Init_Store at index %d is preceded by an unexpected command type (%s) or mismatching TEMP.%n", i, prevCommand.getClass().getSimpleName());
+						// Optionally process the store anyway if the TEMP is expected to be valid?
+						// initStoreCmd.MIPSme(); 
+						// processedIndicesPass2.add(i);
+					}
+				} else {
+					System.err.printf("Warning [Pass 2]: Global_Init_Store at index %d has no preceding command or null srcTemp.%n", i);
+					// Optionally process the store anyway?
+					// initStoreCmd.MIPSme();
+					// processedIndicesPass2.add(i);
+				}
 			}
+			// Note: We don't process other command types here in Pass 2 unless they are part
+			// of a recognized global initialization sequence (like Const or New_Array above).
 		}
 
 		// Pass 3: Process all other commands (function code, labels, remaining constants, runtime global stores, etc.)

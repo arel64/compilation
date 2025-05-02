@@ -66,9 +66,9 @@ public class AST_EXP_BINOP extends AST_EXP
 			{
 				return TYPE_INT.getInstance();
 			}
-			if(leftType.isArray() || rightType.isArray())
+			if(leftType.isArray() && !rightType.isArray() || rightType.isArray() && !leftType.isArray())
 			{
-				throw new SemanticException(lineNumber,String.format("Cannot compare between %s and %s arrays",leftType,rightType)); 
+				return TYPE_INT.getInstance();
 			}
 			if((leftType.isClass() && (!rightType.isClass()))||(!leftType.isClass() && (rightType.isClass())))
 			{

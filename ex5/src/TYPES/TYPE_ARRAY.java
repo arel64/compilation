@@ -21,7 +21,7 @@ public class TYPE_ARRAY extends TYPE_VAR_DEC
 	}
 	@Override
 	public boolean isAssignable(TYPE other) {
-		return isInterchangeableWith(other) || (((TYPE_ARRAY)other).t == t);
+		return isInterchangeableWith(other) || (other.isArray() && ((TYPE_ARRAY)other).t == t);
 	}
 	@Override
 	public boolean isInterchangeableWith(TYPE other) {
