@@ -77,6 +77,7 @@ public class SYMBOL_TABLE_ENTRY
 		this.prevtop = prevtop;
 		this.prevtop_index = prevtop_index;
 		this.isGlobal = isGlobal;
+		this.offset = Integer.MIN_VALUE; // Ensure default is sentinel
 	}
 
 	@Override
@@ -87,9 +88,13 @@ public class SYMBOL_TABLE_ENTRY
 				", index=" + index + '\n' +
 				", size=" + size + '\n' +
 				", isGlobal=" + isGlobal + '\n' +
+				", offset=" + offset + '\n' +
 				'}';
 	}
 	public boolean isGlobal() {
 		return isGlobal;
+	}
+	public int getOffset() {
+		return offset;
 	}
 }

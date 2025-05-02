@@ -5,6 +5,8 @@ import SYMBOL_TABLE.SYMBOL_TABLE;
 
 public abstract class AST_DEC extends AST_Node {
     public String name;
+    public boolean isGlobal;
+    public int offset = Integer.MIN_VALUE;
     public AST_DEC(String name)
     {
         this.name = name;
@@ -23,6 +25,6 @@ public abstract class AST_DEC extends AST_Node {
     }
     protected boolean isDeclaredInCurrentScope()
     {
-        return SYMBOL_TABLE.getInstance().existsInCurrentScope(name);
+        return SYMBOL_TABLE.getInstance().existsInScopeStack(name);
     }
 }

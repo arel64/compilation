@@ -1,6 +1,7 @@
 package AST;
 
 import SYMBOL_TABLE.SYMBOL_TABLE;
+import SYMBOL_TABLE.ScopeType;
 import SYMBOL_TABLE.SemanticException;
 import TYPES.TYPE;
 import TYPES.TYPE_INT;
@@ -32,7 +33,7 @@ public abstract class AST_STMT_CONDITIONAL extends AST_STMT
         {
             throw new SemanticException(lineNumber,String.format("Conditional statement condition must be int, got: %s ",conditionType));
         }
-        SYMBOL_TABLE.getInstance().beginScope();
+        SYMBOL_TABLE.getInstance().beginScope(ScopeType.BODY);
         for (AST_STMT stmt : body) {
             stmt.SemantMe();
         }

@@ -2,7 +2,6 @@ package AST;
 import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
 import TEMP.*;
-import IR.*;
 public class AST_STMT_FUNC_INVO extends AST_STMT {
     public AST_FUNC_INVOCATION invocation;
 

@@ -1,9 +1,5 @@
 package AST;
 
-import TEMP.*;
-import IR.*;
-import SYMBOL_TABLE.SYMBOL_TABLE;
-
 
 // New class extending AST_VAR_DEC for array declarations
 public class AST_ARR_DEC extends AST_VAR_DEC {

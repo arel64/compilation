@@ -6,6 +6,7 @@ import java_cup.runtime.Symbol;
 import AST.*;
 import IR.*;
 import MIPS.*;
+import SYMBOL_TABLE.SYMBOL_TABLE;
 import SYMBOL_TABLE.SemanticException;
 
 public class Main {
@@ -49,6 +50,7 @@ public class Main {
 				System.out.println("AST printed");
 				AST.SemantMeLog();
 				System.out.println("AST semantic analysis done");
+				SYMBOL_TABLE.getInstance().PrintMe();
 				AST.IRme();
 				System.out.println("AST IR generation done");
 

@@ -1,51 +1,39 @@
-array IntArray = int[];
-
-void BubbleSort(IntArray arr, int size)
+int IsPrime(int p)
 {
-    int i         := 0;
-    int j         := 0;
-    int min :=   32767;
-    int minIndex := -1;
-    int temp     :=  0;
+    int i := 2;
+    int j := 2;
     
-    while (i < size)
+    while (i<p)
     {
-        j := i;
-        min := 32767;
-        while ( j < size )
+		j := 2;
+        while (j<p)
         {
-            if (arr[j] < min)
+            if (i*j = p)
             {
-                min := arr[j];
-                minIndex := j;
+                 return 0;
             }
-            j := j + 1;
+            j := j+1;
         }
-        temp := arr[i];
-	arr[i] := min;
-	arr[minIndex] := temp;
-	i := i + 1;
+        i := i+1;
+    }
+    return 1;
+}
+
+void PrintPrimes(int start, int end)
+{
+    int p := start;
+    
+    while (p < end+1)
+    {
+        if (IsPrime(p))
+        {
+            PrintInt(p);
+        }
+        p := p + 1;
     }
 }
 
 void main()
 {
-    IntArray arr := new int[7];
-    
-    arr[0] := 34;
-    arr[1] := 12;
-    arr[2] := -600;
-    arr[3] := -400;
-    arr[4] := 70;
-    arr[5] := 30;
-    arr[6] := -580;
-    
-    BubbleSort(arr,7);
-
-    int i := 0;
-    while (i < 7) {
-        PrintInt(arr[i]);
-        i := i + 1;
-    }
+    PrintPrimes(2,100);
 }
-

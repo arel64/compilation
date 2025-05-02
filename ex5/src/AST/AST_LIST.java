@@ -5,7 +5,6 @@ import IR.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import SYMBOL_TABLE.SYMBOL_TABLE;
 import SYMBOL_TABLE.SemanticException;
 
 public class AST_LIST<T extends AST_Node> extends AST_Node implements Iterable<T>{

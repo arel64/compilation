@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import SYMBOL_TABLE.SYMBOL_TABLE;
+import SYMBOL_TABLE.ScopeType;
 import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
 import TEMP.*;
@@ -70,7 +71,7 @@ public class AST_CLASS_DEC extends AST_DEC {
 		TYPE_CLASS currentClass = new TYPE_CLASS(parentClassName, getName(),lineNumber);
         SYMBOL_TABLE.getInstance().enter(getName(),currentClass);
         
-        symbol_table.beginScope();
+        symbol_table.beginScope(ScopeType.FUNCTION);//todo remove
         TYPE_CLASS_VAR_DEC_LIST parentAttributes = null;
         List<String> potenitianlyOverridenFunctions = new ArrayList<>();
         TYPE_CLASS_VAR_DEC_LIST declist = new TYPE_CLASS_VAR_DEC_LIST(potenitianlyOverridenFunctions);

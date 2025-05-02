@@ -2,7 +2,6 @@ package AST;
 import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
 import TEMP.*;
-import IR.*;
 
 public class AST_BINOP extends AST_EXP
 {
@@ -59,7 +58,6 @@ public class AST_BINOP extends AST_EXP
 	@Override
 	public TEMP IRme()
 	{
-	
-		return null;
+		throw new RuntimeException("AST_BINOP.IRme() should not be called directly.");
 	}
 }

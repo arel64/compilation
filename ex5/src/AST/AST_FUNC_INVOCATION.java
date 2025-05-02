@@ -1,11 +1,14 @@
 package AST;
 import SYMBOL_TABLE.SYMBOL_TABLE;
+import SYMBOL_TABLE.ScopeType;
 import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
 import TEMP.*;
-import IR.*;
+import IR.IR;
+import IR.IRcommand_Func_Call;
+import IR.IRcommand_Class_Method_Call;
 import java.util.ArrayList;
-import java.util.List;
+
 public class AST_FUNC_INVOCATION extends AST_EXP {
     
     public String funcName;
@@ -82,7 +85,7 @@ public class AST_FUNC_INVOCATION extends AST_EXP {
         }
         TYPE_FUNCTION myFunctionType = (TYPE_FUNCTION)functionType;
 
-        table.beginScope();
+        table.beginScope(ScopeType.FUNCTION);
         if(params != null)
         {
             if(params.size() != myFunctionType.getParams().size())

@@ -31,16 +31,14 @@ public class AST_VAR_DEC extends AST_DEC {
     }
     @Override
     public String toString() {
-        return t.toString()+ " "+getName() + (varValue != null ? "="+varValue:"");
+        return t.toString()+ " "+getName() + (varValue != null ? "="+varValue:"") + "offset: " + offset + "isGlobal: " + isGlobal;
     }
 
     @Override
     public TYPE SemantMe() throws SemanticException{
         String currentVarName = getName(); // Store name for clarity
         System.out.println("--- Checking variable declaration for: " + currentVarName + " ---");
-        System.out.println("Symbol Table Top before check: " + SYMBOL_TABLE.getInstance().getTopEntryName());
         boolean exists = SYMBOL_TABLE.getInstance().isDeclaredInImmediateScope(currentVarName);
-        // System.out.println("Result of isDeclaredInImmediateScope(" + currentVarName + "): " + exists);
         if(exists) // Check the stored result
         {
             System.out.println("--- ERROR: Variable already exists in current scope! ---");
@@ -51,9 +49,25 @@ public class AST_VAR_DEC extends AST_DEC {
         {
             type = new TYPE_VAR_DEC(type,getName());
         }
-        boolean isGlobal = SYMBOL_TABLE.getInstance().isAtGlobalScope();
-        System.out.println("Entering variable2: " + getName() + " with type: " + type + " and isGlobal: " + isGlobal);
-        SYMBOL_TABLE.getInstance().enter(getName(), type,  isGlobal);
+        SYMBOL_TABLE.getInstance().enter(getName(), type);
+        
+        // Retrieve the entry that was just created to get its calculated offset
+        SYMBOL_TABLE_ENTRY entry = SYMBOL_TABLE.getInstance().findEntryInCurrentScopeStack(getName());
+
+        if (entry != null) {
+            this.offset = entry.offset; // Store the correct offset
+            this.isGlobal = entry.isGlobal; // Use the flag from the entry
+            // +++ DEBUG LOGGING +++
+            System.out.format("SemantMe: Retrieved for '%s': offset=%d, isGlobal=%b\\n", getName(), this.offset, this.isGlobal);
+        } else {
+            // This indicates a serious internal error
+            System.err.println("FATAL Semantic Error: Could not find symbol table entry for '" + getName() + "' immediately after entering.");
+            this.offset = Integer.MIN_VALUE; // Assign default error value
+            this.isGlobal = false; // Assign default error value
+            // Consider throwing an exception here instead of just printing
+            throw new SemanticException(lineNumber, "Internal compiler error: Symbol table state inconsistency for variable " + getName());
+        }
+
         if( varValue != null)
         {
             TYPE valueType = varValue.SemantMeLog();
@@ -68,32 +82,28 @@ public class AST_VAR_DEC extends AST_DEC {
     @Override
     public TEMP IRme()
 	{           
-        SYMBOL_TABLE_ENTRY entry = SYMBOL_TABLE.getInstance().findEntry(getName());
-        boolean isGlobal = entry.isGlobal;
-        if(isGlobal)
+        if(this.isGlobal)
         {
             IR.getInstance().Add_IRcommand(new IRcommand_Allocate(getName()));
         }
-        // 3. Handle initialization if present
-        // System.out.println("IRme for variable: " + entry.toString() + " VAR VALUE: " + this.varValue);
+        
         if (this.varValue != null) {
             TEMP initValTemp = this.varValue.IRme();
-            if(isGlobal)
+            // +++ DEBUG LOGGING +++
+            System.out.format("IRme AST_VAR_DEC '%s': Using offset=%d, isGlobal=%b for store/init\\n", getName(), this.offset, this.isGlobal);
+            if(this.isGlobal)
             {
-                // Global variable initialization: Use Global_Init_Store
                 IR.getInstance().Add_IRcommand(new IRcommand_Global_Init_Store(getName(), initValTemp));
             }
             else
             {
-                if (entry.offset == Integer.MIN_VALUE) {
-                    System.out.println("Local variable '" + getName() + "' offset not set during IRme, likely global");
+                if (this.offset == Integer.MIN_VALUE) {
+                    System.err.println("ERROR: Local variable '" + getName() + "' offset is MIN_VALUE during IRme store!");
+                     // Potentially throw exception here
                 }
-                System.out.printf("  IR: Storing initial value for local '%s' to offset %d\n", getName(), entry.offset);
-                IR.getInstance().Add_IRcommand(new IRcommand_Store(initValTemp, entry.offset, getName()));
+                IR.getInstance().Add_IRcommand(new IRcommand_Store(initValTemp, this.offset, getName()));
             }
         }
-        
-        // IRme for a declaration doesn't return a value TEMP
         return null; 
-    }
+	}
 }
