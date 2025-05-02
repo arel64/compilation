@@ -3,12 +3,12 @@
 /***********/
 package SYMBOL_TABLE;
 
+import TEMP.TEMP;
 /*******************/
 /* PROJECT IMPORTS */
 /*******************/
 import TYPES.*;
-import TEMP.*;
-import AST.AST_VAR_DEC;
+
 
 /**********************/
 /* SYMBOL TABLE ENTRY */
@@ -44,14 +44,13 @@ public class SYMBOL_TABLE_ENTRY
 	/******************************************/
 	/* AST Node for the declaration (VAR_DEC) */
 	/******************************************/
-	public AST_VAR_DEC declarationNode = null;
 
 	/*********************************************/
 	/* prevtop and next symbol table entries ... */
 	/*********************************************/
 	public SYMBOL_TABLE_ENTRY prevtop;
 	public SYMBOL_TABLE_ENTRY next;
-
+	public boolean isGlobal;
 	/****************************************************/
 	/* The prevtop_index is just for debug purposes ... */
 	/****************************************************/
@@ -67,7 +66,7 @@ public class SYMBOL_TABLE_ENTRY
 		SYMBOL_TABLE_ENTRY next,
 		SYMBOL_TABLE_ENTRY prevtop,
 		int prevtop_index,
-		AST_VAR_DEC declarationNode)
+		boolean isGlobal)
 	{
 		this.index = index;
 		this.name = name;
@@ -75,17 +74,20 @@ public class SYMBOL_TABLE_ENTRY
 		this.next = next;
 		this.prevtop = prevtop;
 		this.prevtop_index = prevtop_index;
-		this.declarationNode = declarationNode;
+		this.isGlobal = isGlobal;
 	}
 
-	public SYMBOL_TABLE_ENTRY(
-		String name,
-		TYPE type,
-		int index,
-		SYMBOL_TABLE_ENTRY next,
-		SYMBOL_TABLE_ENTRY prevtop,
-		int prevtop_index)
-	{
-		this(name, type, index, next, prevtop, prevtop_index, null);
+	@Override
+	public String toString() {
+		return "SYMBOL_TABLE_ENTRY{ \n" + 
+				"name='" + name + '\n' +
+				", type=" + type + '\n' +
+				", index=" + index + '\n' +
+				", size=" + size + '\n' +
+				", isGlobal=" + isGlobal + '\n' +
+				'}';
+	}
+	public boolean isGlobal() {
+		return isGlobal;
 	}
 }

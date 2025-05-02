@@ -38,13 +38,18 @@ public class AST_VAR_SIMPLE extends AST_VAR
 	public TEMP IRme()
 	{
 		SYMBOL_TABLE_ENTRY entry = SYMBOL_TABLE.getInstance().findEntry(this.val);
-		if (entry == null) {
-            throw new RuntimeException("Compiler Error: Symbol table entry not found for variable " + this.val + " during IR generation.");
+		if(entry.temp == null)
+		{
+			throw new RuntimeException("Compiler Error: TEMP not associated with variable " + this.val + " during IRme.");
+		}
+        if (entry.isGlobal) {
+			System.out.println("Loading global variable: " + this.val);
+            IR.getInstance().Add_IRcommand(new IRcommand_Load_Global(entry.temp, this.val));
+        } else {
+            System.out.println("Loading local variable: " + this.val);
+            // IR.getInstance().Add_IRcommand(new IRcommand_Load(entry.temp	, 0, this.val)); 
         }
-		if (entry.temp == null) {
-            throw new RuntimeException("Compiler Error: TEMP not associated with variable " + this.val + " during IR generation.");
-        }
-		
+
 		return entry.temp;
 	}
 
@@ -57,7 +62,12 @@ public class AST_VAR_SIMPLE extends AST_VAR
 		if (entry.temp == null) {
 			throw new RuntimeException("Compiler Error: TEMP not associated with variable " + this.val + " during storeValueIR.");
 		}
-		IR.getInstance().Add_IRcommand(new IRcommand_Store(entry.temp, sourceValue, this.val));
+		System.out.println("Storing value in variable: " + this.val + " with value: " + sourceValue + " global: " + entry.isGlobal);
+		if (entry.isGlobal) {
+			IR.getInstance().Add_IRcommand(new IRcommand_Global_Store(this.val, sourceValue));
+		} else {
+			IR.getInstance().Add_IRcommand(new IRcommand_Store(entry.temp, sourceValue, this.val));
+		}
 		return null; // Store operation doesn't produce a result TEMP
 	}
 

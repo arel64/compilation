@@ -28,22 +28,18 @@ public class IRcommand_String_EQ extends IRcommand {
     public void MIPSme() {
         MIPSGenerator gen = MIPSGenerator.getInstance();
 
-        String s1Reg = gen.tempToRegister(s1);
-        String s2Reg = gen.tempToRegister(s2);
-        String dstReg = gen.tempToRegister(dst);
-
         // Check if destination register is valid
         if (IR.getInstance().getRegister(dst) < 0) return;
 
         // 1. Move string addresses to argument registers $a0, $a1
-        gen.move_registers(MIPSGenerator.A0, s1Reg);
-        gen.move_registers(MIPSGenerator.A1, s2Reg);
+        gen.move_from_temp_to_reg(MIPSGenerator.A0, s1);
+        gen.move_from_temp_to_reg(MIPSGenerator.A1, s2);
 
         // 2. Call the strcmp helper function
         gen.jal("strcmp"); // $v0 = 1 if equal, 0 if not equal. Clobbers $t0, $t1.
 
         // 3. Move the result from $v0 to the destination register
-        gen.move_registers(dstReg, MIPSGenerator.V0);
+        gen.move_from_reg_to_temp(dst, MIPSGenerator.V0);
     }
 
     @Override

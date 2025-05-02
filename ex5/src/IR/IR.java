@@ -21,6 +21,7 @@ import TEMP.*;
 /*******************/
 /* PROJECT IMPORTS */
 /*******************/
+import MIPS.MIPSGenerator;
 
 public class IR
 {
@@ -212,7 +213,63 @@ public class IR
 
 	public static void MIPSme()
 	{
+		MIPSGenerator generator = MIPSGenerator.getInstance();
+		HashSet<Integer> processedIndicesPass2 = new HashSet<>(); // Track commands processed in Pass 2
+
+		// Pass 1: Process only Allocations for .data section
+		// Note: allocate() in MIPSGenerator already manages its context internally.
+		System.out.println("--- IR MIPSme Pass 1: Allocations (.data) ---");
 		for (IRcommand command : instance.commandList) {
+			if (command instanceof IRcommand_Allocate) {
+				System.out.println("[Pass 1] Processing (Allocate): " + command);
+				command.MIPSme();
+			}
+		}
+
+		// Pass 2: Process Global Initializers (.text initial section)
+		System.out.println("--- IR MIPSme Pass 2: Global Initializers (GLOBAL_INIT context) ---");
+		generator.setContextGlobalInit();
+		for (int i = 0; i < instance.commandList.size(); i++) {
+			IRcommand command = instance.commandList.get(i);
+			
+			// Look for Global_Init_Store commands to place initialization code early in .text
+			if (command instanceof IRcommand_Global_Init_Store) {
+				IRcommand_Global_Init_Store initStoreCmd = (IRcommand_Global_Init_Store) command;
+				// Look for the preceding Const command defining the source TEMP
+				if (i > 0 && initStoreCmd.srcTemp != null) { 
+					IRcommand prevCommand = instance.commandList.get(i - 1);
+					// Check if the previous command is a Const command defining the temp used by Init_Store
+					if ((prevCommand instanceof IRcommandConstInt || prevCommand instanceof IRcommandConstString) && 
+						prevCommand.dst != null && prevCommand.dst.equals(initStoreCmd.srcTemp)) 
+					{ 
+						// Process the Const command first in GLOBAL_INIT context
+						System.out.println("[Pass 2] Processing (Const for Global Init Store): " + prevCommand);
+						prevCommand.MIPSme(); 
+						processedIndicesPass2.add(i - 1); // Mark Const as processed
+					}
+				}
+
+				// Now process the Global_Init_Store command itself
+				System.out.println("[Pass 2] Processing (Global Init Store): " + command);
+				command.MIPSme(); 
+				processedIndicesPass2.add(i); // Mark Global_Init_Store as processed
+			}
+		}
+
+		// Pass 3: Process all other commands (function code, labels, remaining constants, runtime global stores, etc.)
+		System.out.println("--- IR MIPSme Pass 3: Function Code & Others (FUNCTION context) ---");
+		generator.setContextFunction();
+		for (int i = 0; i < instance.commandList.size(); i++) {
+			IRcommand command = instance.commandList.get(i);
+			
+			// Skip commands processed in Pass 1 (Allocate) or Pass 2 (Global Init Stores & related Consts)
+			if (command instanceof IRcommand_Allocate || processedIndicesPass2.contains(i)) {
+				System.out.println("[Pass 3] Skipping (Already Processed): " + command.getClass().getSimpleName() + " at index " + i);
+				continue;
+			}
+
+			// Process all remaining commands (including runtime IRcommand_Global_Store) in the FUNCTION context
+			System.out.println("[Pass 3] Processing (Function/Other): " + command);
 			command.MIPSme();
 		}
 	}

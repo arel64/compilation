@@ -29,7 +29,14 @@ public class AST_PROGRAM extends AST_Node {
 
     @Override
     public TYPE SemantMe() throws SemanticException {
-        return declerationList.SemantMeLog();
+        if (declerationList.size() == 0) {
+            return new TYPE_LIST();
+        }
+        for (int i = 0; i < declerationList.size(); i++) {
+            AST_DEC node = declerationList.at(i);
+            node.SemantMeLog();
+        }
+        return null;
     }
 
     @Override

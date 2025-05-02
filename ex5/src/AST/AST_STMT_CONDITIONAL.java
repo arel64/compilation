@@ -33,9 +33,11 @@ public abstract class AST_STMT_CONDITIONAL extends AST_STMT
             throw new SemanticException(lineNumber,String.format("Conditional statement condition must be int, got: %s ",conditionType));
         }
         SYMBOL_TABLE.getInstance().beginScope();
-        TYPE_LIST t = getBody().SemantMe();
+        for (AST_STMT stmt : body) {
+            stmt.SemantMe();
+        }
         SYMBOL_TABLE.getInstance().endScope();
-        return t;
+        return new TYPE_LIST();
     }
 
 }

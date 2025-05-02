@@ -7,15 +7,13 @@ package SYMBOL_TABLE;
 /* GENERAL IMPORTS */
 /*******************/
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
 
+import TEMP.TEMP;
 /*******************/
 /* PROJECT IMPORTS */
 /*******************/
 import TYPES.*;
-import TEMP.*;
-import AST.AST_VAR_DEC;
+
 
 /****************/
 /* SYMBOL TABLE */
@@ -50,12 +48,11 @@ public class SYMBOL_TABLE
 	/****************************************************************************/
 	/* Enter a variable, function, class type or array type to the symbol table */
 	/****************************************************************************/
-	public void enter(String name,TYPE t)
+	public void enter(String name, TYPE t)
 	{
-		enter(name, t, null);
+		enter(name, t, false);
 	}
-
-	public void enter(String name, TYPE t, AST_VAR_DEC declarationNode)
+	public void enter(String name, TYPE t, boolean isGlobal)
 	{
 		/*************************************************/
 		/* [1] Compute the hash value for this new entry */
@@ -78,7 +75,7 @@ public class SYMBOL_TABLE
 		/**************************************************************************/
 		/* [4] Prepare a new symbol table entry with name, type, node, next, prevtop */
 		/**************************************************************************/
-		SYMBOL_TABLE_ENTRY e = new SYMBOL_TABLE_ENTRY(name, t, hashValue, next, top, top_index++, declarationNode);
+		SYMBOL_TABLE_ENTRY e = new SYMBOL_TABLE_ENTRY(name, t, hashValue, next, top, top_index++, isGlobal);
 		e.size = calculatedSize;
 
 		/**********************************************/
@@ -311,13 +308,47 @@ public class SYMBOL_TABLE
     }
 
 	public boolean existsInCurrentScope(String name) {
+        System.out.println("  [existsInCurrentScope] Checking for: " + name);
         SYMBOL_TABLE_ENTRY e = top;
         while (e != null && !e.name.equals("SCOPE-BOUNDARY")) {
+            System.out.println("  [existsInCurrentScope] Comparing with entry: " + e.name);
             if (e.name.equals(name) ) {
+               System.out.println("  [existsInCurrentScope] Found match!");
                return true;
             }
         e = e.prevtop;
         }
+        if (e != null && e.name.equals("SCOPE-BOUNDARY")) {
+            System.out.println("  [existsInCurrentScope] Reached scope boundary.");
+        } else if (e == null) {
+            System.out.println("  [existsInCurrentScope] Reached top of stack (null).");
+        }
+        System.out.println("  [existsInCurrentScope] No match found in current scope.");
+        return false;
+    }
+
+    /**
+     * Checks if a name is declared strictly within the current scope level,
+     * searching from the current top down to the first scope boundary.
+     */
+    public boolean isDeclaredInImmediateScope(String name) {
+        // This logic is identical to the corrected existsInCurrentScope
+        String lowerCaseName = name.toLowerCase(); 
+        System.out.println("  [isDeclaredInImmediateScope] Checking for: " + lowerCaseName + " starting from top: " + (top != null ? top.name : "null"));
+        SYMBOL_TABLE_ENTRY e = top;
+        while (e != null) {
+            if (e.name.equals("scope-boundary")) { 
+                System.out.println("  [isDeclaredInImmediateScope] Reached scope boundary marker.");
+                break; 
+            }
+            System.out.println("  [isDeclaredInImmediateScope] Comparing with entry: " + e.name);
+            if (e.name.equals(lowerCaseName)) {
+               System.out.println("  [isDeclaredInImmediateScope] Found match!");
+               return true; 
+            }
+            e = e.prevtop;
+        }
+        System.out.println("  [isDeclaredInImmediateScope] No match found in immediate scope for: " + lowerCaseName);
         return false;
     }
 
@@ -375,5 +406,13 @@ public class SYMBOL_TABLE
 			return;
 		} 
 		throw new RuntimeException("No entry found for name: " + name);
+	}
+
+	// Helper method to get the name of the top entry for debugging
+	public String getTopEntryName() {
+	    if (top == null) {
+	        return "null";
+	    }
+	    return top.name + " (prev: " + (top.prevtop != null ? top.prevtop.name : "null") + ")";
 	}
 }

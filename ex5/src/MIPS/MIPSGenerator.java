@@ -7,6 +7,7 @@ package MIPS;
 /* GENERAL IMPORTS */
 /*******************/
 import java.io.PrintWriter;
+import java.nio.file.Path;
 import java.util.Map;
 
 import IR.IR;
@@ -21,7 +22,6 @@ public class MIPSGenerator
 	public static final int NUM_ALLOCATABLE_REGISTERS = 10;
 
 	// Add the $at register constant
-	public static final String AT = "$at";
 	public static final String V0 = "$v0"; // Useful for syscalls/return values
 	public static final String A0 = "$a0"; // Useful for syscalls/arguments
 	public static final String A1 = "$a1"; // Useful for syscalls/arguments
@@ -42,14 +42,29 @@ public class MIPSGenerator
 	private StringBuilder textContent = new StringBuilder();
 	private StringBuilder globalInitContent = new StringBuilder(); // New buffer for global init
 
-	// Helper to append instructions consistently
-	private void commandWrite(String instruction) {
-		textContent.append("\t").append(instruction).append("\n");
-	}
+	// NEW: Context tracking for writing MIPS code
+	private enum CodeContext { DATA, GLOBAL_INIT, FUNCTION }
+	private CodeContext currentContext = CodeContext.FUNCTION; // Default to function code
 
-	// Helper to append global init instructions
-	private void globalInitWrite(String instruction) {
-		globalInitContent.append("\t").append(instruction).append("\n");
+	// NEW: Methods to set the writing context
+	public void setContextData() { this.currentContext = CodeContext.DATA; }
+	public void setContextGlobalInit() { this.currentContext = CodeContext.GLOBAL_INIT; }
+	public void setContextFunction() { this.currentContext = CodeContext.FUNCTION; }
+
+	// NEW: Unified helper to append code based on context
+	private void appendCode(String code) {
+		String indentedCode = "\t" + code + "\n"; // Indent instructions
+		switch (currentContext) {
+			case DATA:
+				dataContent.append("    ").append(code).append("\n"); // Data directives usually have different indentation
+				break;
+			case GLOBAL_INIT:
+				globalInitContent.append(indentedCode);
+				break;
+			case FUNCTION:
+				textContent.append(indentedCode);
+				break;
+		}
 	}
 
 	/**
@@ -57,17 +72,20 @@ public class MIPSGenerator
 	 * @param directive The complete data directive line (e.g., "my_string: .asciiz \"Hello\"").
 	 */
 	public void addDataDirective(String directive) {
-		dataContent.append("    ").append(directive).append("\n"); // Indent for readability
+		CodeContext originalContext = this.currentContext; // Save context
+		setContextData(); // Set context for data
+		appendCode(directive); // Use the unified append method
+		this.currentContext = originalContext; // Restore context
 	}
 
 	/***********************/
 	/* The file writer ... */
 	/***********************/
-	public void finalizeFile()
+	public void finalizeFile(String filepath)
 	{
 		try {
 			// Create a new file writer for the final output
-			PrintWriter finalWriter = new PrintWriter("./output/MIPS.txt");
+			PrintWriter finalWriter = new PrintWriter(filepath);
 			
 			// Build the complete MIPS file with correct organization
 			finalWriter.print(".data\n");
@@ -110,17 +128,21 @@ public class MIPSGenerator
 	public void allocate(String var_name)
 	{
 		// Use .space to reserve space, initialization happens in .text
-		String instruction = String.format("\tglobal_%s: .space 4\n", var_name); 
-		dataContent.append(instruction);
+		// This method should only handle the .data part.
+		CodeContext originalContext = this.currentContext;
+		setContextData();
+		appendCode(".align 2");
+		appendCode(String.format("global_%s: .space 4", var_name)); 
+		this.currentContext = originalContext;
 	}
 	public void store(TEMP src, int offset) {
 		String reg = tempToRegister(src);
-		commandWrite(String.format("sw %s,%d($sp)", reg, offset));
+		appendCode(String.format("sw %s,%d($sp)", reg, offset));
 	}
 	public void li(TEMP t,int value)
 	{
 		String reg = tempToRegister(t);
-		commandWrite(String.format("li %s,%d", reg, value));
+		appendCode(String.format("li %s,%d", reg, value));
 	}
 	public void add(TEMP dst,TEMP oprnd1,TEMP oprnd2)
 	{
@@ -133,63 +155,72 @@ public class MIPSGenerator
         String dstReg = tempToRegister(dst);
         String src1Reg = tempToRegister(oprnd1);
         String src2Reg = tempToRegister(oprnd2);
-		commandWrite(String.format("sub %s,%s,%s", dstReg, src1Reg, src2Reg));
+		appendCode(String.format("sub %s,%s,%s", dstReg, src1Reg, src2Reg));
     }
 	public void mul(TEMP dst, TEMP oprnd1, TEMP oprnd2) {
         String dstReg = tempToRegister(dst);
         String src1Reg = tempToRegister(oprnd1);
         String src2Reg = tempToRegister(oprnd2);
-		commandWrite(String.format("mul %s,%s,%s", dstReg, src1Reg, src2Reg));
+		appendCode(String.format("mul %s,%s,%s", dstReg, src1Reg, src2Reg));
     }
 	public void mul_imm(TEMP dst, TEMP oprnd1, int immediate) {
 		String dstReg = tempToRegister(dst);
 		String src1Reg = tempToRegister(oprnd1);
-		commandWrite(String.format("mul %s,%s,%d", dstReg, src1Reg, immediate));
+		appendCode(String.format("mul %s,%s,%d", dstReg, src1Reg, immediate));
 	}
     public void div(TEMP dst, TEMP oprnd1, TEMP oprnd2) {
         String dstReg = tempToRegister(dst);
         String src1Reg = tempToRegister(oprnd1);
         String src2Reg = tempToRegister(oprnd2);
-		commandWrite(String.format("div %s,%s,%s", dstReg, src1Reg, src2Reg));
+		appendCode(String.format("div %s,%s", src1Reg, src2Reg)); // MIPS div instruction only takes two operands
+		appendCode(String.format("mflo %s", dstReg)); // Move result from LO register
     }
 	public String label(String inlabel)
 	{
-		String l = String.format("%s:\n", inlabel);
-		String instruction = l;
-		textContent.append(instruction);
+		String l = String.format("%s:", inlabel);
+		switch (currentContext) {
+			case GLOBAL_INIT:
+				globalInitContent.append(l).append("\n");
+				break;
+			case FUNCTION:
+				textContent.append(l).append("\n");
+				break;
+			default: // Labels usually don't belong in .data
+				textContent.append(l).append("\n"); // Default to text section
+		}
 		return l;
 	}	
 	public void jump(String inlabel)
 	{
-		commandWrite(String.format("j %s", inlabel));
+		appendCode(String.format("j %s", inlabel));
 	}	
 	public void blt(TEMP oprnd1, TEMP oprnd2, String label) {
         String src1Reg = tempToRegister(oprnd1);
         String src2Reg = tempToRegister(oprnd2);
-		commandWrite(String.format("blt %s,%s,%s", src1Reg, src2Reg, label));
+		appendCode(String.format("blt %s,%s,%s", src1Reg, src2Reg, label));
     }
 	public void bge(TEMP oprnd1, TEMP oprnd2, String label) {
         String src1Reg = tempToRegister(oprnd1);
         String src2Reg = tempToRegister(oprnd2);
-		commandWrite(String.format("bge %s,%s,%s", src1Reg, src2Reg, label));
+		appendCode(String.format("bge %s,%s,%s", src1Reg, src2Reg, label));
     }
 	public void bne(TEMP oprnd1, TEMP oprnd2, String label) {
         String src1Reg = tempToRegister(oprnd1);
         String src2Reg = tempToRegister(oprnd2);
-		commandWrite(String.format("bne %s,%s,%s", src1Reg, src2Reg, label));
+		appendCode(String.format("bne %s,%s,%s", src1Reg, src2Reg, label));
     }
 	public void beq(TEMP oprnd1, TEMP oprnd2, String label) {
         String src1Reg = tempToRegister(oprnd1);
         String src2Reg = tempToRegister(oprnd2);
-		commandWrite(String.format("beq %s,%s,%s", src1Reg, src2Reg, label));
+		appendCode(String.format("beq %s,%s,%s", src1Reg, src2Reg, label));
     }
 	public void beqz(TEMP oprnd1, String label) {
         String src1Reg = tempToRegister(oprnd1);
-		commandWrite(String.format("beqz %s,%s", src1Reg, label));
+		appendCode(String.format("beqz %s,%s", src1Reg, label));
     }
 	
 	public void jal(String label) {
-		commandWrite(String.format("jal %s", label));
+		appendCode(String.format("jal %s", label));
     }
 	
 	public void addi(TEMP dst, TEMP src, int immediate) {
@@ -199,32 +230,32 @@ public class MIPSGenerator
 	}
 
 	public void sw_sp(TEMP src, int offset) { // Store word relative to $sp
-		sw_reg_sp(tempToRegister(src), offset);
+		appendCode(String.format("sw %s,%d(%s)", tempToRegister(src), offset, SP));
 	}
 
 	public void sw_fp(TEMP src, int offset) { // Store word relative to $fp
 		String srcReg = tempToRegister(src);
-		commandWrite(String.format("sw %s,%d($fp)", srcReg, offset));
+		appendCode(String.format("sw %s,%d(%s)", srcReg, offset, FP));
 	}
 
 	public void lw_sp(TEMP dst, int offset) { // Load word relative to $sp
-		lw_reg_sp(tempToRegister(dst), offset);
+		appendCode(String.format("lw %s,%d(%s)", tempToRegister(dst), offset, SP));
 	}
 
 	public void lw_fp(TEMP dst, int offset) { // Load word relative to $fp
 		String dstReg = tempToRegister(dst);
-		commandWrite(String.format("lw %s,%d($fp)", dstReg, offset));
+		appendCode(String.format("lw %s,%d(%s)", dstReg, offset, FP));
 	}
 
 	public void move(TEMP dst, TEMP src) {
 		String dstReg = tempToRegister(dst);
         String srcReg = tempToRegister(src);
-		commandWrite(String.format("move %s,%s", dstReg, srcReg));
+		appendCode(String.format("move %s,%s", dstReg, srcReg));
 	}
 
 	public void jr(TEMP target) {
 		String targetReg = tempToRegister(target);
-		commandWrite(String.format("jr %s", targetReg));
+		appendCode(String.format("jr %s", targetReg));
 	}
 	
 	/**************************************/
@@ -272,7 +303,7 @@ public class MIPSGenerator
 	}
 
 	// Helper method to convert TEMP to register name ($t0-$t9)
-	public String tempToRegister(TEMP temp) {
+	private String tempToRegister(TEMP temp) {
 		if (temp == null) {
 			System.err.println("ERROR: Attempting to get register for null TEMP.");
 			throw new RuntimeException("Null TEMP encountered in tempToRegister");
@@ -292,89 +323,83 @@ public class MIPSGenerator
 	// --- Dedicated Prologue/Epilogue --- 
 
 	public void genPrologue(int frameSize) {
-		textContent.append("#### Prologue ####\n");
+		appendCode("# Prologue Start");
 		// Allocate space on stack: addi $sp, $sp, -frameSize
 		// frameSize includes space for locals, saved $fp, saved $ra
-		addi_imm(SP, SP, -frameSize);
+		appendCode(String.format("addi %s,%s,%d", SP, SP, -frameSize));
 
 		// Save return address: sw $ra, offset($sp) (e.g., offset = frameSize - 4)
-		sw_reg_sp(RA, frameSize - 4);
+		appendCode(String.format("sw %s,%d(%s)", RA, frameSize - 4, SP));
 
 		// Save old frame pointer: sw $fp, offset($sp) (e.g., offset = frameSize - 8)
-		sw_reg_sp(FP, frameSize - 8);
+		appendCode(String.format("sw %s,%d(%s)", FP, frameSize - 8, SP));
 
 		// Set new frame pointer: addi $fp, $sp, frameSize 
-		addi_imm(FP, SP, frameSize);
-		textContent.append("#### Prologue End ####\n");
+		appendCode(String.format("addi %s,%s,%d", FP, SP, frameSize));
+		appendCode("# Prologue End");
 	}
 
 	public void genEpilogue(int frameSize) {
-		textContent.append("#### Epilogue ####\n");
+		appendCode("# Epilogue Start");
 		// Restore return address: lw $ra, offset($sp)
-		lw_reg_sp(RA, frameSize - 4);
+		appendCode(String.format("lw %s,%d(%s)", RA, frameSize - 4, SP));
 
 		// Restore old frame pointer: lw $fp, offset($sp)
-		lw_reg_sp(FP, frameSize - 8);
+		appendCode(String.format("lw %s,%d(%s)", FP, frameSize - 8, SP));
 
 		// Deallocate stack frame: addi $sp, $sp, frameSize
-		addi_imm(SP, SP, frameSize);
+		appendCode(String.format("addi %s,%s,%d", SP, SP, frameSize));
 
 		genReturnJump(); // Adds jr $ra
-		textContent.append("#### Epilogue End ####\n");
-
+		appendCode("# Epilogue End");
 	}
 
 	public void genReturnJump() {
-		jr_register(RA);
+		appendCode(String.format("jr %s", RA));
 	}
 
 	public void genMoveReturnValue(TEMP src) {
 		String srcReg = tempToRegister(src);
-		move_registers(V0, srcReg);
+		appendCode(String.format("move %s,%s", V0, srcReg));
 	}
 
     // Add immediate instruction (allows using register names like $sp)
     public void addi_imm(String dstReg, String srcReg, int immediate) {
-		commandWrite(String.format("addi %s,%s,%d", dstReg, srcReg, immediate));
+		appendCode(String.format("addi %s,%s,%d", dstReg, srcReg, immediate));
     }
 
     // Load immediate value into a specific register (e.g., $a0)
     public void li_imm(String dstReg, int immediate) {
-		commandWrite(String.format("li %s,%d", dstReg, immediate));
+		appendCode(String.format("li %s,%d", dstReg, immediate));
     }
 
     public void move_from_v0(TEMP dst) {
         String dstReg = tempToRegister(dst);
-        move_registers(dstReg, V0);
-    }
-
-    // Load Address
-    public void la(String dstReg, String label) {
-		commandWrite(String.format("la %s,%s", dstReg, label));
+        appendCode(String.format("move %s,%s", dstReg, V0));
     }
 
 	/**
 	 * Load Address using TEMP object for destination.
-	 * Gets the register name for the TEMP and calls la(String, String).
+	 * Gets the register name for the TEMP and calls the private la(String, String).
 	 */
-	public void la_temp(TEMP dst, String label) {
+	public void la(TEMP dst, String label) {
 		String dstReg = tempToRegister(dst);
 		la(dstReg, label);
 	}
 
     // Syscall
     public void syscall() {
-		commandWrite("syscall");
+		appendCode("syscall");
     }
 
     // Store register relative to $sp
-    public void sw_reg_sp(String regName, int offset) {
-		commandWrite(String.format("sw %s,%d($sp)", regName, offset));
+    public void sw_reg_sp(String regName, int offset) { // Keep this version for String register names
+		appendCode(String.format("sw %s,%d(%s)", regName, offset, SP));
     }
 
     // Load register relative to $sp
-    public void lw_reg_sp(String regName, int offset) {
-		commandWrite(String.format("lw %s,%d($sp)", regName, offset));
+    public void lw_reg_sp(String regName, int offset) { // Keep this version for String register names
+		appendCode(String.format("lw %s,%d(%s)", regName, offset, SP));
     }
 
     // Append a raw, pre-formatted MIPS instruction
@@ -382,14 +407,14 @@ public class MIPSGenerator
         // Ensure proper formatting (e.g., leading tab, trailing newline)
         String formatted = instruction.trim();
         if (!formatted.isEmpty()) {
-            commandWrite(formatted);
+            appendCode(formatted);
         }
     }
 
     // Move TEMP value into $a0
     public void move_temp_to_a0(TEMP src) {
         String srcReg = tempToRegister(src);
-		move_registers(A0, srcReg);
+		appendCode(String.format("move %s,%s", A0, srcReg));
     }
 
 	public void print_int(TEMP t) {
@@ -404,21 +429,21 @@ public class MIPSGenerator
     // Branch if less than or equal to zero
     public void blez(TEMP cond, String label) {
         String condReg = tempToRegister(cond);
-		commandWrite(String.format("blez %s,%s", condReg, label));
+		appendCode(String.format("blez %s,%s", condReg, label));
     }
 
     // Store TEMP value at offset relative to another TEMP's address
-    public void sw_temp_offset(TEMP src, int offset, TEMP base) {
+    public void sw_offset(TEMP src, int offset, TEMP base) {
         String srcReg = tempToRegister(src);
         String baseReg = tempToRegister(base);
-		sw_offset(srcReg, offset, baseReg);
+		appendCode(String.format("sw %s,%d(%s)", srcReg, offset, baseReg));
     }
 
     // Load TEMP value from offset relative to another TEMP's address
-    public void lw_temp_offset(TEMP dst, int offset, TEMP base) {
+    public void lw_offset(TEMP dst, int offset, TEMP base) {
         String dstReg = tempToRegister(dst);
         String baseReg = tempToRegister(base);
-		lw_offset(dstReg, offset, baseReg);
+		appendCode(String.format("lw %s,%d(%s)", dstReg, offset, baseReg));
     }
 
     // Print string given a data label
@@ -437,7 +462,7 @@ public class MIPSGenerator
     // Branch if less than zero
     public void bltz(TEMP cond, String label) {
         String condReg = tempToRegister(cond);
-		commandWrite(String.format("bltz %s,%s", condReg, label));
+		appendCode(String.format("bltz %s,%s", condReg, label));
     }
 
 	public void malloc(TEMP dst, TEMP size) {
@@ -453,7 +478,7 @@ public class MIPSGenerator
 	public void malloc(TEMP dst, String sizeReg) {
 		// Ensure size is in $a0 for the syscall
 		if (!sizeReg.equals(A0)) {
-			move_registers(A0, sizeReg);
+			appendCode(String.format("move %s, %s", A0, sizeReg));
 		}
 		_malloc(dst);
 	}
@@ -473,40 +498,103 @@ public class MIPSGenerator
 
 	// NEW: Shift Left Logical using register names
 	public void sll_registers(String dstReg, String srcReg, int shiftAmount) {
-		commandWrite(String.format("sll %s,%s,%d", dstReg, srcReg, shiftAmount));
+		appendCode(String.format("sll %s,%s,%d", dstReg, srcReg, shiftAmount));
+	}
+
+	// NEW: Shift Left Logical using TEMP source into a specific register
+	public void sll_temp_into_reg(String dstReg, TEMP src, int shiftAmount) {
+		String srcReg = tempToRegister(src);
+		sll_registers(dstReg, srcReg, shiftAmount);
 	}
 
 	// NEW: Move using register names
 	public void move_registers(String dstReg, String srcReg) {
-		commandWrite(String.format("move %s,%s", dstReg, srcReg));
+		appendCode(String.format("move %s,%s", dstReg, srcReg));
+	}
+
+	// NEW: Move from TEMP to specific register
+	public void move_from_temp_to_reg(String dstReg, TEMP src) {
+		String srcReg = tempToRegister(src);
+		move_registers(dstReg, srcReg);
+	}
+
+	// NEW: Move from specific register to TEMP
+	public void move_from_reg_to_temp(TEMP dst, String srcReg) {
+		String dstReg = tempToRegister(dst);
+		move_registers(dstReg, srcReg);
 	}
 
 	// NEW: Store word using register names for src and base
 	public void sw_offset(String srcReg, int offset, String baseReg) {
 		// This command now writes to the regular text content
-		commandWrite(String.format("sw %s,%d(%s)", srcReg, offset, baseReg));
+		appendCode(String.format("sw %s,%d(%s)", srcReg, offset, baseReg));
 	}
 
-	public void sw_global(String srcReg, String globalVarLabel) {
-		// 1. Load address of global variable into $at
-		globalInitWrite(String.format("la %s, %s", AT, globalVarLabel));
-		// 2. Store the value from srcReg into the global variable address
-		globalInitWrite(String.format("sw %s, 0(%s)", srcReg, AT));
+	// NEW: Store word using TEMP source and register name base
+	public void sw_offset_from_temp(TEMP src, int offset, String baseReg) {
+		String srcReg = tempToRegister(src);
+		sw_offset(srcReg, offset, baseReg);
+	}
+
+	// NEW: Store word specifically for global initialization
+	public void sw_global_reg(String srcReg, String globalVarLabel) {
+		// Use TEMP_REG_1 ($s0) as a temporary register for the address
+		String tempAddrReg = TEMP_REG_1; 
+		// 1. Load address of global variable into the temporary register
+		appendCode(String.format("la %s, %s", tempAddrReg, globalVarLabel));
+		// 2. Store the value from srcReg into the global variable address (held in tempAddrReg)
+		appendCode(String.format("sw %s, 0(%s)", srcReg, tempAddrReg));
+	}
+
+	// NEW: Store word specifically for global initialization using TEMP source
+	public void sw_global(TEMP src, String globalVarLabel) {
+		String srcReg = tempToRegister(src);
+		sw_global_reg(srcReg, globalVarLabel); // Call the register-based version
 	}
 
 	// NEW: Load word using register names for dst and base
 	public void lw_offset(String dstReg, int offset, String baseReg) {
-		commandWrite(String.format("lw %s,%d(%s)", dstReg, offset, baseReg));
+		appendCode(String.format("lw %s,%d(%s)", dstReg, offset, baseReg));
+	}
+
+	// NEW: Load word using register name base into TEMP destination
+	public void lw_offset_from_reg(TEMP dst, int offset, String baseReg) {
+		String dstReg = tempToRegister(dst);
+		lw_offset(dstReg, offset, baseReg);
 	}
 
 	// NEW: Add operation using register names (strings)
 	public void add_registers(String dstReg, String src1Reg, String src2Reg) {
-		commandWrite(String.format("add %s,%s,%s", dstReg, src1Reg, src2Reg));
+		appendCode(String.format("add %s,%s,%s", dstReg, src1Reg, src2Reg));
+	}
+
+	// NEW: Add operation using TEMP source 1 and register source 2 into a register dest
+	public void add_temp_into_reg(String dstReg, TEMP src1, String src2Reg) {
+		String src1Reg = tempToRegister(src1);
+		add_registers(dstReg, src1Reg, src2Reg);
+	}
+
+	// NEW: Add operation using TEMP source 1 and register source 2 into a register dest
+	public void add_temp_reg(String dstReg, TEMP src1, String src2Reg) {
+		String src1Reg = tempToRegister(src1);
+		add_registers(dstReg, src1Reg, src2Reg);
+	}
+
+	// NEW: Load global variable into TEMP
+	public void load_global(TEMP dst, String varName) {
+		String dstReg = tempToRegister(dst);
+        String globalLabel = "global_" + varName;
+		// Use TEMP_REG_1 ($s0) as a temporary register for the address
+		String tempAddrReg = TEMP_REG_1;
+		// 1. Load address of the global variable into the temporary register
+		la(tempAddrReg, globalLabel);
+		// 2. Load the word from the global variable address (in tempAddrReg) into dstReg
+		lw_offset(dstReg, 0, tempAddrReg);
 	}
 
 	// NEW: Jump register using name
 	public void jr_register(String targetReg) {
-		commandWrite(String.format("jr %s", targetReg));
+		appendCode(String.format("jr %s", targetReg));
 	}
 
 	// NEW: Adds standard library helper functions (strlen, strcpy, strcmp) to the output
@@ -588,5 +676,20 @@ public class MIPSGenerator
 		finalWriter.println("\taddi    $sp, $sp, 8  # Deallocate stack space");
 		finalWriter.println("\tjr      $ra         # Return");
 		finalWriter.println("");
+	}
+
+	// Overload for specific register destination
+	public void la(String dstReg, String label) {
+		appendCode(String.format("la %s,%s", dstReg, label));
+	}
+
+	// NEW: Store TEMP relative to $sp
+	public void sw_reg_sp(TEMP src, int offset) {
+		sw_offset(tempToRegister(src), offset, SP);
+	}
+
+	// NEW: Load TEMP relative to $sp
+	public void lw_reg_sp(TEMP dst, int offset) {
+		lw_offset(tempToRegister(dst), offset, SP);
 	}
 }

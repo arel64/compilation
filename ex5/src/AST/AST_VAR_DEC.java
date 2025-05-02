@@ -1,18 +1,16 @@
 package AST;
 import SYMBOL_TABLE.SYMBOL_TABLE;
+import SYMBOL_TABLE.SYMBOL_TABLE_ENTRY;
 import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
 import TEMP.*;
 import IR.*;
-import SYMBOL_TABLE.SYMBOL_TABLE_ENTRY;
 
 public class AST_VAR_DEC extends AST_DEC {
     
     public AST_TYPE t;
     public AST_EXP varValue;
     public String varName;
-    // Field to store the TEMP created during IR generation for this variable
-    public TEMP associatedTemp = null; 
 
     public AST_VAR_DEC(String varName, AST_TYPE varType, AST_EXP initialValue) {
         super(varName);
@@ -29,7 +27,7 @@ public class AST_VAR_DEC extends AST_DEC {
     public void PrintMe() {
         AST_GRAPHVIZ.getInstance().logNode(
 			SerialNumber,
-			"AST_DEC "+ this.toString());	
+			"AST_VAR_DEC "+ this.toString());	
     }
     @Override
     public String toString() {
@@ -38,16 +36,24 @@ public class AST_VAR_DEC extends AST_DEC {
 
     @Override
     public TYPE SemantMe() throws SemanticException{
-        if(isDeclaredInCurrentScope())
+        String currentVarName = getName(); // Store name for clarity
+        System.out.println("--- Checking variable declaration for: " + currentVarName + " ---");
+        System.out.println("Symbol Table Top before check: " + SYMBOL_TABLE.getInstance().getTopEntryName());
+        boolean exists = SYMBOL_TABLE.getInstance().isDeclaredInImmediateScope(currentVarName);
+        System.out.println("Result of isDeclaredInImmediateScope(" + currentVarName + "): " + exists);
+        if(exists) // Check the stored result
         {
-            throw new SemanticException(lineNumber, String.format("Cannot declare %s was already declared in this scope", getName()));
+            System.out.println("--- ERROR: Variable already exists in current scope! ---");
+            throw new SemanticException(lineNumber, String.format("Cannot declare %s was already declared in this scope", currentVarName));
         }
         TYPE type = t.SemantMeLog();
         if(type.isPrimitive())
         {
             type = new TYPE_VAR_DEC(type,getName());
         }
-        SYMBOL_TABLE.getInstance().enter(getName(), type, this);
+        boolean isGlobal = SYMBOL_TABLE.getInstance().isAtGlobalScope();
+        System.out.println("Entering variable2: " + getName() + " with type: " + type + " and isGlobal: " + isGlobal);
+        SYMBOL_TABLE.getInstance().enter(getName(), type,  isGlobal);
         if( varValue != null)
         {
             TYPE valueType = varValue.SemantMeLog();
@@ -56,6 +62,7 @@ public class AST_VAR_DEC extends AST_DEC {
                 throw new SemanticException(lineNumber,String.format("Initial value %s does not match type %s", valueType,type));
             }
         }
+        System.out.println("--- Finished variable declaration for: " + currentVarName + " ---");
         return type;
     }
     @Override
@@ -63,18 +70,31 @@ public class AST_VAR_DEC extends AST_DEC {
 	{
         // 1. Create the TEMP for this variable
         TEMP varTemp = TEMP_FACTORY.getInstance().getFreshTEMP();
-        
+                
         // 2. Associate this TEMP with the variable name in the symbol table
+        SYMBOL_TABLE_ENTRY entry = SYMBOL_TABLE.getInstance().findEntry(getName());
         SYMBOL_TABLE.getInstance().associateTemp(getName(), varTemp);
-
+        boolean isGlobal = entry.isGlobal;
+        if(isGlobal)
+        {
+            IR.getInstance().Add_IRcommand(new IRcommand_Allocate(getName()));
+        }
         // 3. Handle initialization if present
+        // System.out.println("IRme for variable: " + entry.toString() + " VAR VALUE: " + this.varValue);
         if (this.varValue != null) {
-            TEMP initValTemp = this.varValue.IRme(); 
-            // Generate an IR command to move the initial value into the variable's TEMP
-            IR.getInstance().Add_IRcommand(new IRcommand_Store(varTemp, initValTemp, getName())); 
+            TEMP initValTemp = this.varValue.IRme();
+            if(isGlobal)
+            {
+                // Global variable initialization: Use Global_Init_Store
+                IR.getInstance().Add_IRcommand(new IRcommand_Global_Init_Store(getName(), initValTemp));
+            }
+            else
+            {
+                IR.getInstance().Add_IRcommand(new IRcommand_Store(varTemp, initValTemp, getName())); 
+            }
         }
         
         // IRme for a declaration doesn't return a value TEMP
         return null; 
-	}
+    }
 }

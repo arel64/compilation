@@ -74,29 +74,7 @@ public class AST_LIST<T extends AST_Node> extends AST_Node implements Iterable<T
     }
     @Override
     public TYPE_LIST SemantMe() throws SemanticException {
-        if (list.isEmpty()) {
-            return new TYPE_LIST();
-        }
-        TYPE_LIST typelist = new TYPE_LIST();
-        SYMBOL_TABLE instance = SYMBOL_TABLE.getInstance(); 
-        for (int i = 0; i < list.size(); i++) {
-            T node = list.get(i);
-            if (node == null)
-                throw new SemanticException(lineNumber, "null arg");
-            try {
-                TYPE t = node.SemantMeLog();
-                if(t != null) {
-                    instance.enter(t.getName(), t);
-                    typelist.add(t, node.lineNumber);
-                }
-            } catch(SemanticException e) {
-                if (node instanceof AST_STMT) {
-                    throw new SemanticException(node.lineNumber, e.getMessage());
-                }
-                throw e;
-            }
-        }
-        return typelist;
+        throw new SemanticException(lineNumber, "this causes bugs iterate properly");
     }
     @Override
     public Iterator<T> iterator() {

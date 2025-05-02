@@ -56,7 +56,7 @@ public class IRcommandConstString extends IRcommand
 		mipsGen.addDataDirective(dataDirective);
 
 		// 2. Load the address of the label into the destination register
-		mipsGen.la_temp(dst, dataLabel);
+		mipsGen.la(dst, dataLabel);
 	}
 
 	@Override

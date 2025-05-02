@@ -1,4 +1,5 @@
 import java.io.*;
+import java.nio.file.Path;
 import java.util.*; 
 
 import java_cup.runtime.Symbol;
@@ -70,8 +71,9 @@ public class Main {
         			    file_writer.write(var + "\n");
         			}
 				}
+				System.out.println("MIPS generation done");
 				AST_GRAPHVIZ.getInstance().finalizeFile();
-				MIPSGenerator.getInstance().finalizeFile();
+				MIPSGenerator.getInstance().finalizeFile(outputFilename);
 			} catch (LexerError e) {
 				System.out.println(e.getMessage());
 				file_writer.write("ERROR");
@@ -83,6 +85,8 @@ public class Main {
 				file_writer.write("ERROR(" + (p.errorLine) + ")\n");
 			} catch (Throwable e) {
 				file_writer.write("ERROR");
+				e.printStackTrace();
+				System.out.println(e.getMessage());
 			}
 
 			/*************************/
@@ -92,11 +96,13 @@ public class Main {
 			/*************************/
 			/* [7] Close output file */
 			/*************************/
+			System.out.println("Closing output file");
 			file_writer.close();
 
 			/*************************************/
 			/* [8] Finalize AST GRAPHIZ DOT file */
 			/*************************************/
+			System.out.println("Finalizing AST GRAPHIZ DOT file");
 			AST_GRAPHVIZ.getInstance().finalizeFile();
 		} catch (Exception e) {
 			e.printStackTrace();
