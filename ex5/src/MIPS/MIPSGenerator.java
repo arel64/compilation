@@ -196,11 +196,40 @@ public class MIPSGenerator
 	{
 		appendCode(String.format("j %s", inlabel));
 	}	
+	/**
+	 * Branch if less than. Compares TEMP oprnd1 with TEMP oprnd2.
+	 */
 	public void blt(TEMP oprnd1, TEMP oprnd2, String label) {
         String src1Reg = tempToRegister(oprnd1);
         String src2Reg = tempToRegister(oprnd2);
 		appendCode(String.format("blt %s,%s,%s", src1Reg, src2Reg, label));
     }
+	
+	/**
+	 * Branch if less than. Compares TEMP oprnd1 with the value in register oprnd2Reg.
+	 */
+	public void blt_temp_reg(TEMP oprnd1, String oprnd2Reg, String label) {
+        String src1Reg = tempToRegister(oprnd1);
+		appendCode(String.format("blt %s,%s,%s", src1Reg, oprnd2Reg, label));
+    }
+
+	/**
+	 * Branch if greater than. Compares TEMP oprnd1 with TEMP oprnd2.
+	 */
+	public void bgt(TEMP oprnd1, TEMP oprnd2, String label) {
+        String src1Reg = tempToRegister(oprnd1);
+        String src2Reg = tempToRegister(oprnd2);
+        appendCode(String.format("bgt %s,%s,%s", src1Reg, src2Reg, label));
+    }
+
+	/**
+	 * Branch if greater than. Compares TEMP oprnd1 with the value in register oprnd2Reg.
+	 */
+	public void bgt_temp_reg(TEMP oprnd1, String oprnd2Reg, String label) {
+        String src1Reg = tempToRegister(oprnd1);
+        appendCode(String.format("bgt %s,%s,%s", src1Reg, oprnd2Reg, label));
+    }
+
 	public void bge(TEMP oprnd1, TEMP oprnd2, String label) {
         String src1Reg = tempToRegister(oprnd1);
         String src2Reg = tempToRegister(oprnd2);

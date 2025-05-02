@@ -71,6 +71,7 @@ print_info "Created temporary directory: ${TEMP_OUTPUT_DIR}"
 passed_count=0
 failed_count=0
 test_count=0
+passing_tests=() # Array to store names of passing tests
 
 print_info "Searching for test files in '${INPUT_DIR}'..."
 
@@ -145,6 +146,7 @@ for input_file in "${test_files[@]}"; do
     if diff -w -B "${expected_output_file}" "${temp_spim_output_file}" > /dev/null 2>&1; then
         print_success "  Output matches the expected result."
         passed_count=$((passed_count + 1))
+        passing_tests+=("${base_name}") # Add passing test name to the array
     else
         print_error "  Output does NOT match the expected result."
         print_info "  Diff between expected (${expected_output_file}) and actual (${temp_spim_output_file}) [showing max 10 lines]:"
@@ -161,6 +163,13 @@ print_info "Test run finished."
 echo "================ Summary ================"
 echo -e " Total tests run: ${test_count}"
 echo -e " ${COLOR_GREEN}Passed: ${passed_count}${COLOR_RESET}"
+if [ ${#passing_tests[@]} -gt 0 ]; then
+    # Join the array elements with a comma
+    passing_list=$(printf "%s," "${passing_tests[@]}")
+    # Remove the trailing comma
+    passing_list=${passing_list%,}
+    echo -e "   Passing tests: ${COLOR_GREEN}${passing_list}${COLOR_RESET}"
+fi
 echo -e " ${COLOR_RED}Failed: ${failed_count}${COLOR_RESET}"
 echo "======================================="
 

@@ -49,15 +49,49 @@ public class IRcommand_Binop_Arithmetic extends IRcommand {
             return;
         }
 
+        final int MIN_VAL = -32768; // -2^15
+        final int MAX_VAL = 32767;  // 2^15 - 1
+
+        // Helper function/lambda to generate saturation code (optional, but avoids repetition)
+        Runnable addSaturationChecks = () -> {
+            // Use dedicated temporary registers instead of fresh TEMPs
+            String minReg = MIPSGenerator.TEMP_REG_1; // e.g., $s0
+            String maxReg = MIPSGenerator.TEMP_REG_2; // e.g., $s1
+            String set_min_label = getFreshLabel("set_min");
+            String set_max_label = getFreshLabel("set_max");
+            String end_sat_label = getFreshLabel("end_sat");
+
+            gen.li_imm(minReg, MIN_VAL); // Use li_imm with register name
+            gen.li_imm(maxReg, MAX_VAL); // Use li_imm with register name
+
+            // Call modified blt/bgt with TEMP and register name string
+            gen.blt_temp_reg(dst, minReg, set_min_label); // Branch if dst < MIN_VAL (compare TEMP dst with value in minReg)
+            gen.bgt_temp_reg(dst, maxReg, set_max_label); // Branch if dst > MAX_VAL (compare TEMP dst with value in maxReg)
+            gen.jump(end_sat_label); // If within bounds, skip saturation
+
+            gen.label(set_min_label);
+            gen.li(dst, MIN_VAL); // Set dst = MIN_VAL (li still works with TEMP)
+            gen.jump(end_sat_label);
+
+            gen.label(set_max_label);
+            gen.li(dst, MAX_VAL); // Set dst = MAX_VAL (li still works with TEMP)
+
+            gen.label(end_sat_label);
+        };
+
+
         switch (operation) {
             case ADD:
                 gen.add(dst, t1, t2);
+                addSaturationChecks.run(); // Add saturation checks
                 break;
             case SUB:
                 gen.sub(dst, t1, t2);
+                addSaturationChecks.run(); // Add saturation checks
                 break;
             case MUL:
                 gen.mul(dst, t1, t2);
+                addSaturationChecks.run(); // Add saturation checks
                 break;
             case DIV:
                 // Add runtime check for division by zero
@@ -69,8 +103,9 @@ public class IRcommand_Binop_Arithmetic extends IRcommand {
                 String afterErrLabel = getFreshLabel("div_after_error"); // Label after error handling
                 gen.beqz(t2, afterErrLabel); // If t2 == 0, skip the division, jump to error handling
                 
-                // If t2 != 0, perform division and jump over error handling
+                // If t2 != 0, perform division
                 gen.div(dst, t1, t2);    // Perform division
+                addSaturationChecks.run(); // Add saturation checks AFTER division
                 gen.jump(okLabel);      // Jump past error handling
 
                 // Error handling block (if t2 == 0)
