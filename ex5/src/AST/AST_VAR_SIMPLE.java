@@ -40,22 +40,19 @@ public class AST_VAR_SIMPLE extends AST_VAR
 	public TEMP IRme()
 	{
 		SYMBOL_TABLE_ENTRY entry = SYMBOL_TABLE.getInstance().findEntry(this.val);
+		TEMP dstTemp = TEMP_FACTORY.getInstance().getFreshTEMP();
 		if (entry.isGlobal) {
 			System.out.println("IR: Loading global variable: " + this.val);
-			if (entry.temp == null) {
-				throw new RuntimeException("Compiler Error: TEMP not associated with global variable " + this.val + " during IRme.");
-			}
-			IR.getInstance().Add_IRcommand(new IRcommand_Load_Global(entry.temp, this.val));
-			return entry.temp;
+			IR.getInstance().Add_IRcommand(new IRcommand_Load_Global(dstTemp, this.val));
+			
 		} else { // Local variable or parameter
 			System.out.printf("IR: Loading local variable '%s' from offset %d\n", this.val, entry.offset);
 			if (entry.offset == Integer.MIN_VALUE) {
 				throw new RuntimeException("Compiler Error: Local variable '" + this.val + "' offset not set during IRme load.");
 			}
-			TEMP dstTemp = TEMP_FACTORY.getInstance().getFreshTEMP();
 			IR.getInstance().Add_IRcommand(new IRcommand_Load(dstTemp, entry.offset, this.val));
-			return dstTemp;
 		}
+		return dstTemp;
 	}
 	@Override
 	public TEMP storeValueIR(TEMP sourceValue) {
@@ -63,9 +60,7 @@ public class AST_VAR_SIMPLE extends AST_VAR
 		if (entry == null) {
 			throw new RuntimeException("Compiler Error: Symbol table entry not found for variable " + this.val + " during storeValueIR.");
 		}
-		if (entry.temp == null) {
-			throw new RuntimeException("Compiler Error: TEMP not associated with variable " + this.val + " during storeValueIR.");
-		}
+
 		if (entry.isGlobal) {
 			System.out.println("IR: Storing to global variable: " + this.val);
 			IR.getInstance().Add_IRcommand(new IRcommand_Global_Store(this.val, sourceValue));

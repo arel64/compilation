@@ -4,12 +4,18 @@ import TYPES.*;
 import TEMP.*;
 import IR.*;
 import SYMBOL_TABLE.SYMBOL_TABLE;
+import SYMBOL_TABLE.SYMBOL_TABLE_ENTRY;
+import java.util.ArrayList;
+import java.util.List;
 
 public class AST_FUNC_DEC extends AST_CLASS_FIELDS_DEC {
     
     public AST_TYPE returnType;
     public AST_LIST<AST_VAR_DEC> params;
     public AST_LIST<AST_STMT> body;
+    
+    // Field to track the next available offset during the pre-calculation pass
+    private int nextLocalOffset; 
 
     public AST_FUNC_DEC(String funcName, AST_TYPE returnType, AST_LIST<AST_VAR_DEC> params, AST_LIST<AST_STMT> body) {
         super(funcName,returnType);
@@ -121,70 +127,137 @@ public class AST_FUNC_DEC extends AST_CLASS_FIELDS_DEC {
 
     @Override
     public TEMP IRme() {
+        IR ir = IR.getInstance();
+        SYMBOL_TABLE symTable = SYMBOL_TABLE.getInstance();
 		String funcName = this.varName;
 
-		String label_start = IRcommand.getFreshLabel(funcName + "_start");
-        String label_end   = IRcommand.getFreshLabel(funcName + "_end");
+        // Built-in functions handled elsewhere
+        if (funcName.equals("PrintInt") || funcName.equals("PrintString")) { 
+            return null;
+        }
 
-        int numLocals = 0;
-        if (body != null) {
-            for (AST_STMT stmt : body) {
-                if (stmt instanceof AST_STMT_VAR_DECL) {
-                    numLocals++;
+        String label_start = IRcommand.getFreshLabel(funcName + "_start");
+        String label_end = IRcommand.getFreshLabel(funcName + "_end");
+
+        symTable.beginScope(); // Scope for parameters and locals
+        ir.registerFunctionLabel(this.getName(), label_start);
+        ir.pushFunctionEndLabel(label_end);
+
+        // --- Parameter Offset Assignment ---
+        // Corrected: First parameter is at $fp + 4 
+        int paramOffset = 0; 
+        if (params != null) {
+            for (AST_VAR_DEC param : params) {
+                // Parameters are expected to be found in the current scope
+                SYMBOL_TABLE_ENTRY entry = symTable.findEntry(param.getName()); 
+                System.out.println("entry: " + entry);
+                 if (entry != null && !entry.isGlobal) {
+                    entry.offset = paramOffset;
+                    System.out.printf("  Assigning param '%s' offset: %d($fp)\n", param.getName(), entry.offset);
+                    paramOffset += 4; // Next param is 4 bytes higher
+                } else {
+                     throw new RuntimeException("Compiler Error: Param '" + param.getName() + "' symbol table entry issue during offset assignment.");
                 }
             }
         }
-        int frameSize = 8 + numLocals * 4;
 
-        IR ir = IR.getInstance(); // Get instance once
+        // --- Local Variable Offset Pre-calculation ---
+        // Calculate total frame size using existing count method
+        int numberOfLocals = countLocalDeclarations(body);
+        int localsSize = numberOfLocals * 4; // Assuming 4 bytes per local/pointer
+        int frameSize = localsSize + 8; // 8 bytes for saved $fp and $ra
+        System.out.printf("Function '%s': Calculated locals=%d, localsSize=%d, frameSize=%d\n", this.getName(), numberOfLocals, localsSize, frameSize);
+
+        // Initialize the starting offset for locals (below saved $fp and $ra)
+        this.nextLocalOffset = -12; 
         
-        if (funcName.equals("main")) {
-            System.out.println("Generating main function IR");
-            _mainIr(body);
-            return null;
-        }
-        ir.registerFunctionLabel(funcName, label_start);
+        // Recursively traverse the body to assign offsets to all locals
+        System.out.printf("--- Assigning Local Offsets for %s ---\n", funcName);
+        assignLocalOffsetsHelper(this.body); 
+        System.out.printf("--- Finished Assigning Local Offsets for %s ---\n", funcName);
+
+
+        // --- IR Generation ---
+        // Emit function label and prologue (uses pre-calculated frameSize)
         ir.Add_IRcommand(new IRcommand_Label(label_start));
         ir.Add_IRcommand(new IRcommand_Prologue(frameSize));
-        
-        // --- Parameter Loading ---
-        if (params != null) {
-            int paramIndex = 0;
-            for (AST_VAR_DEC param : params) {
-                int offset = 0 + paramIndex * 4; 
-                TEMP paramTemp = TEMP_FACTORY.getInstance().getFreshTEMP();
-                ir.Add_IRcommand(new IRcommand_Load(paramTemp, offset, param.getName()));
-                SYMBOL_TABLE.getInstance().associateTemp(param.getName(), paramTemp);
-                paramIndex++;
-            }
-        }
 
-        // --- Process Body with End Label Tracking ---
-        ir.pushFunctionEndLabel(label_end); // Push label before processing body
+        // Generate IR for the function body. Load/Store commands within will use the offsets
+        // previously assigned and stored in the symbol table entries.
         if (body != null) {
-            body.IRme();
+            body.IRme(); // This call no longer needs/uses offset parameters
         }
-        ir.popFunctionEndLabel(); // Pop label after processing body
 
-        // --- End Label and Epilogue ---
-        ir.Add_IRcommand(new IRcommand_Label(label_end)); // End label position
-        ir.Add_IRcommand(new IRcommand_Epilogue(frameSize)); // Epilogue comes AFTER end label
+        // Emit function end label and epilogue
+        ir.Add_IRcommand(new IRcommand_Label(label_end));
+        ir.Add_IRcommand(new IRcommand_Epilogue(frameSize));
 
-
-        return null;
-    }
-    public void _mainIr(AST_LIST<AST_STMT> body) {
-        IR ir = IR.getInstance();
-
-        ir.Add_IRcommand(new IRcommand_Label("mainStart"));
-        ir.Add_IRcommand(new IRcommand_Prologue(12));
-        ir.pushFunctionEndLabel("main");
-        if (body != null) {
-            body.IRme();
-        }
         ir.popFunctionEndLabel();
-        ir.Add_IRcommand(new IRcommand_Epilogue(12));
+        symTable.endScope(); // End scope for parameters and locals
 
+        return null; // Function declaration itself doesn't produce a value TEMP
+    }
+
+    // Recursive helper to assign offsets to local variables before IR generation
+    private void assignLocalOffsetsHelper(AST_LIST<? extends AST_STMT> statements) {
+        if (statements == null) return;
+
+        for (AST_STMT stmt : statements) {
+            if (stmt instanceof AST_STMT_VAR_DECL) {
+                // Found a local variable declaration
+                AST_DEC declaration = ((AST_STMT_VAR_DECL) stmt).varDec;
+                String varName = declaration.getName();
+                SYMBOL_TABLE_ENTRY entry = SYMBOL_TABLE.getInstance().findEntry(varName);
+                System.out.println("entry: " + entry);
+                if (entry != null && !entry.isGlobal) {
+                     // Assign the current offset and decrement for the next local
+                    entry.offset = this.nextLocalOffset; 
+                    System.out.printf("  Assigning local '%s' offset: %d($fp)\n", varName, entry.offset);
+                    this.nextLocalOffset -= 4; 
+                } else {
+                    // This indicates an internal error - the variable should be in the table
+                    System.err.printf("Warning: Could not find symbol table entry for local '%s' during offset assignment pass.\n", varName);
+                     // Optionally throw: throw new RuntimeException("Compiler Error: Local var '" + varName + "' not found in ST during offset assignment.");w
+                }
+            } else if (stmt instanceof AST_STMT_IF) {
+                // Assume AST_STMT_IF has field 'body' 
+                AST_STMT_IF ifStmt = (AST_STMT_IF) stmt;
+                assignLocalOffsetsHelper(ifStmt.body);
+                // Removed else branch processing as it's not supported
+            } else if (stmt instanceof AST_STMT_WHILE) {
+                // Assume AST_STMT_WHILE has field 'body'
+                AST_STMT_WHILE whileStmt = (AST_STMT_WHILE) stmt;
+                assignLocalOffsetsHelper(whileStmt.body);
+            } 
+            // Add recursive calls for other compound statements (e.g., FOR loops) if they exist
+        }
+    }
+
+
+    // Keep this method to calculate total space needed for the frame BEFORE processing the body.
+    // Ensure it correctly counts declarations in all relevant blocks.
+    private int countLocalDeclarations(AST_LIST<? extends AST_STMT> statements) {
+        int count = 0;
+        if (statements == null) return 0;
+
+        for (AST_STMT stmt : statements) {
+            if (stmt instanceof AST_STMT_VAR_DECL) {
+                // Count every variable declaration statement
+                count++; 
+            } else if (stmt instanceof AST_STMT_IF) {
+                // Assume AST_STMT_IF has field 'body' 
+                AST_STMT_IF ifStmt = (AST_STMT_IF) stmt;
+                count += countLocalDeclarations(ifStmt.body);
+                 // Removed else branch counting as it's not supported
+            } else if (stmt instanceof AST_STMT_WHILE) {
+                // Assume AST_STMT_WHILE has field 'body'
+                AST_STMT_WHILE whileStmt = (AST_STMT_WHILE) stmt;
+                count += countLocalDeclarations(whileStmt.body);
+            } 
+            // Add other compound statements if necessary
+        }
+        return count;
     }
 }
+
 

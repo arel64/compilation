@@ -308,22 +308,22 @@ public class SYMBOL_TABLE
     }
 
 	public boolean existsInCurrentScope(String name) {
-        System.out.println("  [existsInCurrentScope] Checking for: " + name);
+        // System.out.println("  [existsInCurrentScope] Checking for: " + name);
         SYMBOL_TABLE_ENTRY e = top;
         while (e != null && !e.name.equals("SCOPE-BOUNDARY")) {
-            System.out.println("  [existsInCurrentScope] Comparing with entry: " + e.name);
+            // System.out.println("  [existsInCurrentScope] Comparing with entry: " + e.name);
             if (e.name.equals(name) ) {
-               System.out.println("  [existsInCurrentScope] Found match!");
+               // System.out.println("  [existsInCurrentScope] Found match!");
                return true;
             }
         e = e.prevtop;
         }
         if (e != null && e.name.equals("SCOPE-BOUNDARY")) {
-            System.out.println("  [existsInCurrentScope] Reached scope boundary.");
+            // System.out.println("  [existsInCurrentScope] Reached scope boundary.");
         } else if (e == null) {
-            System.out.println("  [existsInCurrentScope] Reached top of stack (null).");
+            // System.out.println("  [existsInCurrentScope] Reached top of stack (null).");
         }
-        System.out.println("  [existsInCurrentScope] No match found in current scope.");
+        // System.out.println("  [existsInCurrentScope] No match found in current scope.");
         return false;
     }
 
@@ -334,21 +334,21 @@ public class SYMBOL_TABLE
     public boolean isDeclaredInImmediateScope(String name) {
         // This logic is identical to the corrected existsInCurrentScope
         String lowerCaseName = name.toLowerCase(); 
-        System.out.println("  [isDeclaredInImmediateScope] Checking for: " + lowerCaseName + " starting from top: " + (top != null ? top.name : "null"));
+        // System.out.println("  [isDeclaredInImmediateScope] Checking for: " + lowerCaseName + " starting from top: " + (top != null ? top.name : "null"));
         SYMBOL_TABLE_ENTRY e = top;
         while (e != null) {
             if (e.name.equals("scope-boundary")) { 
-                System.out.println("  [isDeclaredInImmediateScope] Reached scope boundary marker.");
+                // System.out.println("  [isDeclaredInImmediateScope] Reached scope boundary marker.");
                 break; 
             }
-            System.out.println("  [isDeclaredInImmediateScope] Comparing with entry: " + e.name);
+            // System.out.println("  [isDeclaredInImmediateScope] Comparing with entry: " + e.name);
             if (e.name.equals(lowerCaseName)) {
-               System.out.println("  [isDeclaredInImmediateScope] Found match!");
+            //    System.out.println("  [isDeclaredInImmediateScope] Found match!");
                return true; 
             }
             e = e.prevtop;
         }
-        System.out.println("  [isDeclaredInImmediateScope] No match found in immediate scope for: " + lowerCaseName);
+        // System.out.println("  [isDeclaredInImmediateScope] No match found in immediate scope for: " + lowerCaseName);
         return false;
     }
 
@@ -396,16 +396,6 @@ public class SYMBOL_TABLE
 			}
 		}
 		return null;
-	}
-
-	public void associateTemp(String name, TEMP temp)
-	{
-		SYMBOL_TABLE_ENTRY entry = findEntry(name);
-		if (entry != null) {
-			entry.temp = temp;
-			return;
-		} 
-		throw new RuntimeException("No entry found for name: " + name);
 	}
 
 	// Helper method to get the name of the top entry for debugging

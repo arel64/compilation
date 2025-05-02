@@ -40,7 +40,7 @@ public class AST_VAR_DEC extends AST_DEC {
         System.out.println("--- Checking variable declaration for: " + currentVarName + " ---");
         System.out.println("Symbol Table Top before check: " + SYMBOL_TABLE.getInstance().getTopEntryName());
         boolean exists = SYMBOL_TABLE.getInstance().isDeclaredInImmediateScope(currentVarName);
-        System.out.println("Result of isDeclaredInImmediateScope(" + currentVarName + "): " + exists);
+        // System.out.println("Result of isDeclaredInImmediateScope(" + currentVarName + "): " + exists);
         if(exists) // Check the stored result
         {
             System.out.println("--- ERROR: Variable already exists in current scope! ---");
@@ -67,13 +67,8 @@ public class AST_VAR_DEC extends AST_DEC {
     }
     @Override
     public TEMP IRme()
-	{
-        // 1. Create the TEMP for this variable
-        TEMP varTemp = TEMP_FACTORY.getInstance().getFreshTEMP();
-                
-        // 2. Associate this TEMP with the variable name in the symbol table
+	{           
         SYMBOL_TABLE_ENTRY entry = SYMBOL_TABLE.getInstance().findEntry(getName());
-        SYMBOL_TABLE.getInstance().associateTemp(getName(), varTemp);
         boolean isGlobal = entry.isGlobal;
         if(isGlobal)
         {
@@ -91,7 +86,7 @@ public class AST_VAR_DEC extends AST_DEC {
             else
             {
                 if (entry.offset == Integer.MIN_VALUE) {
-                    throw new RuntimeException("Compiler Error: Local variable '" + getName() + "' offset not set during IRme.");
+                    System.out.println("Local variable '" + getName() + "' offset not set during IRme, likely global");
                 }
                 System.out.printf("  IR: Storing initial value for local '%s' to offset %d\n", getName(), entry.offset);
                 IR.getInstance().Add_IRcommand(new IRcommand_Store(initValTemp, entry.offset, getName()));

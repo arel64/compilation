@@ -30,12 +30,7 @@ public class SYMBOL_TABLE_ENTRY
 	/******************/
 	public TYPE type;
 
-	/******************************************/
-	/* TEMP object associated with this var...*/
-	/* (Set during IR generation)             */
-	/******************************************/
-	public TEMP temp = null;
-
+	
 	/******************************************/
 	/* Offset relative to frame pointer ($fp) */
 	/* Used for local variables & parameters  */
