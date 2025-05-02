@@ -75,6 +75,8 @@ public class AST_CLASS_DEC extends AST_DEC {
         List<String> potenitianlyOverridenFunctions = new ArrayList<>();
         TYPE_CLASS_VAR_DEC_LIST declist = new TYPE_CLASS_VAR_DEC_LIST(potenitianlyOverridenFunctions);
 
+        int currentOffset = 0; // Start offset at 0 for the first field
+
         if(father != null && father.getDataMembers() != null)
         {
             parentAttributes = father.getDataMembers();
@@ -96,16 +98,26 @@ public class AST_CLASS_DEC extends AST_DEC {
                         continue;
                     }
                 }
+                field.setOffset(currentOffset);
+                currentOffset += 4; // Increment offset for the next field (assuming 4 bytes per field)
                 SYMBOL_TABLE.getInstance().enter(field.getName(), field.t);
                 declist.add(field);
-                currentClass.setDataMembers(declist);
-                
             }
         }        
-        for(AST_CLASS_FIELDS_DEC myField : fields)
+        for(AST_CLASS_FIELDS_DEC myFieldAST : fields)
         {
-            TYPE myFieldType = myField.SemantMe();
-            declist.add(new TYPE_CLASS_FIELD(myField.getName(),myFieldType,myField.lineNumber));
+            TYPE myFieldType = myFieldAST.SemantMe();
+
+            TYPE_CLASS_FIELD myField = new TYPE_CLASS_FIELD(myFieldAST.getName(), myFieldType, myFieldAST.lineNumber);
+
+            if (!myFieldType.isFunction()) {
+                myField.setOffset(currentOffset);
+                currentOffset += 4; // Increment offset for the next data field
+            } else {
+                myField.setOffset(-1);
+            }
+
+            declist.add(myField);
 
             if(parentAttributes != null)
             {
@@ -115,14 +127,15 @@ public class AST_CLASS_DEC extends AST_DEC {
                     if(!(myFieldType.isFunction() && previousFieldDeclaration.t.isFunction() &&
                              ((TYPE_FUNCTION)myFieldType).isOverriding((TYPE_FUNCTION)previousFieldDeclaration.t)))
                     {
-                        throw new SemanticException(myField.lineNumber,String.format("Function redeclared %s but does not override %s", myFieldType, previousFieldDeclaration));
+                        throw new SemanticException(myFieldAST.lineNumber,String.format("Field/Method redeclared '%s' but does not correctly override parent's version.", myField.getName()));
                     }
                 }
             }
             SYMBOL_TABLE.getInstance().enter(myField.getName(), myFieldType);
-            currentClass.setDataMembers(declist);
         }
         symbol_table.endScope();
+        currentClass.setDataMembers(declist);
+        currentClass.setInstanceSize(currentOffset);
 		return currentClass;  
 	}
 

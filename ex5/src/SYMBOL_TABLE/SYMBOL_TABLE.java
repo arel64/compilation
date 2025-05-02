@@ -99,6 +99,9 @@ public class SYMBOL_TABLE
 	/***********************************************/
 	public TYPE find(String name)
 	{
+		if (name == null) {
+			return null;
+		}
 		name = name.toLowerCase();
 		SYMBOL_TABLE_ENTRY e = findEntry(name);
 		if (e != null) {

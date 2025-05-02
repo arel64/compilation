@@ -13,21 +13,26 @@ package IR;
 import TEMP.*;
 import java.util.Arrays;
 import java.util.HashSet;
+import MIPS.MIPSGenerator;
 
 public class IRcommand_Class_Field_Access extends IRcommand
 {
 	public TEMP src;
-	public String field;
+	public int offset;
+	public String className;
+	public String fieldName;
 	
-	public IRcommand_Class_Field_Access(TEMP dst, TEMP src, String field)
+	public IRcommand_Class_Field_Access(TEMP dst, TEMP src, int offset, String className, String fieldName)
 	{
 		this.dst = dst;
 		this.src = src;
-		this.field = field;
+		this.offset = offset;
+		this.className = className;
+		this.fieldName = fieldName;
 	}
 	@Override
 	public String toString() {
-		return "IRcommand_Class_Field_Access: dst=" + dst + ", src=" + src + ", field=" + field;
+		return String.format("CLASS_FIELD_ACCESS: %s := %s.%s (offset %d)", dst, src, fieldName, offset);
 	}
 
 	public void staticAnalysis() {
@@ -40,4 +45,11 @@ public class IRcommand_Class_Field_Access extends IRcommand
 		return new HashSet<TEMP>(Arrays.asList(src));
 	}
 
+	/***************/
+	/* MIPS me !!! */
+	/***************/
+	public void MIPSme()
+	{
+		MIPSGenerator.getInstance().lw_offset(dst, offset, src);
+	}
 }

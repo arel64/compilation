@@ -51,11 +51,40 @@ public class AST_NEW_EXP extends AST_EXP {
     public TEMP IRme()
 	{
         TEMP address = TEMP_FACTORY.getInstance().getFreshTEMP();
-        if (this.exp != null)
-            IR.getInstance().Add_IRcommand(new IRcommand_New_Array(address, this.type.type, this.exp.IRme()));
+        try {
+            TYPE instanceType = type.SemantMeLog();
 
-        else
-            IR.getInstance().Add_IRcommand(new IRcommand_New_Class(address, this.type.type));
-		return address;
+            if (this.exp != null) {
+                TEMP sizeTemp = this.exp.IRme();
+                if (sizeTemp == null) {
+                    System.err.printf("IR Error(ln %d): Array size expression did not yield a value.\n", lineNumber);
+                    return null;
+                }
+                String arrayBaseTypeName = "unknown_array_base";
+                if (instanceType instanceof TYPE_ARRAY) {
+                    arrayBaseTypeName = ((TYPE_ARRAY)instanceType).t.getName();
+                } else if (instanceType != null) {
+                    arrayBaseTypeName = instanceType.getName();
+                }
+                IR.getInstance().Add_IRcommand(new IRcommand_New_Array(address, arrayBaseTypeName, sizeTemp));
+            }
+            else {
+                if (!(instanceType instanceof TYPE_CLASS)) {
+                    System.err.printf("IR Error(ln %d): Attempting 'new' on a non-class type: %s\n", lineNumber, instanceType.getName());
+                    return null;
+                }
+                TYPE_CLASS classType = (TYPE_CLASS) instanceType;
+                int size = classType.getSize();
+                if (size < 0) {
+                    System.err.printf("IR Error(ln %d): Could not determine size for class: %s\n", lineNumber, classType.getName());
+                    return null;
+                }
+                IR.getInstance().Add_IRcommand(new IRcommand_New_Class(address, classType.getName(), size));
+            }
+            return address;
+        } catch (SemanticException e) {
+            System.err.printf("IR Generation Error (ln %d) during 'new' expression: %s\n", lineNumber, e.getMessage());
+            return null;
+        }
 	}
 }

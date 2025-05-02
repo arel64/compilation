@@ -14,6 +14,7 @@ public class TYPE_CLASS extends TYPE
 	public TYPE_CLASS father;
 	private TYPE_CLASS_VAR_DEC_LIST memberList;
 	public int line;
+    private int instanceSize = -1; // Store calculated instance size
 	/**************************************************/
 	/* Gather up all data members in one place        */
 	/* Note that data members coming from the AST are */
@@ -114,6 +115,11 @@ public class TYPE_CLASS extends TYPE
 	public void setDataMembers(TYPE_CLASS_VAR_DEC_LIST members){
 		this.memberList = members;
 	}
+	// Add a setter for the instance size
+	public void setInstanceSize(int size) {
+		this.instanceSize = size;
+	}
+
 	public TYPE_CLASS_FIELD getDataMember(String name)
 	{
 		
@@ -131,6 +137,18 @@ public class TYPE_CLASS extends TYPE
 		return null;
 
 	}
+	public int getDataMemberOffset(String fieldName) throws SemanticException {
+		 TYPE_CLASS_FIELD field = getDataMember(fieldName);
+		 if (field == null) {
+			 throw new SemanticException(line, String.format("Field '%s' not found in class '%s'.", fieldName, getName()));
+		 }
+		 if (field.offset < 0) {
+			 // This likely means it's a method or offset wasn't calculated correctly
+			 throw new SemanticException(line, String.format("Offset for field '%s' in class '%s' is invalid (%d).", fieldName, getName(), field.offset));
+		 }
+		 return field.offset;
+	}
+
 	@Override
 	public boolean isAssignable(TYPE other) throws SemanticException {
 		return other instanceof TYPE_NIL || (other instanceof TYPE_CLASS && ((TYPE_CLASS)other).isDerivedFrom(this));
@@ -138,43 +156,17 @@ public class TYPE_CLASS extends TYPE
 
     @Override
     public int getSize()  {
-        // Use a helper to handle potential recursion depth
-        return getSizeRecursive(new HashSet<>());
+        // Return the pre-calculated size. Should not be -1 if SemantMe ran correctly.
+        if (instanceSize < 0) {
+             // Consider throwing an error or logging a warning if size wasn't calculated
+             System.err.printf("Warning: getSize() called on class '%s' before instance size was calculated.%n", getName());
+             return 0; // Or throw?
+        }
+        return instanceSize;
     }
 
-    private int getSizeRecursive(Set<TYPE_CLASS> visited)  {
-        return 0;
-		// visited.add(this); // Mark this class as visited for this path
-        
-        // int size = 0;
-        // // Size is the sum of sizes of all *own* non-method data members.
-        // // Inheritance is handled by how dataMembers list is populated during SemantMe.
-        // // We assume memberList contains all fields (own + inherited) by the time getSize is called.
-        // if (memberList != null) {
-        //     for (TYPE_CLASS_FIELD field : memberList) {
-        //         // Only count non-method fields
-        //         if (!(field.t instanceof TYPE_FUNCTION)) {
-        //             // Ensure field type is resolved before getting size
-        //             if (field.t == null) {
-        //                  throw new SemanticException(line, String.format("Field '%s' in class '%s' has unresolved type during getSize calculation.", field.getName(), getName()));
-        //             }
-        //             // Delegate to the field's type getSize, passing the visited set
-        //             if (field.t instanceof TYPE_CLASS) {
-        //                 size += ((TYPE_CLASS)field.t).getSizeRecursive(new HashSet<>(visited)); // Pass copy of set
-        //             } else {
-        //                 size += field.t.getSize();
-        //             }
-        //         }
-        //     }
-        // }
-
-        // // No need to explicitly add father's size if memberList correctly includes inherited fields.
-        // // If memberList ONLY contains fields declared in *this* class, then you'd need:
-        // // if (father != null) {
-        // //     size += father.getSizeRecursive(new HashSet<>(visited));
-        // // }
-        
-        // // visited.remove(this); // Not strictly necessary if passing copies
-        // return size;
-    }
+    // Remove or comment out getSizeRecursive if no longer needed
+    // private int getSizeRecursive(Set<TYPE_CLASS> visited)  {
+    // ...
+    //}
 }
