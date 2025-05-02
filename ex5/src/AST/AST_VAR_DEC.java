@@ -90,7 +90,11 @@ public class AST_VAR_DEC extends AST_DEC {
             }
             else
             {
-                IR.getInstance().Add_IRcommand(new IRcommand_Store(varTemp, initValTemp, getName())); 
+                if (entry.offset == Integer.MIN_VALUE) {
+                    throw new RuntimeException("Compiler Error: Local variable '" + getName() + "' offset not set during IRme.");
+                }
+                System.out.printf("  IR: Storing initial value for local '%s' to offset %d\n", getName(), entry.offset);
+                IR.getInstance().Add_IRcommand(new IRcommand_Store(initValTemp, entry.offset, getName()));
             }
         }
         

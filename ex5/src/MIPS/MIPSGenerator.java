@@ -98,13 +98,15 @@ public class MIPSGenerator
 			finalWriter.print("\n.text\n");
 			finalWriter.print(".globl main\n");
 			finalWriter.print("main:\n");
-			// Print global initialization code first
-			finalWriter.print(globalInitContent.toString()); 
-			// Then jump to the actual start of the user's main function
-			finalWriter.print("\tjal mainStart\n");
-			finalWriter.print("j program_exit\n");
+ 			// Print global initialization code first
+ 			finalWriter.print(globalInitContent.toString()); 
+ 			// Then jump to the actual start of the user's main function
+ 			// Get the registered label for the main function
+ 			String mainLabel = IR.getInstance().getFunctionLabel("main");
+ 			finalWriter.format("\tjal %s\n", mainLabel); // Jump to the registered label
+ 			finalWriter.print("j program_exit\n");
 
-			String textContentStr = textContent.toString();
+ 			String textContentStr = textContent.toString();
 
 			finalWriter.print(textContentStr);
 			
@@ -691,5 +693,16 @@ public class MIPSGenerator
 	// NEW: Load TEMP relative to $sp
 	public void lw_reg_sp(TEMP dst, int offset) {
 		lw_offset(tempToRegister(dst), offset, SP);
+	}
+
+	// NEW: Multiply operation using TEMP source 1 and register source 2 into a register destination
+	public void mul_temp_reg(String dstReg, TEMP src1, String src2Reg) {
+		String src1Reg = tempToRegister(src1);
+		mul_registers(dstReg, src1Reg, src2Reg); // Use the existing mul_registers
+	}
+
+	// NEW: Multiply operation using register names
+	public void mul_registers(String dstReg, String src1Reg, String src2Reg) {
+		appendCode(String.format("mul %s,%s,%s", dstReg, src1Reg, src2Reg));
 	}
 }

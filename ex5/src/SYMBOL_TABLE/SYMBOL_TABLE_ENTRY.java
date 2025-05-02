@@ -37,6 +37,13 @@ public class SYMBOL_TABLE_ENTRY
 	public TEMP temp = null;
 
 	/******************************************/
+	/* Offset relative to frame pointer ($fp) */
+	/* Used for local variables & parameters  */
+	/* Negative for locals, positive for params */
+	/******************************************/
+	public int offset = Integer.MIN_VALUE; // Sentinel: Not yet assigned
+
+	/******************************************/
 	/* Size of the type in memory (bytes)   */
 	/******************************************/
 	public int size = 0; // Will be set during semantic analysis

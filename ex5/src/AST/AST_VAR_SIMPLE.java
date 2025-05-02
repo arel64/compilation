@@ -5,6 +5,8 @@ import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
 import TEMP.*;
 import IR.*;
+import java.util.ArrayList;
+import java.util.List;
 public class AST_VAR_SIMPLE extends AST_VAR
 {
 	
@@ -38,21 +40,23 @@ public class AST_VAR_SIMPLE extends AST_VAR
 	public TEMP IRme()
 	{
 		SYMBOL_TABLE_ENTRY entry = SYMBOL_TABLE.getInstance().findEntry(this.val);
-		if(entry.temp == null)
-		{
-			throw new RuntimeException("Compiler Error: TEMP not associated with variable " + this.val + " during IRme.");
+		if (entry.isGlobal) {
+			System.out.println("IR: Loading global variable: " + this.val);
+			if (entry.temp == null) {
+				throw new RuntimeException("Compiler Error: TEMP not associated with global variable " + this.val + " during IRme.");
+			}
+			IR.getInstance().Add_IRcommand(new IRcommand_Load_Global(entry.temp, this.val));
+			return entry.temp;
+		} else { // Local variable or parameter
+			System.out.printf("IR: Loading local variable '%s' from offset %d\n", this.val, entry.offset);
+			if (entry.offset == Integer.MIN_VALUE) {
+				throw new RuntimeException("Compiler Error: Local variable '" + this.val + "' offset not set during IRme load.");
+			}
+			TEMP dstTemp = TEMP_FACTORY.getInstance().getFreshTEMP();
+			IR.getInstance().Add_IRcommand(new IRcommand_Load(dstTemp, entry.offset, this.val));
+			return dstTemp;
 		}
-        if (entry.isGlobal) {
-			System.out.println("Loading global variable: " + this.val);
-            IR.getInstance().Add_IRcommand(new IRcommand_Load_Global(entry.temp, this.val));
-        } else {
-            System.out.println("Loading local variable: " + this.val);
-            // IR.getInstance().Add_IRcommand(new IRcommand_Load(entry.temp	, 0, this.val)); 
-        }
-
-		return entry.temp;
 	}
-
 	@Override
 	public TEMP storeValueIR(TEMP sourceValue) {
 		SYMBOL_TABLE_ENTRY entry = SYMBOL_TABLE.getInstance().findEntry(this.val);
@@ -62,11 +66,15 @@ public class AST_VAR_SIMPLE extends AST_VAR
 		if (entry.temp == null) {
 			throw new RuntimeException("Compiler Error: TEMP not associated with variable " + this.val + " during storeValueIR.");
 		}
-		System.out.println("Storing value in variable: " + this.val + " with value: " + sourceValue + " global: " + entry.isGlobal);
 		if (entry.isGlobal) {
+			System.out.println("IR: Storing to global variable: " + this.val);
 			IR.getInstance().Add_IRcommand(new IRcommand_Global_Store(this.val, sourceValue));
 		} else {
-			IR.getInstance().Add_IRcommand(new IRcommand_Store(entry.temp, sourceValue, this.val));
+			System.out.printf("IR: Storing to local variable '%s' at offset %d\n", this.val, entry.offset);
+			if (entry.offset == Integer.MIN_VALUE) {
+				throw new RuntimeException("Compiler Error: Local variable '" + this.val + "' offset not set during IRme store.");
+			}
+			IR.getInstance().Add_IRcommand(new IRcommand_Store(sourceValue, entry.offset, this.val));
 		}
 		return null; // Store operation doesn't produce a result TEMP
 	}

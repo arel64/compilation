@@ -54,38 +54,47 @@ public class IRcommand_New_Array extends IRcommand
 		String label_Invalid_Size = IRcommand.getFreshLabel("Invalid_Array_Size");
 		String label_Alloc_Done   = IRcommand.getFreshLabel("New_Array_Alloc_Done");
 
-        // Get element size from Symbol Table using the type name
-        int elementSize = 4; // Default/fallback size
-        
-		TYPE elementType = SYMBOL_TABLE.getInstance().find(this.type);
-		if (elementType != null) {
-			elementSize = elementType.getSize();
-		} else {
-				System.err.printf("ERROR: Type '%s' not found in symbol table for array element size lookup. Using default size 4.\n", this.type);
-				// Handle error: use default size
-		}
-		if (elementSize <= 0 && !(elementType instanceof TYPE_VOID)) { 
-				System.err.printf("ERROR: Invalid element size (%d) calculated for type '%s'. Using default size 4.\n", elementSize, this.type);
-				elementSize = 4; // Reset to default? 
-		}
-
-    
-		// 1. Check if size <= 0. 
-        // Note: 'size' TEMP holds the number of elements
-		generator.blez(size, label_Invalid_Size);
-
-		// 2. Calculate total bytes: (size * elementSize) 
-		generator.mul_imm(size, size, elementSize);  // tTotalBytes = size * tElementSize
-
-		generator.malloc(dst, size);
+		// Get element size from Symbol Table using the type name
+		int elementSize = 4; // Default/fallback size
 		
-        generator.jump(label_Alloc_Done);
+		// TODO: Add proper error handling if type not found or size invalid
+		TYPE elementType = SYMBOL_TABLE.getInstance().find(this.type); 
+		if (elementType != null) { elementSize = elementType.getSize(); }
+		if (elementSize <= 0) { elementSize = 4; } 
+
+		// 1. Check if size < 0. 
+		// Note: 'size' TEMP holds the number of elements
+		generator.bltz(size, label_Invalid_Size); // Branch if size TEMP < 0
+
+		// 2. Calculate total bytes needed: (size * elementSize) + 4 (for length header)
+		// Use dedicated temp registers $s0, $s1 from MIPSGenerator
+		String tempReg1 = MIPSGenerator.TEMP_REG_1; // e.g., $s0
+		String tempReg2 = MIPSGenerator.TEMP_REG_2; // e.g., $s1
+		generator.li_imm(tempReg1, elementSize);           // tempReg1 = elementSize
+		generator.mul_temp_reg(tempReg2, size, tempReg1); // tempReg2 = size * tempReg1
+		generator.addi_imm(tempReg2, tempReg2, 4);       // tempReg2 = total bytes (size*elemSize + 4)
+
+		// 3. Allocate memory using malloc (syscall 9)
+		// Pass the allocation size (in tempReg2) to malloc via $a0
+		generator.malloc(dst, tempReg2); // Modifies $a0, $v0. Result pointer in dstReg <- $v0.
+
+		// 4. Runtime check: Check if allocation failed (optional, malloc might handle this)
+		// Example: Could add: generator.beq(dst, MIPSGenerator.ZERO_TEMP, label_OutOfMemory); 
+		// Requires a ZERO_TEMP in TEMP_FACTORY or passing $zero register name
+
+		// 5. Store the original size (number of elements) in the header (at offset 0)
+		generator.sw_offset(size, 0, dst); // sw size_TEMP, 0(dst_TEMP)
+
+		// 6. Adjust the destination pointer to point *after* the header
+		generator.addi(dst, dst, 4); // dst = dst + 4
+
+		generator.jump(label_Alloc_Done);
 
 		generator.label(label_Invalid_Size);
-        generator.print_string_from_label("string_invalid_array_size");
+		generator.print_string_from_label("string_invalid_array_size");
 		generator.exit();
 
-        generator.label(label_Alloc_Done);
+		generator.label(label_Alloc_Done);
 	}
 
 }
