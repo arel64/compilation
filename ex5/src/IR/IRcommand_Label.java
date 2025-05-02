@@ -19,8 +19,7 @@ public class IRcommand_Label extends IRcommand
 {
 	public String label_name;
 	public String closing_label;
-	public boolean funcEnd = false;
-	public boolean ClassEnd = false;
+	public boolean funcOrClassEnd = false;
 	
 	public IRcommand_Label(String label_name)
 	{
@@ -33,11 +32,10 @@ public class IRcommand_Label extends IRcommand
 		this.closing_label = closing_label;
 	}
 
-	public IRcommand_Label(String label_name, boolean funcFlag, boolean classFlag)
+	public IRcommand_Label(String label_name, boolean flag)
 	{
 		this.label_name = label_name;
-		this.funcEnd = funcFlag;
-		this.ClassEnd = classFlag;
+		this.funcOrClassEnd = flag;
 	}
 
 	@Override
@@ -52,11 +50,11 @@ public class IRcommand_Label extends IRcommand
 
 	@Override
 	public void staticAnalysis() {
+		this.inClassVarDecs = false;
 		if (closing_label == null) { // regular label of if or while
 			super.staticAnalysis();
 		}
-		else if (this.funcEnd || this.ClassEnd) { // end label of class or func
-			if (this.ClassEnd) this.inClass = "";
+		else if (this.funcOrClassEnd) { // end label of class or func
 			workList.remove(workList.indexOf(this.index));
 			this.nextCommands = new int[]{};
 		}

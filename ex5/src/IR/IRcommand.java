@@ -34,8 +34,7 @@ public abstract class IRcommand
 
 	public TEMP dst = null; // only relevant in some commands but easier to have it here
 
-	public static String inClass = ""; // this is to track if the last label was of class dec to know if we define class vars and funcs
-
+	public static boolean inClassVarDecs = false; // this is to track if the last label was of class dec to know if we define class vars
 
 	public IRcommand() {
 		this.index = commandCounter++;

@@ -26,8 +26,6 @@ public class IRcommand_Func_Dec extends IRcommand
 	
 	@Override
 	public void staticAnalysis() {
-		if (this.inClass != "") IR.getInstance().registerFunctionLabel(this.inClass + "." + this.name, ((IRcommand_Label)IR.getInstance().commandList.get(this.index - 1)).label_name);
-		else IR.getInstance().registerFunctionLabel(this.name, ((IRcommand_Label)IR.getInstance().commandList.get(this.index - 1)).label_name);
 		workList.remove(workList.indexOf(this.index));
 		HashSet<Init> in = new HashSet<Init>();
 		for (Integer i : prevCommands) {

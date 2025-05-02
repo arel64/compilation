@@ -33,7 +33,7 @@ public class IRcommand_Class_Dec extends IRcommand
 
 	@Override
 	public void staticAnalysis() {
-		this.inClass = name;
+		this.inClassVarDecs = true;
 		super.staticAnalysis();
 	}
 
