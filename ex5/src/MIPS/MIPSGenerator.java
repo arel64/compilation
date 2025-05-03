@@ -16,8 +16,7 @@ import IR.IR;
 /*******************/
 import TEMP.*;
 
-public class MIPSGenerator
-{
+public class MIPSGenerator {
 	// Define the number of registers available to the allocator ($t0-$t7)
 	public static final int NUM_ALLOCATABLE_REGISTERS = 10;
 
@@ -43,20 +42,32 @@ public class MIPSGenerator
 	private StringBuilder globalInitContent = new StringBuilder(); // New buffer for global init
 
 	// NEW: Context tracking for writing MIPS code
-	private enum CodeContext { DATA, GLOBAL_INIT, FUNCTION }
+	private enum CodeContext {
+		DATA, GLOBAL_INIT, FUNCTION
+	}
+
 	private CodeContext currentContext = CodeContext.FUNCTION; // Default to function code
 
 	// NEW: Methods to set the writing context
-	public void setContextData() { this.currentContext = CodeContext.DATA; }
-	public void setContextGlobalInit() { this.currentContext = CodeContext.GLOBAL_INIT; }
-	public void setContextFunction() { this.currentContext = CodeContext.FUNCTION; }
+	public void setContextData() {
+		this.currentContext = CodeContext.DATA;
+	}
+
+	public void setContextGlobalInit() {
+		this.currentContext = CodeContext.GLOBAL_INIT;
+	}
+
+	public void setContextFunction() {
+		this.currentContext = CodeContext.FUNCTION;
+	}
 
 	// NEW: Unified helper to append code based on context
 	private void appendCode(String code) {
 		String indentedCode = "\t" + code + "\n"; // Indent instructions
 		switch (currentContext) {
 			case DATA:
-				dataContent.append("    ").append(code).append("\n"); // Data directives usually have different indentation
+				dataContent.append("    ").append(code).append("\n"); // Data directives usually have different
+																		// indentation
 				break;
 			case GLOBAL_INIT:
 				globalInitContent.append(indentedCode);
@@ -69,7 +80,9 @@ public class MIPSGenerator
 
 	/**
 	 * Appends a directive to the .data segment content.
-	 * @param directive The complete data directive line (e.g., "my_string: .asciiz \"Hello\"").
+	 * 
+	 * @param directive The complete data directive line (e.g., "my_string: .asciiz
+	 *                  \"Hello\"").
 	 */
 	public void addDataDirective(String directive) {
 		CodeContext originalContext = this.currentContext; // Save context
@@ -81,12 +94,11 @@ public class MIPSGenerator
 	/***********************/
 	/* The file writer ... */
 	/***********************/
-	public void finalizeFile(String filepath)
-	{
+	public void finalizeFile(String filepath) {
 		try {
 			// Create a new file writer for the final output
 			PrintWriter finalWriter = new PrintWriter(filepath);
-			
+
 			// Build the complete MIPS file with correct organization
 			finalWriter.print(".data\n");
 			finalWriter.print("    string_access_violation: .asciiz \"Access Violation\"\n");
@@ -94,24 +106,24 @@ public class MIPSGenerator
 			finalWriter.print("    string_invalid_ptr_dref: .asciiz \"Invalid Pointer Dereference\"\n");
 			finalWriter.print("    string_invalid_array_size: .asciiz \"Invalid Array Size\"\n");
 			finalWriter.print(dataContent.toString());
-			
+
 			finalWriter.print("\n.text\n");
 			finalWriter.print(".globl main\n");
 			finalWriter.print("main:\n");
- 			// Print global initialization code first
- 			finalWriter.print(globalInitContent.toString()); 
- 			// Then jump to the actual start of the user's main function
- 			// Get the registered label for the main function
- 			String mainLabel = IR.getInstance().getFunctionLabel("main");
- 			finalWriter.format("\tjal %s\n", mainLabel); // Jump to the registered label
- 			finalWriter.print("j program_exit\n");
+			// Print global initialization code first
+			finalWriter.print(globalInitContent.toString());
+			// Then jump to the actual start of the user's main function
+			// Get the registered label for the main function
+			String mainLabel = IR.getInstance().getFunctionLabel("main");
+			finalWriter.format("\tjal %s\n", mainLabel); // Jump to the registered label
+			finalWriter.print("j program_exit\n");
 
- 			String textContentStr = textContent.toString();
+			String textContentStr = textContent.toString();
 
 			finalWriter.print(textContentStr);
-			
+
 			// Add Standard Library Helper Functions
-			appendHelperFunctions(finalWriter); 
+			appendHelperFunctions(finalWriter);
 
 			// Add the program exit syscall sequence at the very end
 			finalWriter.print("\nprogram_exit:\n"); // Add a label for clarity
@@ -127,58 +139,62 @@ public class MIPSGenerator
 		}
 	}
 
-	public void allocate(String var_name)
-	{
+	public void allocate(String var_name) {
 		// Use .space to reserve space, initialization happens in .text
 		// This method should only handle the .data part.
 		CodeContext originalContext = this.currentContext;
 		setContextData();
 		appendCode(".align 2");
-		appendCode(String.format("global_%s: .space 4", var_name)); 
+		appendCode(String.format("global_%s: .space 4", var_name));
 		this.currentContext = originalContext;
 	}
+
 	public void store(TEMP src, int offset) {
 		String reg = tempToRegister(src);
 		appendCode(String.format("sw %s,%d($sp)", reg, offset));
 	}
-	public void li(TEMP t,int value)
-	{
+
+	public void li(TEMP t, int value) {
 		String reg = tempToRegister(t);
 		appendCode(String.format("li %s,%d", reg, value));
 	}
-	public void add(TEMP dst,TEMP oprnd1,TEMP oprnd2)
-	{
+
+	public void add(TEMP dst, TEMP oprnd1, TEMP oprnd2) {
 		String dstReg = tempToRegister(dst);
 		String src1Reg = tempToRegister(oprnd1);
 		String src2Reg = tempToRegister(oprnd2);
 		add_registers(dstReg, src1Reg, src2Reg);
 	}
-    public void sub(TEMP dst, TEMP oprnd1, TEMP oprnd2) {
-        String dstReg = tempToRegister(dst);
-        String src1Reg = tempToRegister(oprnd1);
-        String src2Reg = tempToRegister(oprnd2);
+
+	public void sub(TEMP dst, TEMP oprnd1, TEMP oprnd2) {
+		String dstReg = tempToRegister(dst);
+		String src1Reg = tempToRegister(oprnd1);
+		String src2Reg = tempToRegister(oprnd2);
 		appendCode(String.format("sub %s,%s,%s", dstReg, src1Reg, src2Reg));
-    }
+	}
+
 	public void mul(TEMP dst, TEMP oprnd1, TEMP oprnd2) {
-        String dstReg = tempToRegister(dst);
-        String src1Reg = tempToRegister(oprnd1);
-        String src2Reg = tempToRegister(oprnd2);
+		String dstReg = tempToRegister(dst);
+		String src1Reg = tempToRegister(oprnd1);
+		String src2Reg = tempToRegister(oprnd2);
 		appendCode(String.format("mul %s,%s,%s", dstReg, src1Reg, src2Reg));
-    }
+	}
+
 	public void mul_imm(TEMP dst, TEMP oprnd1, int immediate) {
 		String dstReg = tempToRegister(dst);
 		String src1Reg = tempToRegister(oprnd1);
 		appendCode(String.format("mul %s,%s,%d", dstReg, src1Reg, immediate));
 	}
-    public void div(TEMP dst, TEMP oprnd1, TEMP oprnd2) {
-        String dstReg = tempToRegister(dst);
-        String src1Reg = tempToRegister(oprnd1);
-        String src2Reg = tempToRegister(oprnd2);
+
+	public void div(TEMP dst, TEMP oprnd1, TEMP oprnd2) {
+		String dstReg = tempToRegister(dst);
+		String src1Reg = tempToRegister(oprnd1);
+		String src2Reg = tempToRegister(oprnd2);
 		appendCode(String.format("div %s,%s", src1Reg, src2Reg)); // MIPS div instruction only takes two operands
 		appendCode(String.format("mflo %s", dstReg)); // Move result from LO register
-    }
-	public String label(String inlabel)
-	{
+	}
+
+	public String label(String inlabel) {
 		String l = String.format("%s:", inlabel);
 		switch (currentContext) {
 			case GLOBAL_INIT:
@@ -191,69 +207,75 @@ public class MIPSGenerator
 				textContent.append(l).append("\n"); // Default to text section
 		}
 		return l;
-	}	
-	public void jump(String inlabel)
-	{
+	}
+
+	public void jump(String inlabel) {
 		appendCode(String.format("j %s", inlabel));
-	}	
+	}
+
 	/**
 	 * Branch if less than. Compares TEMP oprnd1 with TEMP oprnd2.
 	 */
 	public void blt(TEMP oprnd1, TEMP oprnd2, String label) {
-        String src1Reg = tempToRegister(oprnd1);
-        String src2Reg = tempToRegister(oprnd2);
+		String src1Reg = tempToRegister(oprnd1);
+		String src2Reg = tempToRegister(oprnd2);
 		appendCode(String.format("blt %s,%s,%s", src1Reg, src2Reg, label));
-    }
-	
+	}
+
 	/**
-	 * Branch if less than. Compares TEMP oprnd1 with the value in register oprnd2Reg.
+	 * Branch if less than. Compares TEMP oprnd1 with the value in register
+	 * oprnd2Reg.
 	 */
 	public void blt_temp_reg(TEMP oprnd1, String oprnd2Reg, String label) {
-        String src1Reg = tempToRegister(oprnd1);
+		String src1Reg = tempToRegister(oprnd1);
 		appendCode(String.format("blt %s,%s,%s", src1Reg, oprnd2Reg, label));
-    }
+	}
 
 	/**
 	 * Branch if greater than. Compares TEMP oprnd1 with TEMP oprnd2.
 	 */
 	public void bgt(TEMP oprnd1, TEMP oprnd2, String label) {
-        String src1Reg = tempToRegister(oprnd1);
-        String src2Reg = tempToRegister(oprnd2);
-        appendCode(String.format("bgt %s,%s,%s", src1Reg, src2Reg, label));
-    }
+		String src1Reg = tempToRegister(oprnd1);
+		String src2Reg = tempToRegister(oprnd2);
+		appendCode(String.format("bgt %s,%s,%s", src1Reg, src2Reg, label));
+	}
 
 	/**
-	 * Branch if greater than. Compares TEMP oprnd1 with the value in register oprnd2Reg.
+	 * Branch if greater than. Compares TEMP oprnd1 with the value in register
+	 * oprnd2Reg.
 	 */
 	public void bgt_temp_reg(TEMP oprnd1, String oprnd2Reg, String label) {
-        String src1Reg = tempToRegister(oprnd1);
-        appendCode(String.format("bgt %s,%s,%s", src1Reg, oprnd2Reg, label));
-    }
+		String src1Reg = tempToRegister(oprnd1);
+		appendCode(String.format("bgt %s,%s,%s", src1Reg, oprnd2Reg, label));
+	}
 
 	public void bge(TEMP oprnd1, TEMP oprnd2, String label) {
-        String src1Reg = tempToRegister(oprnd1);
-        String src2Reg = tempToRegister(oprnd2);
+		String src1Reg = tempToRegister(oprnd1);
+		String src2Reg = tempToRegister(oprnd2);
 		appendCode(String.format("bge %s,%s,%s", src1Reg, src2Reg, label));
-    }
+	}
+
 	public void bne(TEMP oprnd1, TEMP oprnd2, String label) {
-        String src1Reg = tempToRegister(oprnd1);
-        String src2Reg = tempToRegister(oprnd2);
+		String src1Reg = tempToRegister(oprnd1);
+		String src2Reg = tempToRegister(oprnd2);
 		appendCode(String.format("bne %s,%s,%s", src1Reg, src2Reg, label));
-    }
+	}
+
 	public void beq(TEMP oprnd1, TEMP oprnd2, String label) {
-        String src1Reg = tempToRegister(oprnd1);
-        String src2Reg = tempToRegister(oprnd2);
+		String src1Reg = tempToRegister(oprnd1);
+		String src2Reg = tempToRegister(oprnd2);
 		appendCode(String.format("beq %s,%s,%s", src1Reg, src2Reg, label));
-    }
+	}
+
 	public void beqz(TEMP oprnd1, String label) {
-        String src1Reg = tempToRegister(oprnd1);
+		String src1Reg = tempToRegister(oprnd1);
 		appendCode(String.format("beqz %s,%s", src1Reg, label));
-    }
-	
+	}
+
 	public void jal(String label) {
 		appendCode(String.format("jal %s", label));
-    }
-	
+	}
+
 	public void addi(TEMP dst, TEMP src, int immediate) {
 		String dstReg = tempToRegister(dst);
 		String srcReg = tempToRegister(src);
@@ -280,7 +302,7 @@ public class MIPSGenerator
 
 	public void move(TEMP dst, TEMP src) {
 		String dstReg = tempToRegister(dst);
-        String srcReg = tempToRegister(src);
+		String srcReg = tempToRegister(src);
 		appendCode(String.format("move %s,%s", dstReg, srcReg));
 	}
 
@@ -288,7 +310,7 @@ public class MIPSGenerator
 		String targetReg = tempToRegister(target);
 		appendCode(String.format("jr %s", targetReg));
 	}
-	
+
 	/**************************************/
 	/* USUAL SINGLETON IMPLEMENTATION ... */
 	/**************************************/
@@ -297,35 +319,33 @@ public class MIPSGenerator
 	/*****************************/
 	/* PREVENT INSTANTIATION ... */
 	/*****************************/
-	protected MIPSGenerator() {}
+	protected MIPSGenerator() {
+	}
 
 	/******************************/
 	/* GET SINGLETON INSTANCE ... */
 	/******************************/
-	public static MIPSGenerator getInstance()
-	{
-		if (instance == null)
-		{
+	public static MIPSGenerator getInstance() {
+		if (instance == null) {
 			/*******************************/
 			/* [0] The instance itself ... */
 			/*******************************/
 			instance = new MIPSGenerator();
 
-			try
-			{
+			try {
 				/*********************************************************************************/
-				/* [1] Open the MIPS text file and write data section with error message strings */
+				/*
+				 * [1] Open the MIPS text file and write data section with error message strings
+				 */
 				/*********************************************************************************/
-				String dirname="./output/";
-				String filename=String.format("MIPS.txt");
+				String dirname = "./output/";
+				String filename = String.format("MIPS.txt");
 
 				/***************************************/
 				/* [2] Open MIPS text file for writing */
 				/***************************************/
-				instance.fileWriter = new PrintWriter(dirname+filename);
-			}
-			catch (Exception e)
-			{
+				instance.fileWriter = new PrintWriter(dirname + filename);
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 
@@ -346,12 +366,14 @@ public class MIPSGenerator
 			System.err.println("ERROR: TEMP " + temp + " was not allocated a register (color -1).");
 			throw new RuntimeException("Register allocation failed for TEMP " + temp);
 		} else { // Allocated color is out of expected range (should be 0-7)
-			 System.err.println("ERROR: TEMP " + temp + " assigned unexpected color " + regNum + ". Expected 0-" + (NUM_ALLOCATABLE_REGISTERS - 1) + ".");
-			 throw new RuntimeException("Unexpected register color " + regNum + " for TEMP " + temp + ". Expected 0-" + (NUM_ALLOCATABLE_REGISTERS - 1) + ".");
+			System.err.println("ERROR: TEMP " + temp + " assigned unexpected color " + regNum + ". Expected 0-"
+					+ (NUM_ALLOCATABLE_REGISTERS - 1) + ".");
+			throw new RuntimeException("Unexpected register color " + regNum + " for TEMP " + temp + ". Expected 0-"
+					+ (NUM_ALLOCATABLE_REGISTERS - 1) + ".");
 		}
 	}
 
-	// --- Dedicated Prologue/Epilogue --- 
+	// --- Dedicated Prologue/Epilogue ---
 
 	public void genPrologue(int frameSize) {
 		appendCode("# Prologue Start");
@@ -365,7 +387,7 @@ public class MIPSGenerator
 		// Save old frame pointer: sw $fp, offset($sp) (e.g., offset = frameSize - 8)
 		appendCode(String.format("sw %s,%d(%s)", FP, frameSize - 8, SP));
 
-		// Set new frame pointer: addi $fp, $sp, frameSize 
+		// Set new frame pointer: addi $fp, $sp, frameSize
 		appendCode(String.format("addi %s,%s,%d", FP, SP, frameSize));
 		appendCode("# Prologue End");
 	}
@@ -394,20 +416,20 @@ public class MIPSGenerator
 		appendCode(String.format("move %s,%s", V0, srcReg));
 	}
 
-    // Add immediate instruction (allows using register names like $sp)
-    public void addi_imm(String dstReg, String srcReg, int immediate) {
+	// Add immediate instruction (allows using register names like $sp)
+	public void addi_imm(String dstReg, String srcReg, int immediate) {
 		appendCode(String.format("addi %s,%s,%d", dstReg, srcReg, immediate));
-    }
+	}
 
-    // Load immediate value into a specific register (e.g., $a0)
-    public void li_imm(String dstReg, int immediate) {
+	// Load immediate value into a specific register (e.g., $a0)
+	public void li_imm(String dstReg, int immediate) {
 		appendCode(String.format("li %s,%d", dstReg, immediate));
-    }
+	}
 
-    public void move_from_v0(TEMP dst) {
-        String dstReg = tempToRegister(dst);
-        appendCode(String.format("move %s,%s", dstReg, V0));
-    }
+	public void move_from_v0(TEMP dst) {
+		String dstReg = tempToRegister(dst);
+		appendCode(String.format("move %s,%s", dstReg, V0));
+	}
 
 	/**
 	 * Load Address using TEMP object for destination.
@@ -418,35 +440,35 @@ public class MIPSGenerator
 		la(dstReg, label);
 	}
 
-    // Syscall
-    public void syscall() {
+	// Syscall
+	public void syscall() {
 		appendCode("syscall");
-    }
+	}
 
-    // Store register relative to $sp
-    public void sw_reg_sp(String regName, int offset) { // Keep this version for String register names
+	// Store register relative to $sp
+	public void sw_reg_sp(String regName, int offset) { // Keep this version for String register names
 		appendCode(String.format("sw %s,%d(%s)", regName, offset, SP));
-    }
+	}
 
-    // Load register relative to $sp
-    public void lw_reg_sp(String regName, int offset) { // Keep this version for String register names
+	// Load register relative to $sp
+	public void lw_reg_sp(String regName, int offset) { // Keep this version for String register names
 		appendCode(String.format("lw %s,%d(%s)", regName, offset, SP));
-    }
+	}
 
-    // Append a raw, pre-formatted MIPS instruction
-    public void appendRawInstruction(String instruction) {
-        // Ensure proper formatting (e.g., leading tab, trailing newline)
-        String formatted = instruction.trim();
-        if (!formatted.isEmpty()) {
-            appendCode(formatted);
-        }
-    }
+	// Append a raw, pre-formatted MIPS instruction
+	public void appendRawInstruction(String instruction) {
+		// Ensure proper formatting (e.g., leading tab, trailing newline)
+		String formatted = instruction.trim();
+		if (!formatted.isEmpty()) {
+			appendCode(formatted);
+		}
+	}
 
-    // Move TEMP value into $a0
-    public void move_temp_to_a0(TEMP src) {
-        String srcReg = tempToRegister(src);
+	// Move TEMP value into $a0
+	public void move_temp_to_a0(TEMP src) {
+		String srcReg = tempToRegister(src);
 		appendCode(String.format("move %s,%s", A0, srcReg));
-    }
+	}
 
 	public void print_int(TEMP t) {
 		move_temp_to_a0(t);
@@ -457,44 +479,44 @@ public class MIPSGenerator
 		syscall();
 	}
 
-    // Branch if less than or equal to zero
-    public void blez(TEMP cond, String label) {
-        String condReg = tempToRegister(cond);
+	// Branch if less than or equal to zero
+	public void blez(TEMP cond, String label) {
+		String condReg = tempToRegister(cond);
 		appendCode(String.format("blez %s,%s", condReg, label));
-    }
+	}
 
-    // Store TEMP value at offset relative to another TEMP's address
-    public void sw_offset(TEMP src, int offset, TEMP base) {
-        String srcReg = tempToRegister(src);
-        String baseReg = tempToRegister(base);
+	// Store TEMP value at offset relative to another TEMP's address
+	public void sw_offset(TEMP src, int offset, TEMP base) {
+		String srcReg = tempToRegister(src);
+		String baseReg = tempToRegister(base);
 		appendCode(String.format("sw %s,%d(%s)", srcReg, offset, baseReg));
-    }
+	}
 
-    // Load TEMP value from offset relative to another TEMP's address
-    public void lw_offset(TEMP dst, int offset, TEMP base) {
-        String dstReg = tempToRegister(dst);
-        String baseReg = tempToRegister(base);
+	// Load TEMP value from offset relative to another TEMP's address
+	public void lw_offset(TEMP dst, int offset, TEMP base) {
+		String dstReg = tempToRegister(dst);
+		String baseReg = tempToRegister(base);
 		appendCode(String.format("lw %s,%d(%s)", dstReg, offset, baseReg));
-    }
+	}
 
-    // Print string given a data label
-    public void print_string_from_label(String label) {
-        la(A0, label);
-        li_imm(V0, 4);
-        syscall();
-    }
+	// Print string given a data label
+	public void print_string_from_label(String label) {
+		la(A0, label);
+		li_imm(V0, 4);
+		syscall();
+	}
 
-    // Exit program syscall
-    public void exit() {
-        li_imm(V0, 10);
-        syscall();
-    }
+	// Exit program syscall
+	public void exit() {
+		li_imm(V0, 10);
+		syscall();
+	}
 
-    // Branch if less than zero
-    public void bltz(TEMP cond, String label) {
-        String condReg = tempToRegister(cond);
+	// Branch if less than zero
+	public void bltz(TEMP cond, String label) {
+		String condReg = tempToRegister(cond);
 		appendCode(String.format("bltz %s,%s", condReg, label));
-    }
+	}
 
 	public void malloc(TEMP dst, TEMP size) {
 		move_temp_to_a0(size);
@@ -503,7 +525,8 @@ public class MIPSGenerator
 
 	/**
 	 * Allocates memory on the heap using the sbrk syscall.
-	 * @param dst The TEMP to store the address of the allocated memory.
+	 * 
+	 * @param dst     The TEMP to store the address of the allocated memory.
 	 * @param sizeReg The REGISTER NAME holding the number of bytes to allocate.
 	 */
 	public void malloc(TEMP dst, String sizeReg) {
@@ -517,16 +540,16 @@ public class MIPSGenerator
 	// Make this public so IRcommand_New_Class can call it
 	public void _malloc(TEMP dst) {
 		li_imm(V0, 9); // Syscall code for sbrk
-		syscall();     // Allocate memory, address is in $v0
+		syscall(); // Allocate memory, address is in $v0
 		move_from_v0(dst); // Move address from $v0 to dst TEMP's register
 	}
 
-    // Shift Left Logical using TEMPs
-    public void sll(TEMP dst, TEMP src, int shiftAmount) {
-        String dstReg = tempToRegister(dst);
-        String srcReg = tempToRegister(src);
+	// Shift Left Logical using TEMPs
+	public void sll(TEMP dst, TEMP src, int shiftAmount) {
+		String dstReg = tempToRegister(dst);
+		String srcReg = tempToRegister(src);
 		sll_registers(dstReg, srcReg, shiftAmount);
-    }
+	}
 
 	// NEW: Shift Left Logical using register names
 	public void sll_registers(String dstReg, String srcReg, int shiftAmount) {
@@ -571,10 +594,11 @@ public class MIPSGenerator
 	// NEW: Store word specifically for global initialization
 	public void sw_global_reg(String srcReg, String globalVarLabel) {
 		// Use TEMP_REG_1 ($s0) as a temporary register for the address
-		String tempAddrReg = TEMP_REG_1; 
+		String tempAddrReg = TEMP_REG_1;
 		// 1. Load address of global variable into the temporary register
 		appendCode(String.format("la %s, %s", tempAddrReg, globalVarLabel));
-		// 2. Store the value from srcReg into the global variable address (held in tempAddrReg)
+		// 2. Store the value from srcReg into the global variable address (held in
+		// tempAddrReg)
 		appendCode(String.format("sw %s, 0(%s)", srcReg, tempAddrReg));
 	}
 
@@ -601,7 +625,8 @@ public class MIPSGenerator
 		lw_offset(dstReg, offset, baseReg); // Call the register-based version
 	}
 
-	// NEW: Store word from specific register into offset relative to TEMP base address
+	// NEW: Store word from specific register into offset relative to TEMP base
+	// address
 	public void sw_offset_from_reg(String srcReg, int offset, TEMP baseTemp) {
 		String baseReg = tempToRegister(baseTemp);
 		sw_offset(srcReg, offset, baseReg); // Call the register-based version
@@ -612,13 +637,15 @@ public class MIPSGenerator
 		appendCode(String.format("add %s,%s,%s", dstReg, src1Reg, src2Reg));
 	}
 
-	// NEW: Add operation using TEMP source 1 and register source 2 into a register dest
+	// NEW: Add operation using TEMP source 1 and register source 2 into a register
+	// dest
 	public void add_temp_into_reg(String dstReg, TEMP src1, String src2Reg) {
 		String src1Reg = tempToRegister(src1);
 		add_registers(dstReg, src1Reg, src2Reg);
 	}
 
-	// NEW: Add operation using TEMP source 1 and register source 2 into a register dest
+	// NEW: Add operation using TEMP source 1 and register source 2 into a register
+	// dest
 	public void add_temp_reg(String dstReg, TEMP src1, String src2Reg) {
 		String src1Reg = tempToRegister(src1);
 		add_registers(dstReg, src1Reg, src2Reg);
@@ -627,12 +654,13 @@ public class MIPSGenerator
 	// NEW: Load global variable into TEMP
 	public void load_global(TEMP dst, String varName) {
 		String dstReg = tempToRegister(dst);
-        String globalLabel = "global_" + varName;
+		String globalLabel = "global_" + varName;
 		// Use TEMP_REG_1 ($s0) as a temporary register for the address
 		String tempAddrReg = TEMP_REG_1;
 		// 1. Load address of the global variable into the temporary register
 		la(tempAddrReg, globalLabel);
-		// 2. Load the word from the global variable address (in tempAddrReg) into dstReg
+		// 2. Load the word from the global variable address (in tempAddrReg) into
+		// dstReg
 		lw_offset(dstReg, 0, tempAddrReg);
 	}
 
@@ -641,7 +669,8 @@ public class MIPSGenerator
 		appendCode(String.format("jr %s", targetReg));
 	}
 
-	// NEW: Adds standard library helper functions (strlen, strcpy, strcmp) to the output
+	// NEW: Adds standard library helper functions (strlen, strcpy, strcmp) to the
+	// output
 	private void appendHelperFunctions(PrintWriter finalWriter) {
 		finalWriter.println("\n");
 		finalWriter.println("#-----------------------------------------------\n");
@@ -704,8 +733,10 @@ public class MIPSGenerator
 		finalWriter.println("strcmp_loop:");
 		finalWriter.println(String.format("\tlb      %s, 0($a0) # Load byte from str1 into $s0", TEMP_REG_1));
 		finalWriter.println(String.format("\tlb      %s, 0($a1) # Load byte from str2 into $s1", TEMP_REG_2));
-		finalWriter.println(String.format("\tbne     %s, %s, strcmp_neq # If bytes differ, strings not equal", TEMP_REG_1, TEMP_REG_2));
-		finalWriter.println(String.format("\tbeqz    %s, strcmp_end # If byte is null (and they matched), strings are equal, end", TEMP_REG_1));
+		finalWriter.println(String.format("\tbne     %s, %s, strcmp_neq # If bytes differ, strings not equal",
+				TEMP_REG_1, TEMP_REG_2));
+		finalWriter.println(String.format(
+				"\tbeqz    %s, strcmp_end # If byte is null (and they matched), strings are equal, end", TEMP_REG_1));
 		finalWriter.println("\taddi    $a0, $a0, 1 # Move to next char str1");
 		finalWriter.println("\taddi    $a1, $a1, 1 # Move to next char str2");
 		finalWriter.println("\tj       strcmp_loop # Loop");
@@ -747,7 +778,7 @@ public class MIPSGenerator
 		finalWriter.println("\tli      $v0, 10 # Exit");
 		finalWriter.println("\tsyscall");
 		finalWriter.println("");
-		
+
 		// Add Division by Zero handler
 		finalWriter.println("division_by_zero:");
 		finalWriter.println("\tla      $a0, string_illegal_div_by_0");
@@ -783,7 +814,8 @@ public class MIPSGenerator
 		lw_offset(tempToRegister(dst), offset, SP);
 	}
 
-	// NEW: Multiply operation using TEMP source 1 and register source 2 into a register destination
+	// NEW: Multiply operation using TEMP source 1 and register source 2 into a
+	// register destination
 	public void mul_temp_reg(String dstReg, TEMP src1, String src2Reg) {
 		String src1Reg = tempToRegister(src1);
 		mul_registers(dstReg, src1Reg, src2Reg); // Use the existing mul_registers

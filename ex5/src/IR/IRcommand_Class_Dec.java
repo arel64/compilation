@@ -2,6 +2,7 @@
 /* PACKAGE */
 /***********/
 package IR;
+
 import AST.AST_TYPE;
 
 /*******************/
@@ -18,22 +19,19 @@ import java.util.List;
 import java.util.ArrayList;
 import MIPS.MIPSGenerator;
 
-public class IRcommand_Class_Dec extends IRcommand
-{
+public class IRcommand_Class_Dec extends IRcommand {
 	public String name;
 	public List<String> vmtMethodLabels;
-	
-	public IRcommand_Class_Dec(String name, List<String> vmtMethodLabels)
-	{
+
+	public IRcommand_Class_Dec(String name, List<String> vmtMethodLabels) {
 		this.name = name;
 		this.vmtMethodLabels = (vmtMethodLabels != null) ? new ArrayList<>(vmtMethodLabels) : new ArrayList<>();
 	}
 
 	@Override
-    public String toString() {
-        return String.format("CLASS_DEC: %s, VMT_Labels: %s", name, vmtMethodLabels);
-    }
-
+	public String toString() {
+		return String.format("CLASS_DEC: %s, VMT_Labels: %s", name, vmtMethodLabels);
+	}
 
 	@Override
 	public HashSet<TEMP> liveTEMPs() {
@@ -43,9 +41,9 @@ public class IRcommand_Class_Dec extends IRcommand
 	/***************/
 	/* MIPS me !!! */
 	/***************/
-	public void MIPSme()
-	{
+	public void MIPSme() {
 		MIPSGenerator generator = MIPSGenerator.getInstance();
+
 		String vmtLabel = "VMT_" + name;
 		StringBuilder vmtData = new StringBuilder();
 		vmtData.append(vmtLabel).append(": .word ");

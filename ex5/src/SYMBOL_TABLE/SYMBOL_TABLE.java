@@ -20,6 +20,7 @@ import TYPES.*;
 /* SYMBOL TABLE */
 /****************/
 import SYMBOL_TABLE.ScopeType;
+
 public class SYMBOL_TABLE {
 	private int hashArraySize = 13;
 
@@ -36,6 +37,7 @@ public class SYMBOL_TABLE {
 	private Stack<ScopeType> scopeTypeStack = new Stack<>(); // Stack to track scope types
 	private int currentLocalOffset = 0; // Reset per function scope
 	private int currentParamOffset = 0; // Reset per function scope
+	private int classFuncOffset = 0;
 	private static final int WORD_SIZE = 4; // Assuming 4 bytes per variable/pointer
 	// --- End Offset Calculation Fields ---
 
@@ -73,25 +75,26 @@ public class SYMBOL_TABLE {
 	/****************************************************************************/
 	/* Enter a variable, function, class type or array type to the symbol table */
 	/****************************************************************************/
-	public void enter(String name, TYPE t)
-	{
+	public String enter(String name, TYPE t) {
 		/*************************************************/
 		/* [1] Compute the hash value for this new entry */
 		/*************************************************/
 		int hashValue = hash(name);
 
 		/******************************************************************************/
-		/* [2] Extract what will eventually be the next entry in the hashed position  */
-		/*     NOTE: this entry can very well be null, but the behaviour is identical */
+		/* [2] Extract what will eventually be the next entry in the hashed position */
+		/* NOTE: this entry can very well be null, but the behaviour is identical */
 		/******************************************************************************/
 		SYMBOL_TABLE_ENTRY next = table[hashValue];
 
 		/**************************************************************************/
-		/* [2.5] Calculate size                                                   */
+		/* [2.5] Calculate size */
 		/**************************************************************************/
 		int calculatedSize = 0;
-		try { calculatedSize = t.getSize(); } catch (Exception ex) {
-			 System.err.printf("Warning: getSize() failed for %s (%s)\n", name, t.getName());
+		try {
+			calculatedSize = t.getSize();
+		} catch (Exception ex) {
+			System.err.printf("Warning: getSize() failed for %s (%s)\n", name, t.getName());
 		}
 
 		/**************************************************************************/
@@ -106,13 +109,11 @@ public class SYMBOL_TABLE {
 		if (name.equals("SCOPE-BOUNDARY")) // Special marker, no offset needed
 		{
 			e.offset = Integer.MIN_VALUE;
-		}
-		else if (scopeTypeStack.isEmpty()) // Global scope (stack is empty)
+		} else if (scopeTypeStack.isEmpty()) // Global scope (stack is empty)
 		{
 			e.isGlobal = true; // Mark entry as global
 			e.offset = 0; // Globals might use labels, offset 0 is placeholder
-		}
-		else // Inside a scope (Function, Params, or Body)
+		} else // Inside a scope (Function, Params, or Body)
 		{
 			ScopeType currentScope = scopeTypeStack.peek();
 
@@ -120,34 +121,74 @@ public class SYMBOL_TABLE {
 				// Assign parameter offset (positive, starts at 0)
 				// Check if it's actually a variable-like type
 				if (!t.isFunction()) { // Allow simple types, arrays, maybe nil? Be careful with Void.
-					// System.out.println("Assigning PARAM offset " + currentParamOffset + " to " + name);
+					// System.out.println("Assigning PARAM offset " + currentParamOffset + " to " +
+					// name);
 					e.offset = currentParamOffset;
 					currentParamOffset += WORD_SIZE; // Increment for next parameter
 				} else {
 					e.offset = Integer.MIN_VALUE; // Functions/classes in param list? Unlikely.
 				}
 			} else if (currentScope == ScopeType.BODY || currentScope == ScopeType.FUNCTION) {
-				// Assign local variable offset (negative, starts at -12)
-				// Assign offset only to actual variables/data, not types/functions/void/arrays/nil? Check array logic later.
 				if (!t.isFunction()) {
-					// System.out.println("Assigning LOCAL offset " + currentLocalOffset + " to " + name);
 					e.offset = currentLocalOffset;
 					currentLocalOffset -= WORD_SIZE; // Decrement for next *local* variable
 				} else {
 					e.offset = Integer.MIN_VALUE; // No stack offset for these types
 				}
 			} else if (currentScope == ScopeType.CLASS) {
-				// Class member offsets (field/method) are handled by TYPE_CLASS, not the stack frame.
-				// Assign a placeholder offset here. Retrieval will happen via TYPE_CLASS.
-				e.offset = currentLocalOffset;
-				currentLocalOffset -= WORD_SIZE;
+				if (t.isFunction()) {
+					e.offset = classFuncOffset;
+					classFuncOffset += WORD_SIZE;
+				} else {
+					e.offset = currentLocalOffset;
+					currentLocalOffset += WORD_SIZE;
+				}
 			} else {
-				// Should not happen if scope types are managed correctly
 				e.offset = Integer.MIN_VALUE;
 				System.err.println("Warning: enter() called in unexpected scope state.");
 			}
 		}
+		boolean inClassScope = false;
+		String className = null;
+		ScopeType immediateScopeType = scopeTypeStack.isEmpty() ? null : scopeTypeStack.peek();
 
+		if (immediateScopeType == ScopeType.CLASS) {
+			inClassScope = true;
+			SYMBOL_TABLE_ENTRY walker = top;
+			while (walker != null && !walker.name.equals("SCOPE-BOUNDARY")) {
+				walker = walker.prevtop;
+			}
+			// walker should now be the SCOPE-BOUNDARY entry for the class.
+			// The entry *before* it (walker.prevtop) should be the class definition.
+			if (walker != null && walker.prevtop != null && walker.prevtop.type instanceof TYPE_CLASS) {
+				className = walker.prevtop.name;
+			}
+		}
+		// We might still be nested inside a class (e.g., in a method).
+		// A simpler check: just see if *any* scope in the stack is CLASS.
+		// This is less precise for getting the *immediate* class name but good for the
+		// flag.
+		else { // Check ancestor scopes if immediate is not CLASS
+			for (ScopeType scope : scopeTypeStack) {
+				if (scope == ScopeType.CLASS) {
+					inClassScope = true;
+					// Finding the correct className here is harder. We'd need to know
+					// which scope boundary corresponds to *this* class scope.
+					// Let's leave className null for now if only an *outer* scope is CLASS.
+					// The lookup mechanism might need refinement later if nested classes/methods
+					// need qualified names generated here.
+					break;
+				}
+			}
+		}
+
+		e.inClassScope = inClassScope;
+		e.className = className; // Store the found class name (can be null)
+		if (className != null && t.isFunction()) {
+			e.name = className + "." + name;
+		}
+		// e.name = className + "." + name; // DO NOT MODIFY the name used for lookup.
+		// Keep original 'name'.
 		// System.out.println(e); // DEBUG: Print entry details including offset
 
 		/**********************************************/
@@ -164,13 +205,13 @@ public class SYMBOL_TABLE {
 		/* [6] Print Symbol Table */
 		/**************************/
 		// PrintMe(); // Keep commented out unless debugging
+		return e.name;
 	}
 
 	/****************************************************************************/
 	/* begine scope = Enter the <SCOPE-BOUNDARY> element to the data structure */
 	/****************************************************************************/
-	public void beginScope(ScopeType scopeType)
-	{
+	public void beginScope(ScopeType scopeType) {
 		/******************************************/
 		/* [1] Adjust and Push offset/scope state */
 		/******************************************/
@@ -181,10 +222,10 @@ public class SYMBOL_TABLE {
 				// Entering a function: Reset locals and params, push previous local state.
 				offsetStack.push(currentLocalOffset); // Save outer scope's local offset
 				currentLocalOffset = -12; // Start locals below saved $ra(-4) and $fp(-8)
-				currentParamOffset = 0;   // Reset parameter offset for new function
+				currentParamOffset = 0; // << REVERTED: Parameters start at 0 (likely incorrect based on prologue)
 				break;
 			case PARAMS:
-				// Entering parameter list: Only reset param offset.
+				// Entering parameter list: Reset param offset.
 				// Parameter offsets start at 0($fp).
 				currentParamOffset = 0;
 				// No push/pop needed for param offset as it's reset per function.
@@ -199,24 +240,25 @@ public class SYMBOL_TABLE {
 			case CLASS:
 				// Entering a class: Reset locals and params, push previous local state.
 				offsetStack.push(currentLocalOffset); // Save outer scope's local offset
-				currentLocalOffset = 0; // Start locals below saved $ra(-4) and $fp(-8)
+				currentLocalOffset = 4;
 				currentParamOffset = 0;
+				classFuncOffset = 0;
 				break;
 		}
 
 		/************************************************************************/
-		/* [2] Enter boundary marker                                            */
+		/* [2] Enter boundary marker */
 		/************************************************************************/
 		enter(
-			"SCOPE-BOUNDARY",
-			new TYPE_FOR_SCOPE_BOUNDARIES("NONE"));
+				"SCOPE-BOUNDARY",
+				new TYPE_FOR_SCOPE_BOUNDARIES("NONE"));
 
 		/*********************************************/
 		/* Print the symbol table after every change */
 		/*********************************************/
 		// PrintMe(); // Keep commented out
 
-		scope_count ++;
+		scope_count++;
 	}
 
 	public boolean exists(String name) {
@@ -225,8 +267,10 @@ public class SYMBOL_TABLE {
 	}
 
 	/********************************************************************************/
-	/* end scope = Keep popping elements out of the data structure,                 */
-	/* from most recent element entered, until a <NEW-SCOPE> element is encountered */
+	/* end scope = Keep popping elements out of the data structure, */
+	/*
+	 * from most recent element entered, until a <NEW-SCOPE> element is encountered
+	 */
 	/********************************************************************************/
 	public void endScope() {
 		ScopeType endedScopeType = ScopeType.BODY; // Default guess
@@ -241,25 +285,30 @@ public class SYMBOL_TABLE {
 		/**************************************************************************/
 		while (top != null && !top.name.equals("SCOPE-BOUNDARY")) // Check top != null
 		{
-			// Remove the entry from the hash table *only if* it's the head of the list there
+			// Remove the entry from the hash table *only if* it's the head of the list
+			// there
 			if (table[top.index] == top) {
 				table[top.index] = top.next;
 			} else {
-				// Need to potentially update the 'next' pointer of the preceding element in the hash chain.
+				// Need to potentially update the 'next' pointer of the preceding element in the
+				// hash chain.
 				// This is complex and the original implementation didn't do it either.
 				// The primary mechanism for removal is popping from the 'top' stack.
-				// Hash table entries from closed scopes become "stale" but inaccessible via find/findEntryInCurrentScopeStack.
+				// Hash table entries from closed scopes become "stale" but inaccessible via
+				// find/findEntryInCurrentScopeStack.
 			}
 			// Pop from the scope stack
 			top = top.prevtop;
-			// Decrement top_index? The original didn't seem to use top.prevtop_index consistently.
+			// Decrement top_index? The original didn't seem to use top.prevtop_index
+			// consistently.
 			// Let's stick to the original 'test' logic for prevtop.
 			if (top != null) {
 				top_index = top.prevtop_index + 1; // Infer next index? Risky. Stick to original test logic.
 			} else {
 				top_index = 0;
 			}
-			// Original test logic didn't decrement top_index this way. Let's revert endScope closer to original.
+			// Original test logic didn't decrement top_index this way. Let's revert
+			// endScope closer to original.
 		}
 
 		// Revert endScope to be exactly like the 'test' file logic
@@ -268,13 +317,16 @@ public class SYMBOL_TABLE {
 			// Retrieve the element at the head of the hash list for this entry's index
 			SYMBOL_TABLE_ENTRY head = table[temp_top.index];
 
-			// If the element we are popping is the head of the list in the table array, update the head
+			// If the element we are popping is the head of the list in the table array,
+			// update the head
 			if (head == temp_top) {
 				table[temp_top.index] = temp_top.next;
 			} else {
-				// If it's not the head, we need to find the element *before* it in the hash chain
+				// If it's not the head, we need to find the element *before* it in the hash
+				// chain
 				// and update *its* next pointer to skip the element we are popping.
-				// This ensures the hash chain remains valid for lookups of symbols from outer scopes
+				// This ensures the hash chain remains valid for lookups of symbols from outer
+				// scopes
 				// that might have hashed to the same index.
 				SYMBOL_TABLE_ENTRY prevInHashChain = null;
 				SYMBOL_TABLE_ENTRY currentInHashChain = head;
@@ -331,12 +383,15 @@ public class SYMBOL_TABLE {
 		}
 
 		// Restore local offset ONLY if a FUNCTION or BODY scope ended
-		if ((endedScopeType == ScopeType.FUNCTION || endedScopeType == ScopeType.BODY) && !offsetStack.isEmpty()) {
-			// System.out.println("Restoring local offset from stack: " + offsetStack.peek());
+		if ((endedScopeType == ScopeType.FUNCTION || endedScopeType == ScopeType.BODY)
+				|| endedScopeType == ScopeType.CLASS && !offsetStack.isEmpty()) {
+			// System.out.println("Restoring local offset from stack: " +
+			// offsetStack.peek());
 			currentLocalOffset = offsetStack.pop();
 		} else {
 			// Don't pop offsetStack if PARAMS scope ended or if stack mismatch occurs
-			// System.out.println("Debug: endScope - not popping offset stack (endedType=" + endedScopeType + ", stackEmpty=" + offsetStack.isEmpty() + ")");
+			// System.out.println("Debug: endScope - not popping offset stack (endedType=" +
+			// endedScopeType + ", stackEmpty=" + offsetStack.isEmpty() + ")");
 		}
 
 		/*********************************************/
@@ -344,7 +399,7 @@ public class SYMBOL_TABLE {
 		/*********************************************/
 		// PrintMe(); // Keep commented out
 
-		scope_count --;
+		scope_count--;
 	}
 
 	public static int n = 0;
@@ -398,7 +453,8 @@ public class SYMBOL_TABLE {
 					/*******************************/
 					fileWriter.format("node_%d_%d ", i, j);
 					// Added offset and size to the printout for debugging
-					fileWriter.format("[label=\"<f0>%s|<f1>%s|{<f_off>off=%d|<f_size>sz=%d}|<f2>prevtop=%d|<f3>next\"];\n",
+					fileWriter.format(
+							"[label=\"<f0>%s|<f1>%s|{<f_off>off=%d|<f_size>sz=%d}|<f2>prevtop=%d|<f3>next\"];\n",
 							it.name,
 							it.type.getName(),
 							it.offset, // Print offset
@@ -510,8 +566,10 @@ public class SYMBOL_TABLE {
 		while (e != null) {
 			if (e.name.equals(name) && e.type.equals(recvType)) {
 				// Found the name with the specified type. Now check if it's global.
-				// A simple check: is its prevtop chain ending in null without hitting a scope boundary?
-				// Or, more robustly, walk up its prevtop chain. If we hit null before a SCOPE-BOUNDARY, it's global.
+				// A simple check: is its prevtop chain ending in null without hitting a scope
+				// boundary?
+				// Or, more robustly, walk up its prevtop chain. If we hit null before a
+				// SCOPE-BOUNDARY, it's global.
 				SYMBOL_TABLE_ENTRY checker = e.prevtop;
 				boolean isGlobal = true;
 				while (checker != null) {
@@ -524,18 +582,13 @@ public class SYMBOL_TABLE {
 				if (isGlobal)
 					return true;
 
-				// If not global, continue searching up the stack for other potential matches
 			}
-			// This original logic just checked if the name existed *before* the first scope boundary.
-			// Let's refine the logic to actually check if the *found* entry is in the global scope.
-			// Removed the break on SCOPE-BOUNDARY to allow finding shadowed globals if needed.
+
 			e = e.prevtop;
 		}
-		// If loop finishes, name/type combo wasn't found in the global scope.
 		return false;
 	}
 
-	// Refined version: Find first occurrence, then check if it's global.
 	public boolean isFirstOccurrenceGlobal(String name) {
 		SYMBOL_TABLE_ENTRY e = findEntryInCurrentScopeStack(name);
 		if (e == null)
@@ -557,9 +610,6 @@ public class SYMBOL_TABLE {
 		return (e != null) ? e.type : null;
 	}
 
-	// Original getTypeInGlobalScope searches the whole stack until the first boundary is hit.
-	// It doesn't guarantee the found type *is* global if shadowed.
-	// Let's provide a version that guarantees finding the global type if it exists.
 	public TYPE getTypeInGlobalScope(String name) {
 		if (name == null) {
 			return null;
@@ -581,7 +631,8 @@ public class SYMBOL_TABLE {
 
 			if (isCurrentGlobal && e.name.equals(name)) {
 				globalType = e.type; // Found a global entry with the name
-				// Keep searching in case of errors/multiple globals? No, standard assumes one global.
+				// Keep searching in case of errors/multiple globals? No, standard assumes one
+				// global.
 				break; // Found the (or a) global definition.
 			}
 			e = e.prevtop;
@@ -603,7 +654,8 @@ public class SYMBOL_TABLE {
 		return globalType; // Return found global type or null
 	}
 
-	// Checks if a name exists anywhere in the accessible scope stack (current or outer)
+	// Checks if a name exists anywhere in the accessible scope stack (current or
+	// outer)
 	public boolean existsInScopeStack(String name) {
 		return findEntryInCurrentScopeStack(name) != null;
 	}
@@ -619,51 +671,84 @@ public class SYMBOL_TABLE {
 
 		for (e = table[hash(name)]; e != null; e = e.next) {
 			if (name.equals(e.name)) {
-				// To find the innermost, we need to check the scope stack, not just the hash chain.
+				// To find the innermost, we need to check the scope stack, not just the hash
+				// chain.
 				// Use findEntryInCurrentScopeStack instead.
 				SYMBOL_TABLE_ENTRY foundEntry = findEntryInCurrentScopeStack(name);
 				return (foundEntry != null) ? foundEntry.type : null;
 			}
 		}
 
-		return null; // Should ideally not be reached if findEntryInCurrentScopeStack is used correctly.
+		return null; // Should ideally not be reached if findEntryInCurrentScopeStack is used
+						// correctly.
 	}
 
 	// Helper to find entry by searching the current scope stack (most recent first)
 	public SYMBOL_TABLE_ENTRY findEntryInCurrentScopeStack(String name) {
-		// System.out.format("SymbolTable: Searching stack for '%s' starting from top...\n", name);
+		// System.out.format("SymbolTable: Searching stack for '%s' starting from
+		// top...\n", name);
 		SYMBOL_TABLE_ENTRY e = top;
 		while (e != null) {
-			// System.out.format("SymbolTable:  Checking entry '%s' (type: %s, scope_boundary: %b)\n",
-			// 							e.name,
-			// 							(e.type != null ? e.type.getName() : "null"),
-			// 							e.name.equals("SCOPE-BOUNDARY"));
-			// Don't stop at SCOPE-BOUNDARY if it's the name we are looking for (though unlikely)
+			// System.out.format("SymbolTable: Checking entry '%s' (type: %s,
+			// scope_boundary: %b)\n",
+			// e.name,
+			// (e.type != null ? e.type.getName() : "null"),
+			// e.name.equals("SCOPE-BOUNDARY"));
+			// Don't stop at SCOPE-BOUNDARY if it's the name we are looking for (though
+			// unlikely)
 			if (e.name.equals(name)) {
-				// System.out.format("SymbolTable:  FOUND '%s'! Entry: %s\n", name, e.toString());
+				// System.out.format("SymbolTable: FOUND '%s'! Entry: %s\n", name,
+				// e.toString());
 				return e; // Found the most recent declaration
 			}
 			if (e.name.equals("SCOPE-BOUNDARY")) {
-				// System.out.format("SymbolTable:  Hit scope boundary.\n");
-				// If we hit a boundary *before* finding the name, continue searching outer scopes
-				// But the request implies finding the *innermost*, so we should stop if name not found yet?
+				// System.out.format("SymbolTable: Hit scope boundary.\n");
+				// If we hit a boundary *before* finding the name, continue searching outer
+				// scopes
+				// But the request implies finding the *innermost*, so we should stop if name
+				// not found yet?
 				// Let's keep searching up the stack based on prevtop
 			}
 			e = e.prevtop;
 		}
-		// System.out.format("SymbolTable: Search finished. '%s' NOT FOUND in current stack.\n", name);
+		// System.out.format("SymbolTable: Search finished. '%s' NOT FOUND in current
+		// stack.\n", name);
 		return null; // Not found in current stack segment or any outer scope stack segment
 	}
 
-	// Get offset for a found entry
 	public int getOffset(String name) {
-		// System.out.format("SymbolTable: getOffset requested for '%s'\n", name);
-		SYMBOL_TABLE_ENTRY e = findEntryInCurrentScopeStack(name); // Use stack search for correctness
+		SYMBOL_TABLE_ENTRY e = findEntryInCurrentScopeStack(name);
 		if (e != null) {
-			// System.out.format("SymbolTable: getOffset found entry for '%s', returning offset %d\n", name, e.offset);
+
 			return e.offset;
 		}
-		// System.out.format("SymbolTable: getOffset did NOT find entry for '%s', returning MIN_VALUE\n", name);
-		return Integer.MIN_VALUE; // Indicate not found or offset not set
+
+		return Integer.MIN_VALUE;
+	}
+
+	public String getClassName(String name) {
+		SYMBOL_TABLE_ENTRY e = findEntryInCurrentScopeStack(name);
+		return (e != null) ? e.className : null;
+	}
+
+	public void printSymbolTable() {
+		System.out.println("\n=== SYMBOL TABLE CONTENTS ===");
+		System.out.println("Format: [Name] (Type) Offset: <offset> Class: <class>");
+		System.out.println("----------------------------------------");
+
+		SYMBOL_TABLE_ENTRY e = top;
+		while (e != null) {
+			if (e.name.equals("SCOPE-BOUNDARY")) {
+				System.out.println("-------- SCOPE BOUNDARY --------");
+			} else {
+				System.out.printf("%s (%s) Offset: %d Class: %s\n",
+						e.name,
+						(e.type != null ? e.type.getName() : "null"),
+						e.offset,
+						(e.className != null ? e.className : "null"));
+			}
+			e = e.prevtop;
+		}
+		System.out.println("======= END SYMBOL TABLE =======\n");
 	}
 }

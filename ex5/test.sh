@@ -130,8 +130,8 @@ for input_file in "${test_files[@]}"; do
     print_success "  Compiler ran successfully."
 
     # Run SPIM, redirecting both stdout and stderr to the output file.
-    # Ignore SPIM's exit code entirely.
-    spim -f "${temp_mips_file}" > "${temp_spim_output_file}" 2>&1 || true
+    # Ignore SPIM's exit code entirely, including timeout exit code (124).
+    timeout 5s spim -f "${temp_mips_file}" > "${temp_spim_output_file}" 2>&1 || true
 
     # Compare actual SPIM output with expected output using diff
     if [ ! -f "${expected_output_file}" ]; then
