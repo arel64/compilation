@@ -595,6 +595,18 @@ public class MIPSGenerator
 		lw_offset(dstReg, offset, baseReg);
 	}
 
+	// NEW: Load word using TEMP base into specific register destination
+	public void lw_offset(String dstReg, int offset, TEMP baseTemp) {
+		String baseReg = tempToRegister(baseTemp);
+		lw_offset(dstReg, offset, baseReg); // Call the register-based version
+	}
+
+	// NEW: Store word from specific register into offset relative to TEMP base address
+	public void sw_offset_from_reg(String srcReg, int offset, TEMP baseTemp) {
+		String baseReg = tempToRegister(baseTemp);
+		sw_offset(srcReg, offset, baseReg); // Call the register-based version
+	}
+
 	// NEW: Add operation using register names (strings)
 	public void add_registers(String dstReg, String src1Reg, String src2Reg) {
 		appendCode(String.format("add %s,%s,%s", dstReg, src1Reg, src2Reg));
@@ -708,6 +720,52 @@ public class MIPSGenerator
 		finalWriter.println("\taddi    $sp, $sp, 8  # Deallocate stack space");
 		finalWriter.println("\tjr      $ra         # Return");
 		finalWriter.println("");
+
+		// Add Null Pointer Check routine
+		finalWriter.println("check_null_pointer:");
+		finalWriter.println("\t# Input: $a0 = address to check");
+		finalWriter.println("\t# Output: Jumps to invalid_ptr_dref if $a0 is null");
+		finalWriter.println("\t# Clobbers: $at (implicitly by beqz)");
+		finalWriter.println("\tbeqz    $a0, invalid_ptr_dref");
+		finalWriter.println("\tjr      $ra");
+		finalWriter.println("");
+
+		// Add Invalid Pointer Dereference handler
+		finalWriter.println("invalid_ptr_dref:");
+		finalWriter.println("\tla      $a0, string_invalid_ptr_dref");
+		finalWriter.println("\tli      $v0, 4");
+		finalWriter.println("\tsyscall");
+		finalWriter.println("\tli      $v0, 10 # Exit");
+		finalWriter.println("\tsyscall");
+		finalWriter.println("");
+
+		// Add Access Violation Handler (similar to invalid ptr dref)
+		finalWriter.println("access_violation:");
+		finalWriter.println("\tla      $a0, string_access_violation");
+		finalWriter.println("\tli      $v0, 4");
+		finalWriter.println("\tsyscall");
+		finalWriter.println("\tli      $v0, 10 # Exit");
+		finalWriter.println("\tsyscall");
+		finalWriter.println("");
+		
+		// Add Division by Zero handler
+		finalWriter.println("division_by_zero:");
+		finalWriter.println("\tla      $a0, string_illegal_div_by_0");
+		finalWriter.println("\tli      $v0, 4");
+		finalWriter.println("\tsyscall");
+		finalWriter.println("\tli      $v0, 10 # Exit");
+		finalWriter.println("\tsyscall");
+		finalWriter.println("");
+
+		// Add Invalid Array Size handler
+		finalWriter.println("invalid_array_size:");
+		finalWriter.println("\tla      $a0, string_invalid_array_size");
+		finalWriter.println("\tli      $v0, 4");
+		finalWriter.println("\tsyscall");
+		finalWriter.println("\tli      $v0, 10 # Exit");
+		finalWriter.println("\tsyscall");
+		finalWriter.println("");
+
 	}
 
 	// Overload for specific register destination
@@ -734,5 +792,33 @@ public class MIPSGenerator
 	// NEW: Multiply operation using register names
 	public void mul_registers(String dstReg, String src1Reg, String src2Reg) {
 		appendCode(String.format("mul %s,%s,%s", dstReg, src1Reg, src2Reg));
+	}
+
+	// NEW: Perform null pointer check on a TEMP
+	public void genNullCheck(TEMP objAddrTemp) {
+		String objAddrReg = tempToRegister(objAddrTemp);
+		move_registers(A0, objAddrReg); // Move object address to $a0 for check
+		jal("check_null_pointer"); // Call the check function
+	}
+
+	// NEW: Generate MIPS for loading a class field (includes null check)
+	public void genLoadField(TEMP dst, TEMP objAddr, int fieldOffset) {
+		String dstReg = tempToRegister(dst);
+		String objAddrReg = tempToRegister(objAddr);
+		genNullCheck(objAddr); // Perform null check first
+		lw_offset(dstReg, fieldOffset, objAddrReg); // Load the field value
+	}
+
+	// NEW: Generate MIPS for storing a class field (includes null check)
+	public void genStoreField(TEMP srcVal, TEMP objAddr, int fieldOffset) {
+		String srcValReg = tempToRegister(srcVal);
+		String objAddrReg = tempToRegister(objAddr);
+		genNullCheck(objAddr); // Perform null check first
+		sw_offset(srcValReg, fieldOffset, objAddrReg); // Store the value into the field
+	}
+
+	// NEW: Jump and Link Register
+	public void jalr(String targetReg) {
+		appendCode(String.format("jalr %s", targetReg));
 	}
 }

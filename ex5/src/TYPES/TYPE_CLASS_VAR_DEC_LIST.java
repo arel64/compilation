@@ -6,8 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import AST.AST_CLASS_FIELDS_DEC;
-import AST.AST_LIST;
+
 import SYMBOL_TABLE.SYMBOL_TABLE;
 import SYMBOL_TABLE.SemanticException;
 
@@ -15,13 +14,11 @@ public class TYPE_CLASS_VAR_DEC_LIST implements Iterable<TYPE_CLASS_FIELD>
 {
 	private Set<String> definedNames;
 	private List<TYPE_CLASS_FIELD> attributes;
-	private List<String> overridenFunction;
-	public TYPE_CLASS_VAR_DEC_LIST(List<String> overridenFunction) throws SemanticException
+	
+	public TYPE_CLASS_VAR_DEC_LIST() throws SemanticException
 	{
 		attributes = new ArrayList<>();
 		definedNames = new HashSet<>();
-		this.overridenFunction = overridenFunction;
-		
 	}
 	public List<TYPE_CLASS_FIELD> getAttributes()
 	{
@@ -53,11 +50,10 @@ public class TYPE_CLASS_VAR_DEC_LIST implements Iterable<TYPE_CLASS_FIELD>
 		{
 			throw new SemanticException(declarationType.line,String.format("Cannot create a class with undefined varriables types, attempted %s", declarationType));
 		}
-		if(overridenFunction.contains(declarationType.getName()) && !declarationType.t.isFunction())
-		{
-			throw new SemanticException(declarationType.line,String.format("Redeclared %s as non function in dervied type", declarationType));
-		}
 		this.attributes.add(declarationType);
 		
     }
+	public int getSize() {
+		return this.attributes.size() * 4;
+	}
 }

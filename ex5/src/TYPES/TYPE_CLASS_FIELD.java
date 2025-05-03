@@ -11,10 +11,6 @@ public class TYPE_CLASS_FIELD extends TYPE_WRAPPER
 		this.line =line;
 	}
 
-	// Optional: Add a setter for the offset
-	public void setOffset(int offset) {
-		this.offset = offset;
-	}
 
 	@Override
 	public String toString() {

@@ -32,14 +32,16 @@ public class AST_VAR_SIMPLE extends AST_VAR
 		
 		if (entry == null) {
 			System.err.format(">> ERROR [line:%d] variable '%s' is not declared in this scope or outer scopes.\n", this.lineNumber, val);
+			System.out.println("Stack trace: ");
+			StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+			for (int i = 0; i < stackTrace.length; i++) {
+				System.out.println("  " + stackTrace[i].toString());
+			}
 			throw new SemanticException(this.lineNumber, String.format("Variable '%s' not declared.", val));
 		}
 
 		this.isGlobal = entry.isGlobal; 
-		this.offset = entry.offset; 
-		
-		System.out.format("SemantMe AST_VAR_SIMPLE: Retrieved for '%s': offset=%d, isGlobal=%b\n", val, this.offset, this.isGlobal);
-		
+		this.offset = entry.offset; 		
 		return entry.type;
 	}
 

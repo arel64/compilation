@@ -14,7 +14,6 @@ public class TYPE_CLASS extends TYPE
 	public TYPE_CLASS father;
 	private TYPE_CLASS_VAR_DEC_LIST memberList;
 	public int line;
-    private int instanceSize = -1; // Store calculated instance size
 	/**************************************************/
 	/* Gather up all data members in one place        */
 	/* Note that data members coming from the AST are */
@@ -115,10 +114,6 @@ public class TYPE_CLASS extends TYPE
 	public void setDataMembers(TYPE_CLASS_VAR_DEC_LIST members){
 		this.memberList = members;
 	}
-	// Add a setter for the instance size
-	public void setInstanceSize(int size) {
-		this.instanceSize = size;
-	}
 
 	public TYPE_CLASS_FIELD getDataMember(String name)
 	{
@@ -138,35 +133,40 @@ public class TYPE_CLASS extends TYPE
 
 	}
 	public int getDataMemberOffset(String fieldName) throws SemanticException {
-		 TYPE_CLASS_FIELD field = getDataMember(fieldName);
-		 if (field == null) {
-			 throw new SemanticException(line, String.format("Field '%s' not found in class '%s'.", fieldName, getName()));
-		 }
-		 if (field.offset < 0) {
-			 // This likely means it's a method or offset wasn't calculated correctly
-			 throw new SemanticException(line, String.format("Offset for field '%s' in class '%s' is invalid (%d).", fieldName, getName(), field.offset));
-		 }
-		 return field.offset;
+		TYPE_CLASS_FIELD field = getDataMember(fieldName);
+		if (field == null) {
+			throw new SemanticException(line, String.format("Field '%s' not found in class '%s'.", fieldName, getName()));
+		}
+	
+		return field.offset;
 	}
+
+	public int getMethodOffset(String methodName) throws SemanticException {
+		TYPE_CLASS_FIELD methodField = getDataMember(methodName);
+		if (methodField == null) {
+			throw new SemanticException(line, String.format("Method '%s' not found in class '%s'.", methodName, getName()));
+		}
+		if (!(methodField.t instanceof TYPE_FUNCTION)) {
+			throw new SemanticException(line, String.format("Member '%s' in class '%s' is not a method.", methodName, getName()));
+		}
+		// Assuming method offsets are stored similarly to field offsets in TYPE_CLASS_FIELD
+		// Add validation if method offsets have specific constraints (e.g., must be >= 0?)
+		if (methodField.offset < 0) { 
+			 throw new SemanticException(line, String.format("Offset for method '%s' in class '%s' is invalid (%d). Might indicate calculation error.", methodName, getName(), methodField.offset));
+		}
+		return methodField.offset;
+   }
 
 	@Override
 	public boolean isAssignable(TYPE other) throws SemanticException {
 		return other instanceof TYPE_NIL || (other instanceof TYPE_CLASS && ((TYPE_CLASS)other).isDerivedFrom(this));
 	}
-
+	public int getInstanceSize() {
+		return this.memberList.getSize() * 4;
+	}
     @Override
     public int getSize()  {
-        // Return the pre-calculated size. Should not be -1 if SemantMe ran correctly.
-        if (instanceSize < 0) {
-             // Consider throwing an error or logging a warning if size wasn't calculated
-             System.err.printf("Warning: getSize() called on class '%s' before instance size was calculated.%n", getName());
-             return 0; // Or throw?
-        }
-        return instanceSize;
+        return 4;
     }
 
-    // Remove or comment out getSizeRecursive if no longer needed
-    // private int getSizeRecursive(Set<TYPE_CLASS> visited)  {
-    // ...
-    //}
 }

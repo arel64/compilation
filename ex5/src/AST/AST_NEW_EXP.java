@@ -8,6 +8,10 @@ public class AST_NEW_EXP extends AST_EXP {
     public AST_TYPE type;
     public AST_EXP exp;
 
+    // Store results from SemantMe for IRme (class instance case)
+    private TYPE_CLASS resolvedClassType = null;
+    private int calculatedSize = -1;
+
     public AST_NEW_EXP(AST_TYPE type, AST_EXP exp) {
         SerialNumber = AST_Node_Serial_Number.getFresh();
         this.type = type;
@@ -27,13 +31,24 @@ public class AST_NEW_EXP extends AST_EXP {
     @Override
     public TYPE SemantMe() throws SemanticException{
         TYPE myType = type.SemantMeLog();
-        if (exp == null) {
-            return myType;
+        
+        if (exp == null) { // Class instance creation
+            if (!(myType instanceof TYPE_CLASS)) {
+                throw new SemanticException(lineNumber, String.format("Cannot 'new' a non-class type: %s", myType.getName()));
+            }
+            this.resolvedClassType = (TYPE_CLASS) myType;
+            // Get size calculated during AST_CLASS_DEC.SemantMe
+            this.calculatedSize = this.resolvedClassType.getInstanceSize(); 
+            if (this.calculatedSize < 0) {
+                // This indicates an issue - size should have been set in AST_CLASS_DEC
+                 throw new SemanticException(lineNumber, String.format("Internal Error: Size not calculated for class %s before 'new'.", this.resolvedClassType.getName()));
+            }
+            return this.resolvedClassType; // Return the class type itself
         }
+        
         TYPE expType = exp.SemantMe();
-        //TODO:: need to be assignable to int ? Check definitions
         if (expType != TYPE_INT.getInstance()){
-            throw new SemanticException(lineNumber,"New expr type is not int");
+            throw new SemanticException(lineNumber,"New array expression size is not int");
         }
         if(expType.isVoid())
         {
@@ -46,7 +61,8 @@ public class AST_NEW_EXP extends AST_EXP {
                 throw new SemanticException(lineNumber,"LEN<=0 for array length");
             }
         }
-        return new TYPE_ARRAY(myType,myType.getName());
+        return new TYPE_ARRAY(myType, myType.getName());
+        
     }
     public TEMP IRme()
 	{
@@ -54,7 +70,7 @@ public class AST_NEW_EXP extends AST_EXP {
         try {
             TYPE instanceType = type.SemantMeLog();
 
-            if (this.exp != null) {
+            if (this.exp != null) { // Array creation
                 TEMP sizeTemp = this.exp.IRme();
                 if (sizeTemp == null) {
                     System.err.printf("IR Error(ln %d): Array size expression did not yield a value.\n", lineNumber);
@@ -68,18 +84,19 @@ public class AST_NEW_EXP extends AST_EXP {
                 }
                 IR.getInstance().Add_IRcommand(new IRcommand_New_Array(address, arrayBaseTypeName, sizeTemp));
             }
-            else {
-                if (!(instanceType instanceof TYPE_CLASS)) {
-                    System.err.printf("IR Error(ln %d): Attempting 'new' on a non-class type: %s\n", lineNumber, instanceType.getName());
-                    return null;
+            else { // Class instance creation
+                // Use stored info from SemantMe
+                if (this.resolvedClassType == null || this.calculatedSize < 0) {
+                    System.err.printf("IR Error(ln %d): Class type or size not resolved during SemantMe for 'new %s'.\n", lineNumber, type.toString());
+                    return null; // Cannot proceed
                 }
-                TYPE_CLASS classType = (TYPE_CLASS) instanceType;
-                int size = classType.getSize();
-                if (size < 0) {
-                    System.err.printf("IR Error(ln %d): Could not determine size for class: %s\n", lineNumber, classType.getName());
-                    return null;
-                }
-                IR.getInstance().Add_IRcommand(new IRcommand_New_Class(address, classType.getName(), size));
+
+                // 1. Load the calculated size into a TEMP
+                TEMP sizeTemp = TEMP_FACTORY.getInstance().getFreshTEMP();
+                IR.getInstance().Add_IRcommand(new IRcommandConstInt(sizeTemp, this.calculatedSize));
+                
+                // 2. Generate the New_Class command
+                IR.getInstance().Add_IRcommand(new IRcommand_New_Class(address, sizeTemp, this.resolvedClassType.getName()));
             }
             return address;
         } catch (SemanticException e) {

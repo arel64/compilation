@@ -58,7 +58,7 @@ public class AST_VAR_DEC extends AST_DEC {
             this.offset = entry.offset; // Store the correct offset
             this.isGlobal = entry.isGlobal; // Use the flag from the entry
             // +++ DEBUG LOGGING +++
-            System.out.format("SemantMe: Retrieved for '%s': offset=%d, isGlobal=%b\\n", getName(), this.offset, this.isGlobal);
+            // System.out.format("SemantMe: Retrieved for '%s': offset=%d, isGlobal=%b\\n", getName(), this.offset, this.isGlobal);
         } else {
             // This indicates a serious internal error
             System.err.println("FATAL Semantic Error: Could not find symbol table entry for '" + getName() + "' immediately after entering.");
@@ -71,12 +71,12 @@ public class AST_VAR_DEC extends AST_DEC {
         if( varValue != null)
         {
             TYPE valueType = varValue.SemantMeLog();
+            System.out.println("valueType: " + valueType);
             if(!type.isAssignable(valueType))
             {
                 throw new SemanticException(lineNumber,String.format("Initial value %s does not match type %s", valueType,type));
             }
         }
-        System.out.println("--- Finished variable declaration for: " + currentVarName + " ---");
         return type;
     }
     @Override

@@ -11,6 +11,7 @@ public class AST_VAR_FIELD_INVOCATION extends AST_VAR
 {
 	public String fieldName;
 	private AST_VAR var;	
+	private TYPE_CLASS varClass;
 	public AST_VAR_FIELD_INVOCATION(AST_VAR var,String fieldName)
 	{
 		super(var.val);
@@ -29,7 +30,7 @@ public class AST_VAR_FIELD_INVOCATION extends AST_VAR
 		{
 			throw new SemanticException(lineNumber, String.format("Can not invoke %s.%s on a none class type %s", varType.getName(),fieldName,declaredType));
 		}
-		TYPE_CLASS varClass = (TYPE_CLASS)varType;
+		varClass = (TYPE_CLASS)varType;
 		TYPE_CLASS_FIELD member = varClass.getDataMember(fieldName);
 		if(member == null)
 		{
@@ -45,25 +46,21 @@ public class AST_VAR_FIELD_INVOCATION extends AST_VAR
 			TEMP objectBaseAddr = var.IRme();
 			if (objectBaseAddr == null) {
 				System.err.printf("IR Error(ln %d): Cannot access field '%s' because base object expression did not yield a value.\n", lineNumber, fieldName);
+				
                 return null;
 			}
 
-			TYPE varType = var.SemantMeLog();
-			if (!(varType instanceof TYPE_CLASS)) {
-				System.err.printf("IR Error(ln %d): Cannot access field on non-class type: %s\n", lineNumber, varType.getName());
-                return null;
-			}
-			TYPE_CLASS classType = (TYPE_CLASS) varType;
 
-			int offset = classType.getDataMemberOffset(fieldName);
+			int offset = varClass.getDataMemberOffset(fieldName);
 
 			TEMP dst = TEMP_FACTORY.getInstance().getFreshTEMP();
 			IR.getInstance().Add_IRcommand(
-				new IRcommand_Class_Field_Access(dst, objectBaseAddr, offset, classType.getName(), fieldName)
+				new IRcommand_Class_Field_Access(dst, objectBaseAddr, offset)
 			);
 			return dst;
 		} catch (SemanticException e) {
             System.err.printf("IR Generation Error (ln %d) accessing field '%s': %s\n", lineNumber, fieldName, e.getMessage());
+			e.printStackTrace();
             return null;
         }
 	}
@@ -77,22 +74,16 @@ public class AST_VAR_FIELD_INVOCATION extends AST_VAR
 				System.err.printf("IR Error(ln %d): Cannot set field '%s' because base object expression did not yield a value.\n", lineNumber, fieldName);
                 return null;
 			}
-
-			TYPE varType = var.SemantMeLog();
-			if (!(varType instanceof TYPE_CLASS)) {
-				System.err.printf("IR Error(ln %d): Cannot set field on non-class type: %s\n", lineNumber, varType.getName());
-                return null;
-			}
-			TYPE_CLASS classType = (TYPE_CLASS) varType;
-
-			int offset = classType.getDataMemberOffset(fieldName);
+			int offset = varClass.getDataMemberOffset(fieldName);
 
 			IR.getInstance().Add_IRcommand(
-				new IRcommand_Class_Field_Set(objectBaseAddr, offset, sourceValue, classType.getName(), fieldName)
+				new IRcommand_Class_Field_Set(objectBaseAddr, offset, sourceValue)
 			);
 			return null;
 		} catch (SemanticException e) {
-            System.err.printf("IR Generation Error (ln %d) setting field '%s': %s\n", lineNumber, fieldName, e.getMessage());
+            System.err.printf("IR Genration Error (ln %d) setting field '%s': %s\n", lineNumber, fieldName, e.getMessage());
+			e.printStackTrace();
+
             return null;
         }
 	}

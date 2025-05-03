@@ -119,7 +119,7 @@ public class SYMBOL_TABLE {
 			if (currentScope == ScopeType.PARAMS) {
 				// Assign parameter offset (positive, starts at 0)
 				// Check if it's actually a variable-like type
-				if (!t.isFunction() && !t.isClass()) { // Allow simple types, arrays, maybe nil? Be careful with Void.
+				if (!t.isFunction()) { // Allow simple types, arrays, maybe nil? Be careful with Void.
 					// System.out.println("Assigning PARAM offset " + currentParamOffset + " to " + name);
 					e.offset = currentParamOffset;
 					currentParamOffset += WORD_SIZE; // Increment for next parameter
@@ -129,13 +129,18 @@ public class SYMBOL_TABLE {
 			} else if (currentScope == ScopeType.BODY || currentScope == ScopeType.FUNCTION) {
 				// Assign local variable offset (negative, starts at -12)
 				// Assign offset only to actual variables/data, not types/functions/void/arrays/nil? Check array logic later.
-				if (!t.isFunction() && !t.isClass()) {
+				if (!t.isFunction()) {
 					// System.out.println("Assigning LOCAL offset " + currentLocalOffset + " to " + name);
 					e.offset = currentLocalOffset;
 					currentLocalOffset -= WORD_SIZE; // Decrement for next *local* variable
 				} else {
 					e.offset = Integer.MIN_VALUE; // No stack offset for these types
 				}
+			} else if (currentScope == ScopeType.CLASS) {
+				// Class member offsets (field/method) are handled by TYPE_CLASS, not the stack frame.
+				// Assign a placeholder offset here. Retrieval will happen via TYPE_CLASS.
+				e.offset = currentLocalOffset;
+				currentLocalOffset -= WORD_SIZE;
 			} else {
 				// Should not happen if scope types are managed correctly
 				e.offset = Integer.MIN_VALUE;
@@ -190,6 +195,12 @@ public class SYMBOL_TABLE {
 				// Parameter offset is irrelevant within a body block.
 				offsetStack.push(currentLocalOffset);
 				// currentLocalOffset continues decrementing from its current value.
+				break;
+			case CLASS:
+				// Entering a class: Reset locals and params, push previous local state.
+				offsetStack.push(currentLocalOffset); // Save outer scope's local offset
+				currentLocalOffset = 0; // Start locals below saved $ra(-4) and $fp(-8)
+				currentParamOffset = 0;
 				break;
 		}
 
@@ -550,6 +561,9 @@ public class SYMBOL_TABLE {
 	// It doesn't guarantee the found type *is* global if shadowed.
 	// Let's provide a version that guarantees finding the global type if it exists.
 	public TYPE getTypeInGlobalScope(String name) {
+		if (name == null) {
+			return null;
+		}
 		SYMBOL_TABLE_ENTRY e = top;
 		TYPE globalType = null;
 		// Traverse the entire stack

@@ -17,32 +17,29 @@ import MIPS.MIPSGenerator;
 
 public class IRcommand_Class_Field_Access extends IRcommand
 {
-	public TEMP src;
-	public int offset;
-	public String className;
-	public String fieldName;
-	
-	public IRcommand_Class_Field_Access(TEMP dst, TEMP src, int offset, String className, String fieldName)
+	public TEMP dst;
+	public TEMP objAddr;
+	public int fieldOffset;
+
+	public IRcommand_Class_Field_Access(TEMP dst, TEMP objAddr, int fieldOffset)
 	{
 		this.dst = dst;
-		this.src = src;
-		this.offset = offset;
-		this.className = className;
-		this.fieldName = fieldName;
+		this.objAddr = objAddr;
+		this.fieldOffset = fieldOffset;
 	}
 	@Override
 	public String toString() {
-		return String.format("CLASS_FIELD_ACCESS: %s := %s.%s (offset %d)", dst, src, fieldName, offset);
+		return String.format("CLASS_FIELD_ACCESS: %s := %s (offset %d)", dst, objAddr, fieldOffset);
 	}
 
 	public void staticAnalysis() {
-		if (!src.initialized)
+		if (!objAddr.initialized)
 			dst.initialized = false;
 		super.staticAnalysis();
 	}
 
 	public HashSet<TEMP> liveTEMPs() {
-		return new HashSet<TEMP>(Arrays.asList(src));
+		return new HashSet<TEMP>(Arrays.asList(objAddr));
 	}
 
 	/***************/
@@ -50,6 +47,7 @@ public class IRcommand_Class_Field_Access extends IRcommand
 	/***************/
 	public void MIPSme()
 	{
-		MIPSGenerator.getInstance().lw_offset(dst, offset, src);
+		MIPSGenerator generator = MIPSGenerator.getInstance();
+		generator.genLoadField(dst, objAddr, fieldOffset);
 	}
 }

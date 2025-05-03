@@ -155,7 +155,7 @@ varDec ::= type:t ID:i ASSIGN:as exp:ex SEMICOLON:se
 :}
 | type:t ID:i ASSIGN:as newExp:n SEMICOLON:se
 {:
-  AST_ARR_DEC node = new AST_ARR_DEC(i, t, n);
+  AST_VAR_DEC node = new AST_VAR_DEC(i, t, n);
   node.setLineNumber(tleft);
   RESULT = node;
 :}

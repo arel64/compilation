@@ -15,6 +15,10 @@ public class AST_FUNC_INVOCATION extends AST_EXP {
     public AST_LIST<AST_EXP> params;
     public AST_VAR var;
 
+    // Store results from SemantMe for IRme
+    private int methodOffset = -1; 
+    private TYPE_CLASS resolvedClassType = null; 
+
     public AST_FUNC_INVOCATION(AST_VAR var,String funcName,AST_LIST<AST_EXP> params) {
         this.funcName = funcName;
         this.params = params;
@@ -103,7 +107,6 @@ public class AST_FUNC_INVOCATION extends AST_EXP {
             }
         }
         table.endScope();
-        
         return myFunctionType.getReturnType();
 
     }
@@ -111,11 +114,13 @@ public class AST_FUNC_INVOCATION extends AST_EXP {
     @Override
     public TEMP IRme() {
         ArrayList<TEMP> paramsTemp = new ArrayList<TEMP>();
-        if (params != null)
+        if (params != null){
             for (AST_EXP param : params)
             {
                 paramsTemp.add(param.IRme());
             }
+
+        }
         TEMP dst = TEMP_FACTORY.getInstance().getFreshTEMP();
 
         if (var == null)
@@ -124,8 +129,22 @@ public class AST_FUNC_INVOCATION extends AST_EXP {
         }
         else
         {
-            System.err.println("Warning: IR generation for class method calls requires label updates in IRcommand_Class_Method_Call and correct label retrieval mechanism.");
-            IR.getInstance().Add_IRcommand(new IRcommand_Class_Method_Call(dst, var.IRme(), funcName, paramsTemp)); 
+            TEMP objAddrTemp = var.IRme();
+            if (objAddrTemp == null) {
+                System.err.printf("IR Error(ln %d): Cannot call method '%s' because base object expression did not yield a value.\n", lineNumber, funcName);
+                return null; 
+            }
+
+            // Use the stored offset and class type from SemantMe
+            if (this.resolvedClassType == null) {
+                 System.err.printf("IR Error(ln %d): Class type or method offset not resolved during SemantMe for %s.%s.\n", lineNumber, (var != null ? var.toString() : "null"), funcName);
+                 return null; // Cannot proceed without info from SemantMe
+            }
+
+            // Call the correct constructor using stored info
+            IR.getInstance().Add_IRcommand(
+                new IRcommand_Class_Method_Call(dst, objAddrTemp, this.methodOffset, paramsTemp, this.resolvedClassType.getName(), funcName)
+            ); 
         }
 
         return dst;

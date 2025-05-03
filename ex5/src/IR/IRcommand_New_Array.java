@@ -57,10 +57,6 @@ public class IRcommand_New_Array extends IRcommand
 		// Get element size from Symbol Table using the type name
 		int elementSize = 4; // Default/fallback size
 		
-		// TODO: Add proper error handling if type not found or size invalid
-		TYPE elementType = SYMBOL_TABLE.getInstance().find(this.type); 
-		if (elementType != null) { elementSize = elementType.getSize(); }
-		if (elementSize <= 0) { elementSize = 4; } 
 
 		// 1. Check if size < 0. 
 		// Note: 'size' TEMP holds the number of elements
