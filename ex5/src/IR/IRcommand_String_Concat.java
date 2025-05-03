@@ -28,7 +28,8 @@ public class IRcommand_String_Concat extends IRcommand {
     public void MIPSme() {
         MIPSGenerator gen = MIPSGenerator.getInstance();
 
-        if (IR.getInstance().getRegister(dst) < 0) return;
+        if (IR.getInstance().getRegister(dst) < 0)
+            return;
 
         // --- Calculate Lengths ---
         // 1. Calculate length of s1 -> $s0 (TEMP_REG_1)
@@ -61,14 +62,14 @@ public class IRcommand_String_Concat extends IRcommand {
         // Note: strcpy clobbers $a0, $a1, $v0, and internally uses $s0 ($t8)
         // 5. Copy s1 to the new memory
         gen.move_from_temp_to_reg(MIPSGenerator.A0, dst);
-        gen.lw_reg_sp(MIPSGenerator.A1, 8);                // Use String version: a1 = s1 address (restored from stack)
-        gen.jal("strcpy");                                  // strcpy(dst, s1). Clobbers $s0, $s1
+        gen.lw_reg_sp(MIPSGenerator.A1, 8); // Use String version: a1 = s1 address (restored from stack)
+        gen.jal("strcpy"); // strcpy(dst, s1). Clobbers $s0, $s1
 
         // 6. Copy s2 to the end of s1 in the new memory
-        gen.lw_reg_sp(MIPSGenerator.TEMP_REG_1, 0);        // Use String version: Restore len1 ($s0)
+        gen.lw_reg_sp(MIPSGenerator.TEMP_REG_1, 0); // Use String version: Restore len1 ($s0)
         gen.add_temp_reg(MIPSGenerator.A0, dst, MIPSGenerator.TEMP_REG_1);
-        gen.lw_reg_sp(MIPSGenerator.A1, 4);                // Use String version: a1 = s2 address (restored from stack)
-        gen.jal("strcpy");                                  // strcpy(dst + len1, s2)
+        gen.lw_reg_sp(MIPSGenerator.A1, 4); // Use String version: a1 = s2 address (restored from stack)
+        gen.jal("strcpy"); // strcpy(dst + len1, s2)
 
         // --- Clean Up Stack ---
         gen.addi_imm(MIPSGenerator.SP, MIPSGenerator.SP, 12); // Deallocate stack space
@@ -81,8 +82,8 @@ public class IRcommand_String_Concat extends IRcommand {
 
     @Override
     public void staticAnalysis() {
-         if (!s1.initialized || !s2.initialized)
+        if (!s1.initialized || !s2.initialized)
             dst.initialized = false;
         super.staticAnalysis();
     }
-} 
+}

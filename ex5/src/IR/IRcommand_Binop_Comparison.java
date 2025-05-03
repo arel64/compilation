@@ -12,7 +12,7 @@ public class IRcommand_Binop_Comparison extends IRcommand {
 
     public enum ComparisonOperation {
         LT, // Less Than
-        GT  // Greater Than
+        GT // Greater Than
     }
 
     public IRcommand_Binop_Comparison(TEMP dst, TEMP t1, TEMP t2, ComparisonOperation operation) {
@@ -30,11 +30,14 @@ public class IRcommand_Binop_Comparison extends IRcommand {
 
     @Override
     public void staticAnalysis() {
-        // Basic initialization check: if either operand is uninitialized, the result is.
+        // Basic initialization check: if either operand is uninitialized, the result
+        // is.
         if (t1 == null || t2 == null || !t1.initialized || !t2.initialized) {
-             if (dst != null) dst.initialized = false;
+            if (dst != null)
+                dst.initialized = false;
         } else {
-             if (dst != null) dst.initialized = true;
+            if (dst != null)
+                dst.initialized = true;
         }
         super.staticAnalysis();
     }
@@ -42,8 +45,7 @@ public class IRcommand_Binop_Comparison extends IRcommand {
     @Override
     public void MIPSme() {
         MIPSGenerator gen = MIPSGenerator.getInstance();
-        if (dst == null || IR.getInstance().getRegister(dst) < 0)
-        {
+        if (dst == null || IR.getInstance().getRegister(dst) < 0) {
             return;
         }
 
@@ -76,4 +78,4 @@ public class IRcommand_Binop_Comparison extends IRcommand {
         // The operands t1 and t2 are used by this command.
         return new HashSet<TEMP>(Arrays.asList(t1, t2));
     }
-} 
+}

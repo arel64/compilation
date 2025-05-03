@@ -22,11 +22,11 @@ public class IRcommand_Load_Global extends IRcommand {
     public HashSet<TEMP> liveTEMPs() {
         // This command defines dst, but doesn't use any TEMPs before defining it.
         // Liveness analysis handles this: the variable 'dst' becomes live *after* this.
-        return new HashSet<>(); 
+        return new HashSet<>();
     }
 
     @Override
     public String toString() {
         return String.format("%s := LoadGlobal %s", dst, varName);
     }
-} 
+}

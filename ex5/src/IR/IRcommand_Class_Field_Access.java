@@ -15,18 +15,16 @@ import java.util.Arrays;
 import java.util.HashSet;
 import MIPS.MIPSGenerator;
 
-public class IRcommand_Class_Field_Access extends IRcommand
-{
-	public TEMP dst;
+public class IRcommand_Class_Field_Access extends IRcommand {
 	public TEMP objAddr;
 	public int fieldOffset;
 
-	public IRcommand_Class_Field_Access(TEMP dst, TEMP objAddr, int fieldOffset)
-	{
+	public IRcommand_Class_Field_Access(TEMP dst, TEMP objAddr, int fieldOffset) {
 		this.dst = dst;
 		this.objAddr = objAddr;
 		this.fieldOffset = fieldOffset;
 	}
+
 	@Override
 	public String toString() {
 		return String.format("CLASS_FIELD_ACCESS: %s := %s (offset %d)", dst, objAddr, fieldOffset);
@@ -45,8 +43,7 @@ public class IRcommand_Class_Field_Access extends IRcommand
 	/***************/
 	/* MIPS me !!! */
 	/***************/
-	public void MIPSme()
-	{
+	public void MIPSme() {
 		MIPSGenerator generator = MIPSGenerator.getInstance();
 		generator.genLoadField(dst, objAddr, fieldOffset);
 	}

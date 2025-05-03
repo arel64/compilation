@@ -16,13 +16,11 @@ import java.util.HashSet;
 
 import MIPS.MIPSGenerator;
 
-public class IRcommand_Array_Access extends IRcommand
-{
+public class IRcommand_Array_Access extends IRcommand {
 	public TEMP arr;
 	public TEMP index;
 
-	public IRcommand_Array_Access(TEMP dst, TEMP arr, TEMP index/*, TEMP temp removed */)
-	{
+	public IRcommand_Array_Access(TEMP dst, TEMP arr, TEMP index/* , TEMP temp removed */) {
 		this.dst = dst;
 		this.arr = arr;
 		this.index = index;

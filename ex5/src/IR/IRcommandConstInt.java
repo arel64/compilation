@@ -14,25 +14,23 @@ import TEMP.*;
 import MIPS.*;
 import java.util.HashSet;
 
-public class IRcommandConstInt extends IRcommand
-{
+public class IRcommandConstInt extends IRcommand {
 	public int value;
-	
-	public IRcommandConstInt(TEMP dst,int value)
-	{
+
+	public IRcommandConstInt(TEMP dst, int value) {
 		this.dst = dst;
 		this.value = value;
 	}
 
 	@Override
-    public String toString() {
-        return "IRcommandConstInt: dst=" + dst + ", value=" + value;
-    }
+	public String toString() {
+		return "IRcommandConstInt: dst=" + dst + ", value=" + value;
+	}
 
 	@Override
 	public void MIPSme() {
 		if (IR.getInstance().getRegister(dst) < 0) {
-			return; 
+			return;
 		}
 		MIPSGenerator.getInstance().li(dst, value);
 	}

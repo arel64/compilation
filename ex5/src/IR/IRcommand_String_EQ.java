@@ -29,7 +29,8 @@ public class IRcommand_String_EQ extends IRcommand {
         MIPSGenerator gen = MIPSGenerator.getInstance();
 
         // Check if destination register is valid
-        if (IR.getInstance().getRegister(dst) < 0) return;
+        if (IR.getInstance().getRegister(dst) < 0)
+            return;
 
         // 1. Move string addresses to argument registers $a0, $a1
         gen.move_from_temp_to_reg(MIPSGenerator.A0, s1);
@@ -47,10 +48,10 @@ public class IRcommand_String_EQ extends IRcommand {
         return new HashSet<TEMP>(Arrays.asList(s1, s2));
     }
 
-     @Override
+    @Override
     public void staticAnalysis() {
-         if (!s1.initialized || !s2.initialized)
+        if (!s1.initialized || !s2.initialized)
             dst.initialized = false;
         super.staticAnalysis();
     }
-} 
+}

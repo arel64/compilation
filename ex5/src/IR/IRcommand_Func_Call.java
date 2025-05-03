@@ -19,32 +19,29 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 
-public class IRcommand_Func_Call extends IRcommand
-{
+public class IRcommand_Func_Call extends IRcommand {
 	public String funcName;
 	public ArrayList<TEMP> args;
 
-	public IRcommand_Func_Call(String funcName, ArrayList<TEMP> args)
-	{
+	public IRcommand_Func_Call(String funcName, ArrayList<TEMP> args) {
 		this.funcName = funcName;
 		this.args = args;
 	}
 
-	public IRcommand_Func_Call(TEMP dst, String funcName, ArrayList<TEMP> args)
-	{
+	public IRcommand_Func_Call(TEMP dst, String funcName, ArrayList<TEMP> args) {
 		this.dst = dst;
 		this.funcName = funcName;
 		this.args = args;
 	}
 
 	@Override
-    public String toString() {
-        String result = "IRcommand_Func_Call: funcName=" + funcName + ", args=" + args.toString();
-        if (dst != null) {
-            result += ", dst=" + dst;
-        }
-        return result;
-    }
+	public String toString() {
+		String result = "IRcommand_Func_Call: funcName=" + funcName + ", args=" + args.toString();
+		if (dst != null) {
+			result += ", dst=" + dst;
+		}
+		return result;
+	}
 
 	public void staticAnalysis() {
 		if (args.stream().anyMatch(temp -> !temp.initialized))
@@ -64,17 +61,20 @@ public class IRcommand_Func_Call extends IRcommand
 		// Now that liveness analysis is (hopefully) accurate, only save $t registers
 		// that are actually live after this call instruction.
 		for (TEMP liveTemp : liveOut) {
-			if (registerAllocation != null && registerAllocation.containsKey(liveTemp)) { 
+			if (registerAllocation != null && registerAllocation.containsKey(liveTemp)) {
 				int color = registerAllocation.get(liveTemp);
 				// Use the constant: check if color is within the range [0, K-1]
-				if (color >= 0 && color < MIPSGenerator.NUM_ALLOCATABLE_REGISTERS) { 
+				if (color >= 0 && color < MIPSGenerator.NUM_ALLOCATABLE_REGISTERS) {
 					callerSavedRegistersToSave.add(liveTemp);
 				}
 			} else if (registerAllocation == null) {
 				System.err.println("DEBUG WARNING: registerAllocation map is null in MIPSme for index " + this.index);
 			} else if (!registerAllocation.containsKey(liveTemp)) {
-				// This might happen if a TEMP is live but wasn't allocated a register (e.g., spilled) - should be ok.
-				// System.err.println("DEBUG WARNING: registerAllocation does not contain TEMP " + liveTemp + " in MIPSme for index " + this.index + " LiveOut=" + liveOut.toString() );
+				// This might happen if a TEMP is live but wasn't allocated a register (e.g.,
+				// spilled) - should be ok.
+				// System.err.println("DEBUG WARNING: registerAllocation does not contain TEMP "
+				// + liveTemp + " in MIPSme for index " + this.index + " LiveOut=" +
+				// liveOut.toString() );
 			}
 		}
 		// --- END ORIGINAL SAVING LOGIC ---
@@ -96,7 +96,7 @@ public class IRcommand_Func_Call extends IRcommand
 				TEMP argTemp = args.get(i);
 				int offset = i * 4;
 				if (irInstance.getRegister(argTemp) >= 0) {
- 					gen.sw_sp(argTemp, offset);
+					gen.sw_sp(argTemp, offset);
 				}
 			}
 		}
@@ -104,7 +104,8 @@ public class IRcommand_Func_Call extends IRcommand
 		String labelToJumpTo = irInstance.getFunctionLabel(this.funcName);
 
 		if (labelToJumpTo == null) {
-			throw new RuntimeException("ERROR: Could not find label for function '" + this.funcName + "' during MIPS generation.");
+			throw new RuntimeException(
+					"ERROR: Could not find label for function '" + this.funcName + "' during MIPS generation.");
 		}
 		gen.jal(labelToJumpTo);
 
@@ -115,13 +116,13 @@ public class IRcommand_Func_Call extends IRcommand
 		// --- BEGIN Register Restoring ---
 		// Restore caller-saved registers from stack (in reverse order of saving)
 		if (registersSaveSpace > 0) {
-            gen.appendRawInstruction("\t# DEBUG: Restoring registers loop start\n");
+			gen.appendRawInstruction("\t# DEBUG: Restoring registers loop start\n");
 			for (int i = callerSavedRegistersToSave.size() - 1; i >= 0; i--) {
 				TEMP tempToRestore = callerSavedRegistersToSave.get(i);
 				int offset = i * 4;
 				gen.lw_sp(tempToRestore, offset); // lw temp_reg, offset($sp)
 			}
-            gen.appendRawInstruction("\t# DEBUG: Adjusting SP after restore\n");
+			gen.appendRawInstruction("\t# DEBUG: Adjusting SP after restore\n");
 			gen.addi_imm("$sp", "$sp", registersSaveSpace);
 		}
 		// --- END Register Restoring ---
