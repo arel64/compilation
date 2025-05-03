@@ -105,6 +105,7 @@ public class MIPSGenerator {
 			finalWriter.print("    string_illegal_div_by_0: .asciiz \"Illegal Division By Zero\"\n");
 			finalWriter.print("    string_invalid_ptr_dref: .asciiz \"Invalid Pointer Dereference\"\n");
 			finalWriter.print("    string_invalid_array_size: .asciiz \"Invalid Array Size\"\n");
+			finalWriter.print("    global_nil: .word 0\n"); // Add nil constant as 0
 			finalWriter.print(dataContent.toString());
 
 			finalWriter.print("\n.text\n");

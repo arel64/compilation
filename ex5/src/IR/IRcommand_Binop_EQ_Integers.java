@@ -16,13 +16,11 @@ import TEMP.*;
 import java.util.Arrays;
 import java.util.HashSet;
 
-public class IRcommand_Binop_EQ_Integers extends IRcommand
-{
+public class IRcommand_Binop_EQ_Integers extends IRcommand {
 	public TEMP t1;
 	public TEMP t2;
 
-	public IRcommand_Binop_EQ_Integers(TEMP dst,TEMP t1,TEMP t2)
-	{
+	public IRcommand_Binop_EQ_Integers(TEMP dst, TEMP t1, TEMP t2) {
 		this.dst = dst;
 		this.t1 = t1;
 		this.t2 = t2;
@@ -40,26 +38,31 @@ public class IRcommand_Binop_EQ_Integers extends IRcommand
 	}
 
 	@Override
-	public void MIPSme()
-	{
-		// Generate a unique label for the comparison
+	public void MIPSme() {
+		MIPSGenerator gen = MIPSGenerator.getInstance();
+		if (dst == null || IR.getInstance().getRegister(dst) < 0) {
+			// Optional: Add check if dst is used
+			return;
+		}
+
+		// Generate unique labels
 		String trueLabel = getFreshLabel("eq_true");
 		String endLabel = getFreshLabel("eq_end");
-		
-		// Compare t1 > t2 (this is the same as t2 < t1)
-		// We don't have a direct "greater than" instruction, so we use "less than" in reverse
-		MIPSGenerator.getInstance().beq(t2, t1, trueLabel);
-		
-		// If not greater than, set result to 0
-		MIPSGenerator.getInstance().li(dst, 0);
-		MIPSGenerator.getInstance().jump(endLabel);
-		
-		// If greater than, set result to 1
-		MIPSGenerator.getInstance().label(trueLabel);
-		MIPSGenerator.getInstance().li(dst, 1);
-		
-		// End of comparison
-		MIPSGenerator.getInstance().label(endLabel);
+
+		// *** Corrected equality check ***
+		// Branch to trueLabel if t1 == t2
+		gen.beq(t1, t2, trueLabel); // Use t1 and t2 directly
+
+		// If condition is false (t1 != t2), result (dst) is 0
+		gen.li(dst, 0);
+		gen.jump(endLabel);
+
+		// If condition is true (t1 == t2), result (dst) is 1
+		gen.label(trueLabel);
+		gen.li(dst, 1);
+
+		// End label
+		gen.label(endLabel);
 	}
 
 	public HashSet<TEMP> liveTEMPs() {
