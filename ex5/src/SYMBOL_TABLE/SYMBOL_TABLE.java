@@ -148,47 +148,39 @@ public class SYMBOL_TABLE {
 				System.err.println("Warning: enter() called in unexpected scope state.");
 			}
 		}
-		boolean inClassScope = false;
+
+		// Determine if within any class scope using the helper method
+		boolean inClassScope = this.isInClassScope();
+
+		// Determine immediate class name *only* if the immediate scope is CLASS
 		String className = null;
 		ScopeType immediateScopeType = scopeTypeStack.isEmpty() ? null : scopeTypeStack.peek();
-
 		if (immediateScopeType == ScopeType.CLASS) {
-			inClassScope = true;
-			SYMBOL_TABLE_ENTRY walker = top;
+			// Logic to find the class name when the *immediate* scope is CLASS
+			SYMBOL_TABLE_ENTRY walker = top; // Start from the current top (SCOPE-BOUNDARY)
 			while (walker != null && !walker.name.equals("SCOPE-BOUNDARY")) {
 				walker = walker.prevtop;
 			}
-			// walker should now be the SCOPE-BOUNDARY entry for the class.
-			// The entry *before* it (walker.prevtop) should be the class definition.
+			// walker should now be the SCOPE-BOUNDARY entry for the class scope.
+			// The entry *before* it (walker.prevtop) should be the class type definition.
 			if (walker != null && walker.prevtop != null && walker.prevtop.type instanceof TYPE_CLASS) {
 				className = walker.prevtop.name;
 			}
 		}
-		// We might still be nested inside a class (e.g., in a method).
-		// A simpler check: just see if *any* scope in the stack is CLASS.
-		// This is less precise for getting the *immediate* class name but good for the
-		// flag.
-		else { // Check ancestor scopes if immediate is not CLASS
-			for (ScopeType scope : scopeTypeStack) {
-				if (scope == ScopeType.CLASS) {
-					inClassScope = true;
-					// Finding the correct className here is harder. We'd need to know
-					// which scope boundary corresponds to *this* class scope.
-					// Let's leave className null for now if only an *outer* scope is CLASS.
-					// The lookup mechanism might need refinement later if nested classes/methods
-					// need qualified names generated here.
-					break;
-				}
-			}
+
+		e.inClassScope = inClassScope; // Assign the flag based on helper method result
+		e.className = className; // Store the found immediate class name (can be null)
+
+		// Modify the stored name for functions defined directly within a class scope
+		// This helps in generating unique labels (e.g., MyClass.myMethod)
+		// Use the original 'name' for hash lookup and symbol table key.
+		// The modified name might be stored in a separate field if needed elsewhere,
+		// but the example code modified 'e.name' directly.
+		// Let's keep the modification of e.name for now, assuming it's intended.
+		if (className != null && t.isFunction()) {
+			e.name = className + "." + name; // Qualify function names defined directly in class
 		}
 
-		e.inClassScope = inClassScope;
-		e.className = className; // Store the found class name (can be null)
-		if (className != null && t.isFunction()) {
-			e.name = className + "." + name;
-		}
-		// e.name = className + "." + name; // DO NOT MODIFY the name used for lookup.
-		// Keep original 'name'.
 		// System.out.println(e); // DEBUG: Print entry details including offset
 
 		/**********************************************/
@@ -544,6 +536,16 @@ public class SYMBOL_TABLE {
 
 	public boolean isAtGlobalScope() {
 		return getCurrentScopeIndex() == 0;
+	}
+
+	// Method to check if the current or any enclosing scope is a class scope
+	public boolean isInClassScope() {
+		for (ScopeType scope : scopeTypeStack) {
+			if (scope == ScopeType.CLASS) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	// Renamed from existsInCurrentScope to match usage in AST_VAR_DEC

@@ -40,8 +40,11 @@ public class AST_FUNC_DEC extends AST_CLASS_FIELDS_DEC {
 
     @Override
     public TYPE_FUNCTION SemantMe() throws SemanticException {
-        if (isDeclaredInCurrentScope()) {
+        if (SYMBOL_TABLE.getInstance().isDeclaredInImmediateScope(getName())) {
             throw new SemanticException(lineNumber, String.format("Cannot redeclare function %s", getName()));
+        }
+        if (!SYMBOL_TABLE.getInstance().isInClassScope() && !SYMBOL_TABLE.getInstance().isAtGlobalScope()) {
+            throw new SemanticException(lineNumber, "Cannot declare function in non-class scope");
         }
         TYPE returnT = returnType.SemantMeLog();
         if (returnT == null) {
