@@ -87,7 +87,7 @@ public class AST_FUNC_DEC extends AST_CLASS_FIELDS_DEC {
 
     private void validateReturnType(TYPE_RETURN statementType, TYPE_RETURN returnType, int lineNumber)
             throws SemanticException {
-        if (!statementType.isAssignable(returnType)) {
+        if (!returnType.isAssignable(statementType)) {
 
             throw new SemanticException(lineNumber, String
                     .format("you cannot assign %s to %s and thus is invalid return type", statementType, returnType));

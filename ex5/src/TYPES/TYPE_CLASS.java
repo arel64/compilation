@@ -130,29 +130,6 @@ public class TYPE_CLASS extends TYPE {
 		return field.offset;
 	}
 
-	public int getMethodOffset(String methodName) throws SemanticException {
-		TYPE_CLASS_FIELD methodField = getDataMember(methodName);
-		if (methodField == null) {
-			throw new SemanticException(line,
-					String.format("Method '%s' not found in class '%s'.", methodName, getName()));
-		}
-		if (!(methodField.t instanceof TYPE_FUNCTION)) {
-			throw new SemanticException(line,
-					String.format("Member '%s' in class '%s' is not a method.", methodName, getName()));
-		}
-		// Assuming method offsets are stored similarly to field offsets in
-		// TYPE_CLASS_FIELD
-		// Add validation if method offsets have specific constraints (e.g., must be >=
-		// 0?)
-		if (methodField.offset < 0) {
-			throw new SemanticException(line,
-					String.format(
-							"Offset for method '%s' in class '%s' is invalid (%d). Might indicate calculation error.",
-							methodName, getName(), methodField.offset));
-		}
-		return methodField.offset;
-	}
-
 	@Override
 	public boolean isAssignable(TYPE other) throws SemanticException {
 		return other instanceof TYPE_NIL || (other instanceof TYPE_CLASS && ((TYPE_CLASS) other).isDerivedFrom(this));

@@ -41,7 +41,6 @@ public class IRcommand_New_Class extends IRcommand {
 	/***************/
 	public void MIPSme() {
 		MIPSGenerator generator = MIPSGenerator.getInstance();
-		// String dstReg = generator.tempToRegister(dst); <-- Removed
 
 		// 1. Allocate memory on the heap
 		// malloc(TEMP dst, TEMP size) puts the result address in the dst TEMP
@@ -55,7 +54,43 @@ public class IRcommand_New_Class extends IRcommand {
 		// 3. Store the VMT address at the beginning of the allocated object (offset 0)
 		// Use the correct helper: sw_offset_from_reg(String srcReg, int offset, TEMP
 		// baseTemp)
-		generator.sw_offset_from_reg(tempAddrReg, 0, dst);
+		generator.sw_offset_from_reg(tempAddrReg, 0, dst); // dst holds the object address
+
+		// --- NEW: Call Implicit Constructor ---
+		// 4. Construct constructor label
+		String constructorLabel = "__init_" + className + "_start";
+
+		// 5. Push 'this' argument (the object address currently in TEMP dst)
+		generator.addi_imm(MIPSGenerator.SP, MIPSGenerator.SP, -4); // Make space on stack
+		// Use sw_offset_from_temp to store the value from the TEMP dst onto the stack
+		// ($sp)
+		generator.sw_offset_from_temp(dst, 0, MIPSGenerator.SP);
+
+		// 6. Save caller-saved registers ($t0-$t9) before the call
+		int stackOffsetForSave = 0; // Start saving below the 'this' arg
+		generator.addi_imm(MIPSGenerator.SP, MIPSGenerator.SP, -4 * MIPSGenerator.NUM_ALLOCATABLE_REGISTERS); // Allocate
+																												// space
+																												// for
+																												// $t0-$t9
+		for (int i = 0; i < MIPSGenerator.NUM_ALLOCATABLE_REGISTERS; i++) {
+			generator.sw_offset("$t" + i, stackOffsetForSave + (i * 4), MIPSGenerator.SP);
+		}
+
+		// 7. Call the constructor
+		generator.jal(constructorLabel);
+
+		// 8. Restore caller-saved registers ($t0-$t9) after the call
+		for (int i = 0; i < MIPSGenerator.NUM_ALLOCATABLE_REGISTERS; i++) {
+			generator.lw_offset("$t" + i, stackOffsetForSave + (i * 4), MIPSGenerator.SP);
+		}
+		generator.addi_imm(MIPSGenerator.SP, MIPSGenerator.SP, 4 * MIPSGenerator.NUM_ALLOCATABLE_REGISTERS); // Deallocate
+																												// space
+																												// for
+																												// $t0-$t9
+
+		// 9. Clean up stack (remove 'this' argument)
+		generator.addi_imm(MIPSGenerator.SP, MIPSGenerator.SP, 4);
+		// --- End Constructor Call ---
 	}
 
 	@Override

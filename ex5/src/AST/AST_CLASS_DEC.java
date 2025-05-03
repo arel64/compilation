@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import SYMBOL_TABLE.SYMBOL_TABLE;
-import SYMBOL_TABLE.SYMBOL_TABLE_ENTRY;
 import SYMBOL_TABLE.ScopeType;
 import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
@@ -15,6 +14,7 @@ public class AST_CLASS_DEC extends AST_DEC {
 
     public String parentClassName;
     public AST_LIST<AST_CLASS_FIELDS_DEC> fields;
+    public ArrayList<AST_CLASS_FIELDS_DEC> finalFunctions = new ArrayList<AST_CLASS_FIELDS_DEC>();
 
     public AST_CLASS_DEC(String className, String parentClass, AST_LIST<AST_CLASS_FIELDS_DEC> fields) {
         super(className);
@@ -104,6 +104,7 @@ public class AST_CLASS_DEC extends AST_DEC {
                     // Valid override: Update the type in the list, keep the VMT offset
                     existingMember.t = overridingMethodType; // Update type
                     // Offset (VMT index) remains the same as parent
+                    finalFunctions.add(myFieldAST);
                 } else {
                     // Illegal redeclaration (field hiding field, method hiding field, field hiding
                     // method)
@@ -114,6 +115,9 @@ public class AST_CLASS_DEC extends AST_DEC {
                 }
             } else {
                 memberList.add(myNewMember);
+                if (myFieldType.isFunction()) {
+                    finalFunctions.add(myFieldAST);
+                }
             }
             for (AST_CLASS_FIELDS_DEC field : fields) {
                 if (field.getName().equals(myFieldName)) {
@@ -147,10 +151,11 @@ public class AST_CLASS_DEC extends AST_DEC {
         // Assumes memberList is already sorted by VMT offset for methods due to
         // SemantMe logic
         List<String> vmtMethodLabels = new ArrayList<>();
+        List<TYPE_CLASS_FIELD> sortedMethods = null;
         if (classType.getDataMembers() != null) {
             // Need to sort members by method offset (VMT index) to ensure correct VMT
             // layout
-            List<TYPE_CLASS_FIELD> sortedMethods = new ArrayList<>();
+            sortedMethods = new ArrayList<>();
             for (TYPE_CLASS_FIELD member : classType.getDataMembers()) {
                 if (member.t.isFunction()) {
                     sortedMethods.add(member);
@@ -165,14 +170,66 @@ public class AST_CLASS_DEC extends AST_DEC {
                 vmtMethodLabels.add(label_start);
             }
         }
-
         // 2. Add IR command to create the VMT in .data section
         IR.getInstance().Add_IRcommand(new IRcommand_Class_Dec(classType.getName(), vmtMethodLabels));
-
-        // --- Generate IR for method bodies ---
-        if (fields != null) {
-            fields.IRme(); // Calls IRme on each AST_FUNC_DEC and AST_VAR_DEC in the class
+        for (AST_CLASS_FIELDS_DEC field : finalFunctions) {
+            field.IRme();
         }
+        // --- Generate Implicit CONSTRUCTOR (`__init_ClassName`) ---
+        String constructorLabel = "__init_" + classType.getName();
+        IR.getInstance().Add_IRcommand(new IRcommand_Label(constructorLabel + "_start"));
+        // Frame size needs to accommodate saved $ra, $fp, and potentially local temps
+        // for initializers.
+        // Increase size slightly just in case.
+        int constructorFrameSize = 12;
+        IR.getInstance().Add_IRcommand(new IRcommand_Prologue(constructorFrameSize));
+
+        // Load 'this' pointer once (passed as first arg, at offset 0($fp))
+        TEMP tempThis = TEMP_FACTORY.getInstance().getFreshTEMP();
+        IR.getInstance().Add_IRcommand(new IRcommand_Load(tempThis, 0, "this")); // Load 'this' from frame
+        // Generate initialization code for each field defined in THIS class
+        System.out.format("--- Generating constructor %s body ---\n", constructorLabel);
+        for (AST_CLASS_FIELDS_DEC fieldAST : fields) { // Use the correct list type
+            System.out.format("--- Constructor %s: Processing field %s ---\n", constructorLabel, fieldAST.getName());
+
+            // Find the corresponding TYPE_CLASS_FIELD to get the offset
+            TYPE_CLASS_FIELD fieldInfo = null;
+            if (classType.getDataMembers() != null) {
+                for (TYPE_CLASS_FIELD f : classType.getDataMembers()) {
+                    // Assuming TYPE_CLASS_FIELD has a getName() method or direct access
+                    if (f.getName().equals(fieldAST.getName())) {
+                        fieldInfo = f;
+                        break;
+                    }
+                }
+            }
+            if (fieldInfo == null) {
+                System.err
+                        .println("!!! Error: Could not find field info for " + fieldAST.getName() + " in constructor.");
+                continue; // Skip this field if info not found
+            }
+
+            int fieldOffset = fieldInfo.offset; // Assuming getOffset() exists
+
+            TEMP initialValueTemp = null;
+            if (fieldAST.varValue != null) {
+                System.out.format("--- Constructor %s: Evaluating initial value for %s ---\n", constructorLabel,
+                        fieldAST.getName());
+                initialValueTemp = fieldAST.varValue.IRme();
+            }
+
+            if (initialValueTemp != null) {
+                System.out.format("--- Constructor %s: Setting field %s (offset %d) ---\n", constructorLabel,
+                        fieldAST.getName(), fieldOffset);
+                IR.getInstance().Add_IRcommand(
+                        new IRcommand_Class_Field_Set(tempThis, fieldOffset, initialValueTemp));
+            } else {
+                System.err.println("!!! Error: Initial value computation failed for " + fieldAST.getName());
+            }
+        }
+
+        IR.getInstance().Add_IRcommand(new IRcommand_Epilogue(constructorFrameSize));
+        IR.getInstance().Add_IRcommand(new IRcommand_Label(constructorLabel + "_end"));
 
         return null;
     }
