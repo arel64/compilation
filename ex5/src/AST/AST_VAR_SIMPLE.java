@@ -12,7 +12,7 @@ public class AST_VAR_SIMPLE extends AST_VAR {
 	boolean isGlobal;
 	boolean isParameter;
 	boolean isClassField;
-	boolean isInClassMethodParameter;
+	boolean definedInClassMethodScope;
 	int offset = Integer.MIN_VALUE;
 	private static final int WORD_SIZE = 4; // Define WORD_SIZE if not globally accessible
 
@@ -28,8 +28,8 @@ public class AST_VAR_SIMPLE extends AST_VAR {
 
 	@Override
 	public String toString() {
-		return String.format("%s(offset:%d, global:%b, param:%b, inClassMthdParam:%b, field:%b)",
-				this.val, offset, isGlobal, isParameter, isInClassMethodParameter, isClassField);
+		return String.format("%s(offset:%d, global:%b, param:%b, inClassMthd:%b, field:%b)",
+				this.val, offset, isGlobal, isParameter, definedInClassMethodScope, isClassField);
 	}
 
 	@Override
@@ -47,16 +47,17 @@ public class AST_VAR_SIMPLE extends AST_VAR {
 		this.isParameter = entry.isParameter;
 		this.offset = entry.offset;
 
-		// Determine if it's a class field (declared in CLASS scope, not PARAM or LOCAL)
-		// This heuristic assumes parameters and locals inside methods are not fields.
+		// Determine if it's a class field (declared DIRECTLY in CLASS scope, not PARAM
+		// or LOCAL)
 		this.isClassField = (!this.isGlobal && !this.isParameter && entry.inClassScope);
 
-		// Determine if it's specifically a parameter within a class method
-		this.isInClassMethodParameter = this.isParameter && entry.inClassScope; // Check scope ONLY if it's a parameter
+		// Determine if this variable is being analyzed while the symbol table is inside
+		// a class structure
+		this.definedInClassMethodScope = SYMBOL_TABLE.getInstance().isInClassScope();
 
 		System.out.format(
-				"SemantMe AST_VAR_SIMPLE '%s': isGlobal=%b, isParameter=%b, isClassField=%b, inClassMethodParam=%b, offset=%d, inClassScope=%b\n",
-				this.val, this.isGlobal, this.isParameter, this.isClassField, this.isInClassMethodParameter,
+				"SemantMe AST_VAR_SIMPLE '%s': isGlobal=%b, isParameter=%b, isClassField=%b, definedInClassMthdScope=%b, offset=%d, entry.inClassScope=%b\n",
+				this.val, this.isGlobal, this.isParameter, this.isClassField, this.definedInClassMethodScope,
 				this.offset, entry.inClassScope);
 
 		return entry.type;
@@ -66,8 +67,8 @@ public class AST_VAR_SIMPLE extends AST_VAR {
 	public TEMP IRme() {
 		TEMP dstTemp = TEMP_FACTORY.getInstance().getFreshTEMP();
 		System.out.format(
-				"IRme AST_VAR_SIMPLE '%s': Using offset=%d, isGlobal=%b, isParameter=%b, inClassMethodParam=%b, isClassField=%b for load\n",
-				this.val, this.offset, this.isGlobal, this.isParameter, this.isInClassMethodParameter,
+				"IRme AST_VAR_SIMPLE '%s': Using offset=%d, isGlobal=%b, isParameter=%b, definedInClassMthdScope=%b, isClassField=%b for load\n",
+				this.val, this.offset, this.isGlobal, this.isParameter, this.definedInClassMethodScope,
 				this.isClassField);
 
 		if (this.isGlobal) {
@@ -82,13 +83,13 @@ public class AST_VAR_SIMPLE extends AST_VAR {
 			IR.getInstance().Add_IRcommand(new IRcommand_Class_Field_Access(dstTemp, tempThis, this.offset));
 
 		} else if (this.isParameter) {
-			// Calculate offset based on whether it's a class method parameter (determined
-			// in SemantMe)
-			int paramMipsOffset = this.offset + (this.isInClassMethodParameter ? WORD_SIZE : 0);
+			// Calculate offset based on whether SemantMe determined we were in a class
+			// method scope
+			int paramMipsOffset = this.offset + (this.definedInClassMethodScope ? WORD_SIZE : 0);
 
 			System.out.format(
-					"IRme: Generating Load Parameter for '%s' from %d($fp) (inClassMethodParam=%b, original offset %d)\n",
-					this.val, paramMipsOffset, this.isInClassMethodParameter, this.offset);
+					"IRme: Generating Load Parameter for '%s' from %d($fp) (definedInClassMthdScope=%b, original offset %d)\n",
+					this.val, paramMipsOffset, this.definedInClassMethodScope, this.offset);
 			IR.getInstance().Add_IRcommand(new IRcommand_Load(dstTemp, paramMipsOffset, this.val));
 
 		} else { // Must be a local variable
@@ -106,8 +107,8 @@ public class AST_VAR_SIMPLE extends AST_VAR {
 	@Override
 	public TEMP storeValueIR(TEMP sourceValue) {
 		System.out.format(
-				"storeValueIR AST_VAR_SIMPLE '%s': Using offset=%d, isGlobal=%b, isParameter=%b, inClassMethodParam=%b, isClassField=%b for store\n",
-				this.val, this.offset, this.isGlobal, this.isParameter, this.isInClassMethodParameter,
+				"storeValueIR AST_VAR_SIMPLE '%s': Using offset=%d, isGlobal=%b, isParameter=%b, definedInClassMthdScope=%b, isClassField=%b for store\n",
+				this.val, this.offset, this.isGlobal, this.isParameter, this.definedInClassMethodScope,
 				this.isClassField);
 
 		if (this.isGlobal) {
@@ -122,13 +123,13 @@ public class AST_VAR_SIMPLE extends AST_VAR {
 			IR.getInstance().Add_IRcommand(new IRcommand_Class_Field_Set(tempThis, this.offset, sourceValue));
 
 		} else if (this.isParameter) {
-			// Calculate offset based on whether it's a class method parameter (determined
-			// in SemantMe)
-			int paramMipsOffset = this.offset + (this.isInClassMethodParameter ? WORD_SIZE : 0);
+			// Calculate offset based on whether SemantMe determined we were in a class
+			// method scope
+			int paramMipsOffset = this.offset + (this.definedInClassMethodScope ? WORD_SIZE : 0);
 
 			System.out.format(
-					"storeValueIR: Generating Store Parameter for '%s' to %d($fp) (inClassMethodParam=%b, original offset %d)\n",
-					this.val, paramMipsOffset, this.isInClassMethodParameter, this.offset);
+					"storeValueIR: Generating Store Parameter for '%s' to %d($fp) (definedInClassMthdScope=%b, original offset %d)\n",
+					this.val, paramMipsOffset, this.definedInClassMethodScope, this.offset);
 			IR.getInstance().Add_IRcommand(new IRcommand_Store(sourceValue, paramMipsOffset, this.val));
 
 		} else { // Must be a local variable
