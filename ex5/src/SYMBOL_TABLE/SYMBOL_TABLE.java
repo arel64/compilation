@@ -103,6 +103,12 @@ public class SYMBOL_TABLE {
 		SYMBOL_TABLE_ENTRY e = new SYMBOL_TABLE_ENTRY(name, t, hashValue, next, top, top_index++, false);
 		e.size = calculatedSize; // Store calculated size
 
+		// Determine current scope type *before* offset calculation
+		ScopeType currentScope = scopeTypeStack.isEmpty() ? null : scopeTypeStack.peek();
+
+		// Set parameter flag
+		e.isParameter = (currentScope == ScopeType.PARAMS);
+
 		/**************************************/
 		/* [3.5] Assign offset based on scope */
 		/**************************************/
@@ -115,8 +121,6 @@ public class SYMBOL_TABLE {
 			e.offset = 0; // Globals might use labels, offset 0 is placeholder
 		} else // Inside a scope (Function, Params, or Body)
 		{
-			ScopeType currentScope = scopeTypeStack.peek();
-
 			if (currentScope == ScopeType.PARAMS) {
 				// Assign parameter offset (positive, starts at 0)
 				// Check if it's actually a variable-like type

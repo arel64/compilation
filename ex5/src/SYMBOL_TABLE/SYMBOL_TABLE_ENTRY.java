@@ -41,6 +41,11 @@ public class SYMBOL_TABLE_ENTRY {
 	public int size = 0; // Will be set during semantic analysis
 
 	/******************************************/
+	/* Parameter flag */
+	/******************************************/
+	public boolean isParameter = false;
+
+	/******************************************/
 	/* AST Node for the declaration (VAR_DEC) */
 	/******************************************/
 	public boolean inClassScope = false;
@@ -75,6 +80,7 @@ public class SYMBOL_TABLE_ENTRY {
 		this.prevtop_index = prevtop_index;
 		this.isGlobal = isGlobal;
 		this.offset = Integer.MIN_VALUE; // Ensure default is sentinel
+		this.isParameter = false; // Initialize to false by default
 	}
 
 	@Override
@@ -86,6 +92,7 @@ public class SYMBOL_TABLE_ENTRY {
 				", size=" + size + '\n' +
 				", isGlobal=" + isGlobal + '\n' +
 				", offset=" + offset + '\n' +
+				", isParameter=" + isParameter + '\n' +
 				'}';
 	}
 
