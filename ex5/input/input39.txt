@@ -1,3 +1,4 @@
+
 class Son{
 
     string foo(){
@@ -11,4 +12,7 @@ void main() {
     if(b.foo() = "SonFoo"){
         PrintString(b.bar + "world");
     }
+
+
+
 }
