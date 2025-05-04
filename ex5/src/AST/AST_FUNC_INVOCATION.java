@@ -65,38 +65,55 @@ public class AST_FUNC_INVOCATION extends AST_EXP {
         }
 
         this.resolvedClassType = (TYPE_CLASS) varType;
+        String baseFuncName = funcName;
+        String qualifiedFuncName = null;
         TYPE functionType = null;
-        if (varType == null) {
-            functionType = table.find(funcName);
+        if (resolvedClassType == null) {
+            String className = SYMBOL_TABLE.getInstance().getInScopeClass();
+            String funcNameWithClass = null;
+            if (className != null) {
+                funcNameWithClass = SYMBOL_TABLE.getClassFunctionName(className, baseFuncName);
+                functionType = table.find(funcNameWithClass);
+            }
+            if (functionType != null) {
+                this.resolvedClassType = (TYPE_CLASS) SYMBOL_TABLE.getInstance().find(className);
+                qualifiedFuncName = funcNameWithClass;
+            } else {
+                functionType = table.find(baseFuncName);
+                qualifiedFuncName = baseFuncName;
+            }
         } else {
             TYPE_CLASS varClass = (TYPE_CLASS) varType;
-            functionType = varClass.getDataMember(funcName).t;
+            functionType = varClass.getDataMember(baseFuncName).t;
         }
-
         if (functionType == null) {
-            throw new SemanticException(lineNumber, String.format("%s does not exist and cannot be invoked", funcName));
+            throw new SemanticException(lineNumber, String.format("%s does not exist and cannot be invoked",
+                    baseFuncName));
         }
 
         if (!(functionType instanceof TYPE_FUNCTION)) {
-            throw new SemanticException(lineNumber, String.format("%s cannot be used like a function", funcName));
+            throw new SemanticException(lineNumber, String.format("%s cannot be used like a function",
+                    qualifiedFuncName));
         }
         TYPE_FUNCTION myFunctionType = (TYPE_FUNCTION) functionType;
+        System.out.println("resolvedClassType: " + resolvedClassType + " " + baseFuncName + " " + qualifiedFuncName);
         if (this.resolvedClassType != null) {
-            this.methodOffset = resolvedClassType.getDataMember(funcName).offset;
+            this.methodOffset = resolvedClassType.getDataMember(baseFuncName).offset;
         }
 
         table.beginScope(ScopeType.FUNCTION);
         if (params != null) {
             if (params.size() != myFunctionType.getParams().size()) {
                 throw new SemanticException(lineNumber,
-                        String.format("incorrect function %s invocation, number of parameters", funcName));
+                        String.format("incorrect function %s invocation, number of parameters", qualifiedFuncName));
             }
             for (int i = 0; i < params.size(); i++) {
                 TYPE expType = params.at(i).SemantMeLog();
                 TYPE param = myFunctionType.getParam(i);
                 if (!param.isInterchangeableWith(expType)) {
                     throw new SemanticException(lineNumber, String.format(
-                            "incorrect function %s invocation for value  param %s=%s ", funcName, param, expType));
+                            "incorrect function %s invocation for value  param %s=%s ",
+                            qualifiedFuncName, param, expType));
                 }
             }
         }
@@ -112,30 +129,48 @@ public class AST_FUNC_INVOCATION extends AST_EXP {
             for (AST_EXP param : params) {
                 paramsTemp.add(param.IRme());
             }
-
         }
         TEMP dst = TEMP_FACTORY.getInstance().getFreshTEMP();
 
-        if (var == null) {
+        if (resolvedClassType == null) { // Global function call
+            System.out.printf("IRme: Adding IRcommand_Func_Call for %s\n", funcName);
             IR.getInstance().Add_IRcommand(new IRcommand_Func_Call(dst, funcName, paramsTemp));
-        } else {
-            TEMP objAddrTemp = var.IRme();
-            if (objAddrTemp == null) {
-                System.err.printf(
-                        "IR Error(ln %d): Cannot call method '%s' because base object expression did not yield a value.\n",
-                        lineNumber, funcName);
+        } else { // Class method call (explicit or implicit)
+            TEMP objAddrTemp = null; // Initialize to null
+
+            if (var != null) { // Explicit call: var.funcName()
+                System.out.printf("IRme: Generating explicit method call IR for %s.%s\n", var.toString(), funcName);
+                objAddrTemp = var.IRme();
+                // Robustness: Check if var.IRme() returned a valid TEMP
+                if (objAddrTemp == null) {
+                    System.err.printf("IR Error(ln %d): Base object expression for %s.%s did not yield a TEMP.\n",
+                            lineNumber, var.toString(), funcName);
+                    return null; // Or handle error appropriately
+                }
+                // Consider adding IR for null pointer check on objAddrTemp here if needed
+                // IR.getInstance().Add_IRcommand(new
+                // IRcommand_Check_Null_Pointer(objAddrTemp));
+            } else { // Implicit call: funcName() inside a method
+                // Signal implicit call by leaving objAddrTemp as null.
+                // The actual loading of 'this' from 0($fp) will be handled by
+                // IRcommand_Class_Method_Call.MIPSme()
+                objAddrTemp = TEMP_FACTORY.getInstance().getFreshTEMP();
+                System.out.printf("IRme: Signaling implicit 'this' method call IR for %s (objAddrTemp=null)\n",
+                        funcName);
+            }
+
+            // Check if method offset is valid (should be set in SemantMe)
+            if (this.methodOffset < 0) {
+                System.err.printf("IR Error(ln %d): Invalid method offset (%d) for %s.\n", lineNumber,
+                        this.methodOffset, funcName);
                 return null;
             }
 
-            // Use the stored offset and class type from SemantMe
-            if (this.resolvedClassType == null) {
-                System.err.printf(
-                        "IR Error(ln %d): Class type or method offset not resolved during SemantMe for %s.%s.\n",
-                        lineNumber, (var != null ? var.toString() : "null"), funcName);
-                return null; // Cannot proceed without info from SemantMe
-            }
-            IR.getInstance().Add_IRcommand(
-                    new IRcommand_Class_Method_Call(dst, objAddrTemp, this.methodOffset, paramsTemp));
+            // Generate the call command, passing null objAddrTemp for implicit calls
+            System.out.printf("IRme: Adding IRcommand_Class_Method_Call for %s (offset %d), obj TEMP: %s\n", funcName,
+                    this.methodOffset, objAddrTemp);
+            IR.getInstance()
+                    .Add_IRcommand(new IRcommand_Class_Method_Call(dst, objAddrTemp, this.methodOffset, paramsTemp));
         }
 
         return dst;

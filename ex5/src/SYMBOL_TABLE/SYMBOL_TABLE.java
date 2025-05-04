@@ -156,15 +156,12 @@ public class SYMBOL_TABLE {
 		String className = null;
 		ScopeType immediateScopeType = scopeTypeStack.isEmpty() ? null : scopeTypeStack.peek();
 		if (immediateScopeType == ScopeType.CLASS) {
-			// Logic to find the class name when the *immediate* scope is CLASS
-			SYMBOL_TABLE_ENTRY walker = top; // Start from the current top (SCOPE-BOUNDARY)
-			while (walker != null && !walker.name.equals("SCOPE-BOUNDARY")) {
-				walker = walker.prevtop;
-			}
-			// walker should now be the SCOPE-BOUNDARY entry for the class scope.
-			// The entry *before* it (walker.prevtop) should be the class type definition.
-			if (walker != null && walker.prevtop != null && walker.prevtop.type instanceof TYPE_CLASS) {
-				className = walker.prevtop.name;
+			className = this.getInScopeClass(); // Use the new helper method
+			// Optional: Add a check for robustness, although getInScopeClass should find it
+			// if the scope type matches.
+			if (className == null) {
+				System.err
+						.println("Warning: Immediate scope is CLASS, but getInScopeClass() returned null in enter().");
 			}
 		}
 
@@ -178,7 +175,7 @@ public class SYMBOL_TABLE {
 		// but the example code modified 'e.name' directly.
 		// Let's keep the modification of e.name for now, assuming it's intended.
 		if (className != null && t.isFunction()) {
-			e.name = className + "." + name; // Qualify function names defined directly in class
+			e.name = getClassFunctionName(className, name); // Qualify function names defined directly in class
 		}
 
 		// System.out.println(e); // DEBUG: Print entry details including offset
@@ -198,6 +195,10 @@ public class SYMBOL_TABLE {
 		/**************************/
 		// PrintMe(); // Keep commented out unless debugging
 		return e.name;
+	}
+
+	static public String getClassFunctionName(String className, String name) {
+		return className + "." + name;
 	}
 
 	/****************************************************************************/
@@ -540,7 +541,9 @@ public class SYMBOL_TABLE {
 
 	// Method to check if the current or any enclosing scope is a class scope
 	public boolean isInClassScope() {
+		System.out.println("scopeTypeStack: " + scopeTypeStack + "for loop");
 		for (ScopeType scope : scopeTypeStack) {
+			System.out.println("Iterating scopes" + scope);
 			if (scope == ScopeType.CLASS) {
 				return true;
 			}
@@ -669,20 +672,9 @@ public class SYMBOL_TABLE {
 		if (name == null) {
 			return null;
 		}
-		SYMBOL_TABLE_ENTRY e;
-
-		for (e = table[hash(name)]; e != null; e = e.next) {
-			if (name.equals(e.name)) {
-				// To find the innermost, we need to check the scope stack, not just the hash
-				// chain.
-				// Use findEntryInCurrentScopeStack instead.
-				SYMBOL_TABLE_ENTRY foundEntry = findEntryInCurrentScopeStack(name);
-				return (foundEntry != null) ? foundEntry.type : null;
-			}
-		}
-
-		return null; // Should ideally not be reached if findEntryInCurrentScopeStack is used
-						// correctly.
+		// Directly use the correct scope stack search.
+		SYMBOL_TABLE_ENTRY foundEntry = findEntryInCurrentScopeStack(name);
+		return (foundEntry != null) ? foundEntry.type : null;
 	}
 
 	// Helper to find entry by searching the current scope stack (most recent first)
@@ -731,6 +723,52 @@ public class SYMBOL_TABLE {
 	public String getClassName(String name) {
 		SYMBOL_TABLE_ENTRY e = findEntryInCurrentScopeStack(name);
 		return (e != null) ? e.className : null;
+	}
+
+	/**
+	 * Finds the name of the innermost class scope the current scope is nested
+	 * within.
+	 *
+	 * @return The name of the innermost enclosing class, or null if not currently
+	 *         within any class scope.
+	 */
+	public String getInScopeClass() {
+		// If the scope stack is empty or doesn't contain any CLASS type, we're not in a
+		// class.
+		if (scopeTypeStack.isEmpty() || !this.isInClassScope()) {
+			return null;
+		}
+
+		// Create a copy of the scope stack to iterate through without modifying the
+		// original.
+		List<ScopeType> scopeTypes = new ArrayList<>(scopeTypeStack);
+		int currentScopeLevel = scopeTypes.size() - 1; // Index for the scopeTypes list
+
+		SYMBOL_TABLE_ENTRY walker = top;
+		while (walker != null && currentScopeLevel >= 0) {
+			if (walker.name.equals("SCOPE-BOUNDARY")) {
+				// Check if this boundary corresponds to a CLASS scope
+				if (scopeTypes.get(currentScopeLevel) == ScopeType.CLASS) {
+					// The entry immediately before the class scope boundary should be the class
+					// definition.
+					if (walker.prevtop != null && walker.prevtop.type instanceof TYPE_CLASS) {
+						return walker.prevtop.name; // Found the innermost class name
+					} else {
+						// This indicates an inconsistency in the symbol table structure.
+						System.err.println("Error: Found CLASS scope boundary but previous entry is not a TYPE_CLASS.");
+						return null; // Or throw an exception
+					}
+				}
+				// Move to the next outer scope level
+				currentScopeLevel--;
+			}
+			walker = walker.prevtop;
+		}
+
+		// If the loop finishes without finding a CLASS boundary (which shouldn't happen
+		// if isInClassScope() was true),
+		// return null.
+		return null;
 	}
 
 	public void printSymbolTable() {

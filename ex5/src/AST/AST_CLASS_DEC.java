@@ -68,7 +68,7 @@ public class AST_CLASS_DEC extends AST_DEC {
 
         TYPE_CLASS father = (parentClassName != null) ? (TYPE_CLASS) symbol_table.getTypeInGlobalScope(parentClassName)
                 : null;
-        TYPE_CLASS currentClass = new TYPE_CLASS(father, getName(), lineNumber); // Pass father TYPE_CLASS
+        TYPE_CLASS currentClass = new TYPE_CLASS(father, getName(), this, lineNumber); // Pass father TYPE_CLASS
         SYMBOL_TABLE.getInstance().enter(getName(), currentClass); // Enter class type itself
 
         TYPE_CLASS_VAR_DEC_LIST memberList = new TYPE_CLASS_VAR_DEC_LIST(); // Final list for this class
@@ -82,14 +82,25 @@ public class AST_CLASS_DEC extends AST_DEC {
                 memberList.add(inheritedField);
             }
         }
+        currentClass.setDataMembers(memberList);
         SYMBOL_TABLE.getInstance().beginScope(ScopeType.CLASS);
         // Process Current Class Declarations
         for (AST_CLASS_FIELDS_DEC myFieldAST : fields) {
-            TYPE myFieldType = myFieldAST.SemantMe();
             String myFieldName = myFieldAST.getName();
-            SYMBOL_TABLE.getInstance().printSymbolTable();
-            TYPE_CLASS_FIELD existingMember = memberList.get(myFieldName);
+            TYPE myFieldType = myFieldAST.SemantMe();
             TYPE_CLASS_FIELD myNewMember = new TYPE_CLASS_FIELD(myFieldName, myFieldType, myFieldAST.lineNumber);
+            TYPE_CLASS_FIELD existingMember = memberList.get(myFieldName);
+            memberList.add(myNewMember);
+            currentClass.setDataMembers(memberList);
+            for (AST_CLASS_FIELDS_DEC field : fields) {
+                if (field.getName().equals(myFieldName)) {
+                    int MYoffset = field.offset;
+                    myNewMember.offset = MYoffset;
+                    myNewMember.specifiedName = currentClass.getName() + "." + myFieldName;
+                    break;
+
+                }
+            }
 
             if (existingMember != null) { // Member with this name exists (potentially inherited)
                 if (myFieldType.isFunction() && existingMember.t.isFunction()) {
@@ -114,18 +125,8 @@ public class AST_CLASS_DEC extends AST_DEC {
                                     myFieldName, getName()));
                 }
             } else {
-                memberList.add(myNewMember);
                 if (myFieldType.isFunction()) {
                     finalFunctions.add(myFieldAST);
-                }
-            }
-            for (AST_CLASS_FIELDS_DEC field : fields) {
-                if (field.getName().equals(myFieldName)) {
-                    int MYoffset = field.offset;
-                    myNewMember.offset = MYoffset;
-                    myNewMember.specifiedName = currentClass.getName() + "." + myFieldName;
-                    break;
-
                 }
             }
 

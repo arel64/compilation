@@ -3,6 +3,7 @@ package TYPES;
 import java.util.HashSet;
 import java.util.Set;
 
+import AST.AST_CLASS_DEC;
 import SYMBOL_TABLE.SYMBOL_TABLE;
 import SYMBOL_TABLE.SemanticException;
 
@@ -13,6 +14,7 @@ public class TYPE_CLASS extends TYPE {
 	public TYPE_CLASS father;
 	private TYPE_CLASS_VAR_DEC_LIST memberList;
 	public int line;
+	public AST_CLASS_DEC classDeclaration;
 	/**************************************************/
 	/* Gather up all data members in one place */
 	/* Note that data members coming from the AST are */
@@ -24,15 +26,17 @@ public class TYPE_CLASS extends TYPE {
 	/**
 	 * @throws SemanticException
 	 **************/
-	public TYPE_CLASS(TYPE_CLASS father, String name, int line) throws SemanticException {
-		this((TYPE) father, name, line);
+	public TYPE_CLASS(TYPE_CLASS father, String name, AST_CLASS_DEC classDeclaration, int line)
+			throws SemanticException {
+		this((TYPE) father, name, classDeclaration, line);
 	}
 
-	public TYPE_CLASS(String father, String name, int line) throws SemanticException {
-		this(SYMBOL_TABLE.getInstance().find(father), name, line);
+	public TYPE_CLASS(String father, String name, AST_CLASS_DEC classDeclaration, int line)
+			throws SemanticException {
+		this(SYMBOL_TABLE.getInstance().find(father), name, classDeclaration, line);
 	}
 
-	private TYPE_CLASS(TYPE father, String name, int line) throws SemanticException {
+	private TYPE_CLASS(TYPE father, String name, AST_CLASS_DEC classDeclaration, int line) throws SemanticException {
 		super(name);
 		this.line = line;
 		if (father != null && !(father instanceof TYPE_CLASS)) {
@@ -41,7 +45,7 @@ public class TYPE_CLASS extends TYPE {
 		if (father != null) {
 			this.father = (TYPE_CLASS) father;
 		}
-
+		this.classDeclaration = classDeclaration;
 	}
 
 	@Override

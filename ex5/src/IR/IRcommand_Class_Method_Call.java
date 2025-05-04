@@ -55,29 +55,53 @@ public class IRcommand_Class_Method_Call extends IRcommand {
 	public void MIPSme() {
 		MIPSGenerator generator = MIPSGenerator.getInstance();
 
-		int argStackSize = (args.size() + 1) * 4;
-		generator.addi_imm(MIPSGenerator.SP, MIPSGenerator.SP, -argStackSize);
-		int currentArgOffset = argStackSize - 4;
-
-		for (int i = args.size() - 1; i >= 0; i--) {
-			generator.sw_sp(args.get(i), currentArgOffset);
-			currentArgOffset -= 4;
+		// Determine the effective object address TEMP
+		TEMP effectiveObjAddrTemp = this.objAddrTemp;
+		if (this.objAddrTemp == null) {
+			// Implicit 'this' call: Load 'this' from the frame pointer (0($fp))
+			// NOTE: Creating a fresh TEMP here relies on MIPSGenerator's lw_fp
+			// correctly handling a TEMP that wasn't present during register allocation.
+			// This usually works if lw_fp internally maps it to a transient register for
+			// the load.
+			generator.lw_fp(effectiveObjAddrTemp, 0); // Load 0($fp) into the register for the new TEMP
 		}
 
-		generator.sw_sp(objAddrTemp, 0);
+		// Stack setup for arguments + 'this'
+		int argCount = args != null ? args.size() : 0;
+		int totalArgsSize = (argCount + 1) * 4; // +1 for 'this'
+		generator.addi_imm(MIPSGenerator.SP, MIPSGenerator.SP, -totalArgsSize);
 
-		generator.genNullCheck(objAddrTemp);
+		// Store arguments (if any)
+		int currentArgOffset = totalArgsSize - 4;
+		if (args != null) {
+			for (int i = args.size() - 1; i >= 0; i--) {
+				generator.sw_sp(args.get(i), currentArgOffset); // Store arg TEMP relative to $sp
+				currentArgOffset -= 4;
+			}
+		}
 
-		String vmtAddrReg = MIPSGenerator.TEMP_REG_1;
-		generator.lw_offset(vmtAddrReg, 0, objAddrTemp);
+		// Store 'this' pointer (using the effective TEMP)
+		generator.sw_sp(effectiveObjAddrTemp, 0); // Store at 0($sp)
 
-		String methodAddrReg = MIPSGenerator.TEMP_REG_2;
+		// Null check on 'this' (using the effective TEMP)
+		generator.genNullCheck(effectiveObjAddrTemp);
+
+		// Load VMT address from object (using the effective TEMP)
+		String vmtAddrReg = MIPSGenerator.TEMP_REG_1; // Use $s0 for VMT address
+		// Use the lw_offset version that takes TEMP as base
+		generator.lw_offset(vmtAddrReg, 0, effectiveObjAddrTemp);
+
+		// Load method address from VMT (using vmtAddrReg = $s0 as base)
+		String methodAddrReg = MIPSGenerator.TEMP_REG_2; // Use $s1 for method address
 		generator.lw_offset(methodAddrReg, methodOffset, vmtAddrReg);
 
-		generator.jalr(methodAddrReg);
+		// Call method
+		generator.jalr(methodAddrReg); // Call address in $s1
 
-		generator.addi_imm(MIPSGenerator.SP, MIPSGenerator.SP, argStackSize);
+		// Clean up stack
+		generator.addi_imm(MIPSGenerator.SP, MIPSGenerator.SP, totalArgsSize);
 
+		// Move result if needed
 		if (dst != null) {
 			generator.move_from_v0(dst);
 		}
