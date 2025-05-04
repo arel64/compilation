@@ -184,14 +184,33 @@ public class AST_CLASS_DEC extends AST_DEC {
             }
             // Sort based on the stored VMT index (offset)
             sortedMethods.sort((m1, m2) -> Integer.compare(m1.offset, m2.offset));
+            System.out.format("--- VMT Generation for class: %s ---\n", classType.getName());
             for (TYPE_CLASS_FIELD methodField : sortedMethods) {
-                String label = IRcommand.getFreshLabel(methodField.specifiedName);
-                String label_start = label + "_start";
-                IR.getInstance().registerFunctionLabel(methodField.specifiedName, label);
-                vmtMethodLabels.add(label_start);
+                System.out.format("  Processing method: %s (specifiedName: %s)\n", methodField.getName(),
+                        methodField.specifiedName);
+                // Attempt to retrieve the label registered for this method's specified name.
+                String baseLabel = IR.getInstance().getFunctionLabel(methodField.specifiedName);
+                System.out.format("    getFunctionLabel returned: %s\n", baseLabel);
+                if (baseLabel == null) {
+                    // Label not found (likely a method defined in *this* class), generate and
+                    // register it.
+                    baseLabel = IRcommand.getFreshLabel(methodField.specifiedName);
+                    System.out.format("    Generated fresh label: %s\n", baseLabel);
+                    IR.getInstance().registerFunctionLabel(methodField.specifiedName, baseLabel);
+                }
+                // Else: Label was found (inherited method), reuse it.
+
+                // Construct the final label name with "_start" for the VMT entry.
+                String labelForVMT = baseLabel; // TODO :: This is a hack to fix the VMT generation for inherited
+                                                // methods
+                if (!baseLabel.endsWith("_start")) {
+
+                    labelForVMT = baseLabel + "_start";
+                }
+                System.out.format("    Adding to VMT labels: %s\n", labelForVMT);
+                vmtMethodLabels.add(labelForVMT);
             }
         }
-        // 2. Add IR command to create the VMT in .data section
         IR.getInstance().Add_IRcommand(new IRcommand_Class_Dec(classType.getName(), vmtMethodLabels));
         for (AST_CLASS_FIELDS_DEC field : finalFunctions) {
             field.IRme();

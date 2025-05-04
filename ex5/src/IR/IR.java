@@ -380,13 +380,16 @@ public class IR {
 	}
 
 	public void registerFunctionLabel(String funcName, String label) {
-		System.out.println("Registering function label: " + funcName + " with label: " + label);
+		System.out.format("### IR Registering: funcName='%s', label='%s'\n", funcName, label);
+		System.out.format("### IR Map BEFORE register: %s\n", functionLabels);
 		functionLabels.put(funcName, label);
+		System.out.format("### IR Map AFTER register: %s\n", functionLabels);
 	}
 
 	public String getFunctionLabel(String funcName) {
-		System.out.println("Function labels map: " + functionLabels + " for " + funcName);
+		System.out.format("### IR Looking up: funcName='%s'\n", funcName);
 		String label = functionLabels.get(funcName);
+		System.out.format("### IR Lookup result: '%s' (Map state: %s)\n", label, functionLabels);
 		return label;
 	}
 
