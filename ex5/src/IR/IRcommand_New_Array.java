@@ -12,10 +12,7 @@ package IR;
 /*******************/
 import TEMP.*;
 import MIPS.*; // Assuming MIPSGenerator is in this package
-import SYMBOL_TABLE.SYMBOL_TABLE;
-import IR.IRcommand; // Import base class to use getFreshLabel
-import TYPES.TYPE; // Import TYPE
-import TYPES.TYPE_VOID; // Import TYPE_VOID
+
 import java.util.Arrays;
 import java.util.HashSet;
 

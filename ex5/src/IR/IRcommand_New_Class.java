@@ -20,6 +20,7 @@ public class IRcommand_New_Class extends IRcommand {
 	String className; // Name of the class being instantiated (for VMT lookup)
 
 	public IRcommand_New_Class(TEMP dst, TEMP sizeTemp, String className) {
+		System.out.println("IRcommand_New_Class: dst=" + dst + ", sizeTemp=" + sizeTemp + ", className=" + className);
 		this.dst = dst;
 		this.sizeTemp = sizeTemp;
 		this.className = className;
@@ -56,6 +57,17 @@ public class IRcommand_New_Class extends IRcommand {
 		// baseTemp)
 		generator.sw_offset_from_reg(tempAddrReg, 0, dst); // dst holds the object address
 
+		// 6. Save caller-saved registers ($t0-$t9) before the call
+		int stackOffsetForSave = 0; // Offset within the 40-byte save area
+		generator.addi_imm(MIPSGenerator.SP, MIPSGenerator.SP, -4 * MIPSGenerator.NUM_ALLOCATABLE_REGISTERS); // Allocate
+																												// space
+																												// for
+																												// $t0-$t9
+		for (int i = 0; i < MIPSGenerator.NUM_ALLOCATABLE_REGISTERS; i++) {
+			// Use sw_reg_sp for clarity, offset is relative to the new SP
+			generator.sw_reg_sp("$t" + i, stackOffsetForSave + (i * 4));
+		}
+
 		// --- NEW: Call Implicit Constructor ---
 		// 4. Construct constructor label
 		String constructorLabel = "__init_" + className + "_start";
@@ -66,22 +78,15 @@ public class IRcommand_New_Class extends IRcommand {
 		// ($sp)
 		generator.sw_offset_from_temp(dst, 0, MIPSGenerator.SP);
 
-		// 6. Save caller-saved registers ($t0-$t9) before the call
-		int stackOffsetForSave = 0; // Start saving below the 'this' arg
-		generator.addi_imm(MIPSGenerator.SP, MIPSGenerator.SP, -4 * MIPSGenerator.NUM_ALLOCATABLE_REGISTERS); // Allocate
-																												// space
-																												// for
-																												// $t0-$t9
-		for (int i = 0; i < MIPSGenerator.NUM_ALLOCATABLE_REGISTERS; i++) {
-			generator.sw_offset("$t" + i, stackOffsetForSave + (i * 4), MIPSGenerator.SP);
-		}
-
 		// 7. Call the constructor
 		generator.jal(constructorLabel);
 
+		generator.addi_imm(MIPSGenerator.SP, MIPSGenerator.SP, 4);
 		// 8. Restore caller-saved registers ($t0-$t9) after the call
+		// $sp should be unchanged by the callee
 		for (int i = 0; i < MIPSGenerator.NUM_ALLOCATABLE_REGISTERS; i++) {
-			generator.lw_offset("$t" + i, stackOffsetForSave + (i * 4), MIPSGenerator.SP);
+			// Use lw_reg_sp for clarity, offset is relative to the current SP
+			generator.lw_reg_sp("$t" + i, stackOffsetForSave + (i * 4));
 		}
 		generator.addi_imm(MIPSGenerator.SP, MIPSGenerator.SP, 4 * MIPSGenerator.NUM_ALLOCATABLE_REGISTERS); // Deallocate
 																												// space
@@ -89,7 +94,6 @@ public class IRcommand_New_Class extends IRcommand {
 																												// $t0-$t9
 
 		// 9. Clean up stack (remove 'this' argument)
-		generator.addi_imm(MIPSGenerator.SP, MIPSGenerator.SP, 4);
 		// --- End Constructor Call ---
 	}
 

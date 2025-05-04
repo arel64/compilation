@@ -72,12 +72,10 @@ public class AST_VAR_SIMPLE extends AST_VAR {
 			}
 
 			if (this.isClassField) {
-				System.out.format("IRme: Using CLASS FIELD offset %d for '%s'\n", this.offset, this.val);
 				TEMP tempThis = TEMP_FACTORY.getInstance().getFreshTEMP();
 				IR.getInstance().Add_IRcommand(new IRcommand_Load(tempThis, 0, "this"));
 				IR.getInstance().Add_IRcommand(new IRcommand_Class_Field_Access(dstTemp, tempThis, this.offset));
 			} else {
-				System.out.format("IRme: Using LOCAL offset %d for '%s'\n", this.offset, this.val);
 				IR.getInstance().Add_IRcommand(new IRcommand_Load(dstTemp, this.offset, this.val));
 			}
 		}

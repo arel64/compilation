@@ -134,9 +134,6 @@ public class AST_FUNC_INVOCATION extends AST_EXP {
                         lineNumber, (var != null ? var.toString() : "null"), funcName);
                 return null; // Cannot proceed without info from SemantMe
             }
-
-            // Call the correct constructor using stored info
-
             IR.getInstance().Add_IRcommand(
                     new IRcommand_Class_Method_Call(dst, objAddrTemp, this.methodOffset, paramsTemp));
         }

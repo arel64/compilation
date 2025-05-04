@@ -5,6 +5,7 @@ import TYPES.*;
 import TEMP.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import IR.*;
 
@@ -50,6 +51,7 @@ public class AST_NEW_EXP extends AST_EXP {
                         String.format("Internal Error: Size not calculated for class %s before 'new'.",
                                 this.resolvedClassType.getName()));
             }
+
             return this.resolvedClassType; // Return the class type itself
         }
 
@@ -75,7 +77,7 @@ public class AST_NEW_EXP extends AST_EXP {
         try {
             TYPE instanceType = type.SemantMeLog();
 
-            if (this.exp != null) { // Array creation
+            if (resolvedClassType == null) { // Array creation
                 TEMP sizeTemp = this.exp.IRme();
                 if (sizeTemp == null) {
                     System.err.printf("IR Error(ln %d): Array size expression did not yield a value.\n", lineNumber);
@@ -89,7 +91,7 @@ public class AST_NEW_EXP extends AST_EXP {
                 }
                 IR.getInstance().Add_IRcommand(new IRcommand_New_Array(address, arrayBaseTypeName, sizeTemp));
             } else { // Class instance creation
-                     // Use stored info from SemantMe
+                // Use stored info from SemantMe
                 if (this.resolvedClassType == null || this.calculatedSize < 0) {
                     System.err.printf(
                             "IR Error(ln %d): Class type or size not resolved during SemantMe for 'new %s'.\n",

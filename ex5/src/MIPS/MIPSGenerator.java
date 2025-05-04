@@ -538,8 +538,7 @@ public class MIPSGenerator {
 		_malloc(dst);
 	}
 
-	// Make this public so IRcommand_New_Class can call it
-	public void _malloc(TEMP dst) {
+	private void _malloc(TEMP dst) {
 		li_imm(V0, 9); // Syscall code for sbrk
 		syscall(); // Allocate memory, address is in $v0
 		move_from_v0(dst); // Move address from $v0 to dst TEMP's register
