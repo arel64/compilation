@@ -154,13 +154,17 @@ public class SYMBOL_TABLE {
 		}
 
 		// Determine if within any class scope using the helper method
-		boolean inClassScope = this.isInClassScope();
+		// boolean inClassScope = this.isInClassScope(); // OLD LOGIC: Too broad
 
 		// Determine immediate class name *only* if the immediate scope is CLASS
 		String className = null;
 		ScopeType immediateScopeType = scopeTypeStack.isEmpty() ? null : scopeTypeStack.peek();
-		if (immediateScopeType == ScopeType.CLASS) {
-			className = this.getInScopeClass(); // Use the new helper method
+
+		// NEW LOGIC for inClassScope: Only true if declared DIRECTLY in CLASS scope
+		boolean directlyInClassScope = (immediateScopeType == ScopeType.CLASS);
+
+		if (directlyInClassScope) { // Find className only if directly in class
+			className = this.getInScopeClass(); // Use the helper method
 			// Optional: Add a check for robustness, although getInScopeClass should find it
 			// if the scope type matches.
 			if (className == null) {
@@ -169,7 +173,7 @@ public class SYMBOL_TABLE {
 			}
 		}
 
-		e.inClassScope = inClassScope; // Assign the flag based on helper method result
+		e.inClassScope = directlyInClassScope; // Assign the flag based ONLY on immediate scope type
 		e.className = className; // Store the found immediate class name (can be null)
 
 		// Modify the stored name for functions defined directly within a class scope
