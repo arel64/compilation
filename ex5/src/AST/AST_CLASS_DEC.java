@@ -72,6 +72,8 @@ public class AST_CLASS_DEC extends AST_DEC {
         SYMBOL_TABLE.getInstance().enter(getName(), currentClass); // Enter class type itself
 
         TYPE_CLASS_VAR_DEC_LIST memberList = new TYPE_CLASS_VAR_DEC_LIST(); // Final list for this class
+        int currentDataOffset = 4; // Start after VMT pointer
+        int currentMethodOffset = 0; // VMT index counter
 
         // Handle Inheritance
         if (father != null && father.getDataMembers() != null) {
@@ -79,32 +81,34 @@ public class AST_CLASS_DEC extends AST_DEC {
                 // Create a new instance to avoid modifying father's list
                 TYPE_CLASS_FIELD inheritedField = new TYPE_CLASS_FIELD(parentField.getName(), parentField.t,
                         parentField.line);
+                inheritedField.offset = parentField.offset; // Crucial: inherit offset
+                inheritedField.specifiedName = parentField.specifiedName; // Inherit specified name too
                 memberList.add(inheritedField);
+
+                // Update offsets for the next fields/methods based on parent
+                if (parentField.t.isFunction()) {
+                    // VMT offsets should be contiguous. Find the max VMT index + 1.
+                    currentMethodOffset = Math.max(currentMethodOffset, parentField.offset + 1);
+                } else {
+                    // Data offsets should be contiguous. Find the max data offset + 4.
+                    currentDataOffset = Math.max(currentDataOffset, parentField.offset + 4);
+                }
             }
         }
-        currentClass.setDataMembers(memberList);
+        currentClass.setDataMembers(memberList); // Set initial members (inherited)
+
         SYMBOL_TABLE.getInstance().beginScope(ScopeType.CLASS);
         // Process Current Class Declarations
         for (AST_CLASS_FIELDS_DEC myFieldAST : fields) {
             String myFieldName = myFieldAST.getName();
+            // Semant the field/method declaration itself first
             TYPE myFieldType = myFieldAST.SemantMe();
-            TYPE_CLASS_FIELD myNewMember = new TYPE_CLASS_FIELD(myFieldName, myFieldType, myFieldAST.lineNumber);
-            TYPE_CLASS_FIELD existingMember = memberList.get(myFieldName);
-            memberList.add(myNewMember);
-            currentClass.setDataMembers(memberList);
-            for (AST_CLASS_FIELDS_DEC field : fields) {
-                if (field.getName().equals(myFieldName)) {
-                    int MYoffset = field.offset;
-                    myNewMember.offset = MYoffset;
-                    myNewMember.specifiedName = currentClass.getName() + "." + myFieldName;
-                    break;
 
-                }
-            }
+            TYPE_CLASS_FIELD existingMember = memberList.get(myFieldName); // Check if inherited
 
-            if (existingMember != null) { // Member with this name exists (potentially inherited)
+            if (existingMember != null) { // Member with this name exists (must be inherited)
                 if (myFieldType.isFunction() && existingMember.t.isFunction()) {
-                    // Method Overriding Check
+                    // --- Method Overriding ---
                     TYPE_FUNCTION existingMethodType = (TYPE_FUNCTION) existingMember.t;
                     TYPE_FUNCTION overridingMethodType = (TYPE_FUNCTION) myFieldType;
                     if (!overridingMethodType.isOverriding(existingMethodType)) {
@@ -112,27 +116,43 @@ public class AST_CLASS_DEC extends AST_DEC {
                                 "Method '%s' in class '%s' does not correctly override the version in a parent class.",
                                 myFieldName, getName()));
                     }
-                    // Valid override: Update the type in the list, keep the VMT offset
-                    existingMember.t = overridingMethodType; // Update type
-                    // Offset (VMT index) remains the same as parent
+                    // Valid override: Update the type, keep the inherited VMT offset
+                    existingMember.t = overridingMethodType;
+                    myFieldAST.offset = existingMember.offset; // Store VMT offset in AST node
+                    existingMember.specifiedName = getName() + "." + myFieldName; // Update specified name to this class
                     finalFunctions.add(myFieldAST);
                 } else {
                     // Illegal redeclaration (field hiding field, method hiding field, field hiding
                     // method)
                     throw new SemanticException(myFieldAST.lineNumber,
                             String.format(
-                                    "Cannot redeclare member '%s' in class '%s'. Illegal shadowing or type mismatch.",
+                                    "Cannot redeclare member '%s' in class '%s'. Illegal shadowing or type mismatch with inherited member.",
                                     myFieldName, getName()));
                 }
             } else {
-                if (myFieldType.isFunction()) {
-                    finalFunctions.add(myFieldAST);
-                }
-            }
+                // --- New Member (not inherited) ---
+                TYPE_CLASS_FIELD myNewMember = new TYPE_CLASS_FIELD(myFieldName, myFieldType, myFieldAST.lineNumber);
+                myNewMember.specifiedName = getName() + "." + myFieldName;
 
+                if (myFieldType.isFunction()) {
+                    // Assign the next available VMT offset (index)
+                    int vmtIndex = currentMethodOffset;
+                    int vmtByteOffset = vmtIndex * 4; // Calculate byte offset
+                    myNewMember.offset = vmtByteOffset; // Store byte offset
+                    myFieldAST.offset = vmtByteOffset; // Store byte offset in AST node too
+                    currentMethodOffset++; // Increment index for next method
+                    finalFunctions.add(myFieldAST);
+                } else {
+                    // Assign the next available data offset
+                    myNewMember.offset = currentDataOffset;
+                    myFieldAST.offset = currentDataOffset; // Store data offset in AST node
+                    currentDataOffset += 4; // Increment for the next data field (assuming 4 bytes)
+                }
+                memberList.add(myNewMember); // Add the new member to the list
+            }
         }
         SYMBOL_TABLE.getInstance().endScope();
-        currentClass.setDataMembers(memberList);
+        currentClass.setDataMembers(memberList); // Set the final list including new members
 
         return currentClass;
     }
