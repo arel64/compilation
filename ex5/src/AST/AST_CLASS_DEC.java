@@ -9,6 +9,7 @@ import SYMBOL_TABLE.SemanticException;
 import TYPES.*;
 import TEMP.*;
 import IR.*;
+import MIPS.MIPSGenerator;
 
 public class AST_CLASS_DEC extends AST_DEC {
 
@@ -217,7 +218,11 @@ public class AST_CLASS_DEC extends AST_DEC {
         }
         // --- Generate Implicit CONSTRUCTOR (`__init_ClassName`) ---
         String constructorLabel = "__init_" + classType.getName();
-        IR.getInstance().Add_IRcommand(new IRcommand_Label(constructorLabel + "_start"));
+        String constructorStartLabel = constructorLabel + "_start";
+        // Register the constructor label so it can be called
+        IR.getInstance().registerFunctionLabel(constructorLabel, constructorStartLabel);
+        IR.getInstance().Add_IRcommand(new IRcommand_Label(constructorStartLabel));
+
         // Frame size needs to accommodate saved $ra, $fp, and potentially local temps
         // for initializers.
         // Increase size slightly just in case.
@@ -227,6 +232,24 @@ public class AST_CLASS_DEC extends AST_DEC {
         // Load 'this' pointer once (passed as first arg, at offset 0($fp))
         TEMP tempThis = TEMP_FACTORY.getInstance().getFreshTEMP();
         IR.getInstance().Add_IRcommand(new IRcommand_Load(tempThis, 0, "this")); // Load 'this' from frame
+
+        // --- Call Parent Constructor if it exists ---
+        if (classType.father != null) {
+            System.out.format("--- Constructor %s: Calling parent constructor %s ---\n", constructorLabel,
+                    "__init_" + classType.father.getName());
+            String parentConstructorBaseName = "__init_" + classType.father.getName(); // Get the base name
+
+            // Prepare argument list (just 'this')
+            ArrayList<TEMP> parentArgs = new ArrayList<>();
+            parentArgs.add(tempThis);
+
+            // Add the function call command using the BASE name
+            // IRcommand_Func_Call's MIPSme will look up the correct _start label
+            IR.getInstance().Add_IRcommand(new IRcommand_Func_Call(parentConstructorBaseName, parentArgs));
+
+        }
+        // --- End Parent Constructor Call ---
+
         // Generate initialization code for each field defined in THIS class
         System.out.format("--- Generating constructor %s body ---\n", constructorLabel);
         for (AST_CLASS_FIELDS_DEC fieldAST : fields) { // Use the correct list type

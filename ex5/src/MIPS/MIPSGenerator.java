@@ -871,4 +871,30 @@ public class MIPSGenerator {
 	public void beq_registers(String reg1, String reg2, String label) {
 		appendCode(String.format("beq %s, %s, %s", reg1, reg2, label));
 	}
+
+	// NEW: Generate array bounds check
+	/**
+	 * Generates MIPS code to check array bounds.
+	 * Assumes array base address is in arrayBaseReg ($s1) and index is in indexReg
+	 * ($s2).
+	 * Uses TEMP_REG_1 ($s0) for length and TEMP_REG_CMP ($s4) for comparison.
+	 * Jumps to the predefined "access_violation" label on error.
+	 * 
+	 * @param arrayBaseReg Register holding the array base address (e.g., $s1).
+	 * @param indexReg     Register holding the index to check (e.g., $s2).
+	 */
+	public void genBoundsCheck(String arrayBaseReg, String indexReg) {
+		appendCode("# --- Bounds Check Start ---");
+		// 1. Check index < 0
+		bltz_reg(indexReg, "access_violation"); // If index < 0, violate
+
+		// 2. Load array length (offset -4 from base) into TEMP_REG_1 ($s0)
+		lw_offset(TEMP_REG_1, -4, arrayBaseReg); // $s0 = length
+
+		// 3. Check index >= length (slt $s4, indexReg, lengthReg; beq $s4, $zero,
+		// violation)
+		slt_registers(TEMP_REG_CMP, indexReg, TEMP_REG_1); // $s4 = index < length
+		beq_registers(TEMP_REG_CMP, ZERO, "access_violation"); // If index >= length ($s4==0), violate
+		appendCode("# --- Bounds Check OK ---");
+	}
 }
