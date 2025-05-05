@@ -31,6 +31,9 @@ public class MIPSGenerator {
 	// Add dedicated temp registers, excluded from allocator
 	public static final String TEMP_REG_1 = "$s0";
 	public static final String TEMP_REG_2 = "$s1";
+	public static final String TEMP_REG_3 = "$s2"; // Added for index/general use
+	public static final String TEMP_REG_4 = "$s3"; // Added for address calculation/general use
+	public static final String TEMP_REG_CMP = "$s4"; // Added for comparison results (instead of $at)
 
 	/***********************/
 	/* The file writer ... */
@@ -104,7 +107,7 @@ public class MIPSGenerator {
 			finalWriter.print("    string_access_violation: .asciiz \"Access Violation\"\n");
 			finalWriter.print("    string_illegal_div_by_0: .asciiz \"Illegal Division By Zero\"\n");
 			finalWriter.print("    string_invalid_ptr_dref: .asciiz \"Invalid Pointer Dereference\"\n");
-			finalWriter.print("    string_invalid_array_size: .asciiz \"Invalid Array Size\"\n");
+			finalWriter.print("    string_invalid_array_size: .asciiz \"Access Violation\"\n");
 			finalWriter.print("    global_nil: .word 0\n"); // Add nil constant as 0
 			finalWriter.print(dataContent.toString());
 
@@ -852,5 +855,20 @@ public class MIPSGenerator {
 	// NEW: Jump and Link Register
 	public void jalr(String targetReg) {
 		appendCode(String.format("jalr %s", targetReg));
+	}
+
+	// NEW: Branch if less than zero using register name
+	public void bltz_reg(String condReg, String label) {
+		appendCode(String.format("bltz %s,%s", condReg, label));
+	}
+
+	// NEW: Set Less Than using register names
+	public void slt_registers(String destReg, String src1Reg, String src2Reg) {
+		appendCode(String.format("slt %s, %s, %s", destReg, src1Reg, src2Reg));
+	}
+
+	// NEW: Branch if Equal using register names
+	public void beq_registers(String reg1, String reg2, String label) {
+		appendCode(String.format("beq %s, %s, %s", reg1, reg2, label));
 	}
 }
